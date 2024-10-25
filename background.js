@@ -586,7 +586,7 @@ const webNavigationOnCommittedListener = function(details) {
             filesIsolated.push('scripts/main/istrusted_isolated.js')
             filesMain.push('scripts/main/istrusted_main.js')
         }
-        if (allProjects[getDomainWithoutSubdomain(details.url)]?.needAlert?.()) {
+        if (!allProjects[getDomainWithoutSubdomain(details.url)]?.dontUseAlert?.()) {
             filesIsolated.push('scripts/main/alert_isolated.js')
             filesMain.push('scripts/main/alert_main.js')
         }
