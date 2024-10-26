@@ -4,13 +4,14 @@
 var allProjects = {
     'topcraft.ru': {
         pageURL: (project) => 'https://topcraft.club/servers/' + project.id + '/',
-        voteURL: (project) => 'https://topcraft.club/servers/' + project.id + '/',
+        voteURL: (project) => 'https://topcraft.club/servers/' + project.id + '/vote/',
         projectName: (doc) => doc.querySelector('.project-header > h1').textContent,
         exampleURL: () => ['https://topcraft.club/servers/', '10496', '/'],
         URLMain: () => 'topcraft.ru',
         parseURL: (url) => ({id: url.pathname.split('/')[2]}),
         timeout: () => ({hour: 21}),
-        needAdditionalOrigins: ()=> ['https://*.topcraft.ru/*', '*://*.vk.com/*']
+        needAdditionalOrigins: ()=> ['https://*.topcraft.ru/*', '*://*.vk.com/*'],
+        needIsTrusted: () => true
     },
     'topcraft.club': {},
     'mctop.su': {

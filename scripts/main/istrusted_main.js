@@ -6,26 +6,61 @@
     if (port) {
         port.remove()
 
+        let ITLastEvent
+
         Node.prototype.addEventListener = new Proxy(Node.prototype.addEventListener, {
             apply(target, thisArg, args) {
+                if (!args?.[1]) return Reflect.apply(...arguments)
                 args[1] = new Proxy(args[1], {
                     apply(target, thisArg, args) {
-                        if (args[0]?.detail?.avrId && port.dataset?.avrId && args[0].detail.avrId === port.dataset.avrId) {
-                            const object = {}
-                            for (const property in args[0]) {
-                                if (property === 'detail') continue
-                                object[property] = args[0][property]
+                        const detail = args?.[0]?.detail
+                        // извращённый, но безопасный метод
+                        if (detail?.avrId && port.dataset?.avrId && detail.avrId === port.dataset.avrId) {
+                            const event = new self[detail.eventName](detail.eventType)
+                            args[0] = new Proxy(event, {
+                                get(target, prop, receiver) {
+                                    const value = target[prop]
+                                    if (value instanceof Function) {
+                                        return function (...args) {
+                                            return value.apply(this === receiver ? target : this, args)
+                                        }
+                                    }
+                                    if (prop === 'avrId') {
+                                        return null
+                                    }
+                                    if (detail[prop] != null) {
+                                        if (detail[prop] === 'avrDelete_' + port.dataset.avrId) {
+                                            return null
+                                        }
+                                        return detail[prop]
+                                    }
+                                    if (args[0][prop] != null) {
+                                        return args[0][prop]
+                                    }
+                                    return Reflect.get(...arguments)
+                                },
+                            })
+                        // более простой, но менее безопасный метод
+                        } else if (args[0].type === port.dataset.ITtype) {
+                            if (!ITLastEvent) {
+                                ITLastEvent = args[0]
+                            } else if (ITLastEvent !== args[0]) {
+                                return Reflect.apply(...arguments)
                             }
-                            for (const property in args[0].detail) {
-                                if (property === 'avrId') continue
-                                if (args[0].detail[property] === 'avrDelete_' + port.dataset.avrId) {
-                                    delete object[property]
-                                } else {
-                                    object[property] = args[0].detail[property]
-                                }
-                            }
-                            // object.isTrusted = true
-                            args[0] = object
+                            args[0] = new Proxy(args[0], {
+                                get(target, prop, receiver) {
+                                    const value = target[prop]
+                                    if (value instanceof Function) {
+                                        return function (...args) {
+                                            return value.apply(this === receiver ? target : this, args)
+                                        }
+                                    }
+                                    if (prop === 'isTrusted') {
+                                        return true
+                                    }
+                                    return Reflect.get(...arguments)
+                                },
+                            })
                         }
                         return Reflect.apply(...arguments)
                     }
