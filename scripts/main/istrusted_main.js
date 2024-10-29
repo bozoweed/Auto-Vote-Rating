@@ -34,6 +34,9 @@
                                         }
                                         return detail[prop]
                                     }
+                                    if (port.dataset[port.dataset?.avrId + prop] != null) {
+                                        return port.dataset[prop]
+                                    }
                                     // TODO ошибка Illegal invocation, хз почему
                                     // return Reflect.get(...arguments)
                                     return value
@@ -51,6 +54,9 @@
                                     const value = target[prop]
                                     if (value instanceof Function) {
                                         return target[prop].bind(target)
+                                    }
+                                    if (port.dataset[port.dataset?.avrId + prop] != null) {
+                                        return port.dataset[prop]
                                     }
                                     if (prop === 'isTrusted') {
                                         return true
