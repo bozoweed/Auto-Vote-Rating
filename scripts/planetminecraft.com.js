@@ -1,5 +1,4 @@
 async function vote(first) {
-    if (first === false) return
     if (document.querySelector('#center > div > h1') != null && document.querySelector('#center > div > h1').textContent.includes('Successfully voted')) {
         chrome.runtime.sendMessage({successfully: true})
         return
@@ -37,6 +36,8 @@ async function vote(first) {
         chrome.runtime.sendMessage(request)
         return
     }
+
+    if (first) return
 
     const project = await getProject()
     if (document.querySelector('#submit_vote_form > input[name="mcname"]') != null) {
