@@ -33,8 +33,8 @@ async function vote(first) {
 
     //Авторизованы ли мы в аккаунте?
     if (!document.querySelector('#userLoginWrap').classList.contains('hidden')) {
-        // document.querySelector('.voteBtn').dispatchEvent(new CustomEvent('click', {detail: {avrId: verifyUUID, eventName: 'PointerEvent', eventType: 'click', isTrusted: true}}))
         window.portIsTrusted.dataset.ITtype = 'click'
+        document.querySelector('.voteBtn').dispatchEvent(new CustomEvent('mousedown', {detail: {avrId: verifyUUID, eventName: 'MouseEvent', eventType: 'mousedown', isTrusted: true, detail: 1}}))
         document.querySelector('.voteBtn').click()
         window.portIsTrusted.dataset.ITtype = null
         return
@@ -46,6 +46,7 @@ async function vote(first) {
 
     document.querySelector('input[name=nick]').value = project.nick
     window.portIsTrusted.dataset.ITtype = 'click'
+    document.querySelector('.voteBtn').dispatchEvent(new CustomEvent('mousedown', {detail: {avrId: verifyUUID, eventName: 'MouseEvent', eventType: 'mousedown', isTrusted: true, detail: 1}}))
     document.querySelector('.voteBtn').click()
     window.portIsTrusted.dataset.ITtype = null
 }

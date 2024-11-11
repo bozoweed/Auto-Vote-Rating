@@ -25,7 +25,14 @@
                                     if (value instanceof Function) {
                                         return target[prop].bind(target)
                                     }
-                                    if (prop === 'avrId' || prop === 'detail') {
+                                    if (prop === 'detail') {
+                                        if (detail.detail) {
+                                            return detail.detail
+                                        } else {
+                                            return null
+                                        }
+                                    }
+                                    if (prop === 'avrId') {
                                         return null
                                     }
                                     if (detail[prop] != null) {
