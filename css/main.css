@@ -465,11 +465,11 @@ nav .logo img {
 }
 
 .projectStats img:hover {
-	background: #1a7bee !important;;
+	background: #1a7bee !important;
 }
 
 .projectStats img[src="images/icons/delete.svg"]:hover {
-	background: #da5e5e;
+	background: #da5e5e !important;
 }
 
 .projectsBlock .contentBlock .listcontent li:nth-child(odd) {
