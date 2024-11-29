@@ -65,7 +65,7 @@ async function initializeConfig(background, version) {
     }
     // noinspection JSUnusedGlobalSymbols
     try {
-        db = await idb.openDB('avr', version ? version : 14, {upgrade})
+        db = await idb.openDB('avr', version ? version : 15, {upgrade})
     } catch (error) {
         //На случай если это версия MultiVote
         if (error.name === 'VersionError') {
@@ -74,7 +74,7 @@ async function initializeConfig(background, version) {
                 return
             }
             console.log('Ошибка версии базы данных, возможно вы на версии MultiVote, пытаемся загрузить настройки версии MultiVote')
-            await initializeConfig(background, 140)
+            await initializeConfig(background, 150)
             return
         }
         dbError({target: {source: {name: 'avr'}, error: error}})
@@ -462,12 +462,12 @@ async function upgrade(db, oldVersion, newVersion, transaction) {
             }
 
             if (((project.rating === 'topcraft.club' || project.rating === 'topcraft.ru') && project.id === '7666') || (project.id === 'arago' && (project.rating === 'minecraftrating.ru' || project.rating === 'tmonitoring.com'))) {
-                project.error = 'Отключено расширением. Проект закрыт. Если это не так - сообщите разработчику расширения'
+                project.error = chrome.i18n.getMessage('disabledSite', 'Проект закрыт')
                 project.time = Infinity
             }
 
             if (project.rating === 'craftlist.org') {
-                project.error = 'Auto-voting is suspended for craftlist.org, use other automation methods or vote manually. The risk of being banned for auto-voting is too high.'
+                project.error = chrome.i18n.getMessage('disabledSite','There is a high risk of being blocked for auto-voting, vote on this site manually')
                 project.time = Infinity
             }
 
@@ -485,6 +485,39 @@ async function upgrade(db, oldVersion, newVersion, transaction) {
             await cursor.update(project)
             // noinspection JSVoidFunctionReturnValueUsed
             cursor = await cursor.continue()
+        }
+    }
+
+    if (oldVersion <= 14) {
+        let cursor = await transaction.objectStore('projects').index('rating').openCursor('topcraft.club')
+        while (cursor) {
+            const project = cursor.value
+            project.error = chrome.i18n.getMessage('disabledSite','Высокий риск быть заблокированным за авто-голосование, голосуйте на данном сайте вручную')
+            project.time = Infinity
+            await cursor.update(project)
+            // noinspection JSVoidFunctionReturnValueUsed
+            cursor = await cursor.continue()
+            if (!cursor) cursor = await transaction.objectStore('projects').index('rating').openCursor('topcraft.ru')
+        }
+
+        let cursor2 = await transaction.objectStore('projects').index('rating').openCursor('mctop.su')
+        while (cursor2) {
+            const project = cursor2.value
+            project.error = chrome.i18n.getMessage('disabledSite','Высокий риск быть заблокированным за авто-голосование, голосуйте на данном сайте вручную')
+            project.time = Infinity
+            await cursor2.update(project)
+            // noinspection JSVoidFunctionReturnValueUsed
+            cursor2 = await cursor2.continue()
+        }
+
+        let cursor3 = await transaction.objectStore('projects').index('rating').openCursor('monitoringminecraft.ru')
+        while (cursor3) {
+            const project = cursor3.value
+            project.error = chrome.i18n.getMessage('disabledSite','Сайт не работает')
+            project.time = Infinity
+            await cursor3.update(project)
+            // noinspection JSVoidFunctionReturnValueUsed
+            cursor3 = await cursor3.continue()
         }
     }
 

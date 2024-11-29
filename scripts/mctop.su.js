@@ -1,12 +1,4 @@
 async function vote(first) {
-    // TODO ban
-    const request = {}
-    request.disabledSite = 'Высокий риск быть заблокированным за авто-голосование, голосуйте на данном сайте вручную'
-    request.ignoreReport = true
-    request.retryCoolDown = 315576000000
-    chrome.runtime.sendMessage(request)
-    return
-
     if (document.getElementById('summary') != null) {
         if (document.getElementById('summary').textContent.includes('Ошибка проверки CSRF')) {
             //Костыль костыля, перезагружаем страницу в случае возникновения Ошибки проверки CSRF (данная ошибка выскакивает после прохождения проверки CloudFlare)
