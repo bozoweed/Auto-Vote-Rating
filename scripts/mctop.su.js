@@ -23,6 +23,9 @@ async function vote(first) {
         return
     }
 
+    const verifyUUID = crypto.randomUUID()
+    window.portIsTrusted.dataset.avrId = verifyUUID
+
     //Авторизованы ли мы в аккаунте?
     if (!document.querySelector('#userLoginWrap').classList.contains('hidden')) {
         window.portIsTrusted.dataset.ITtype = 'click'
