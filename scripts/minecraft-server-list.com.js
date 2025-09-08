@@ -25,7 +25,7 @@ async function vote(first) {
     if (first === false) return
 
     const project = await getProject()
-    document.querySelector('#voteform #ignn').value = project.nick
+    document.querySelector('#voteform #ignnn').value = project.nick
     document.querySelector('#voteform #voteButton').click()
 }
 
