@@ -1,12 +1,13 @@
 async function vote(first) {
-    console.log('Voting...')
     if (document.querySelector('.notification') != null) {
         if (document.querySelector('.notification.is-success') != null) {
             chrome.runtime.sendMessage({ successfully: true })
             return
         } else if (document.querySelector('.notification.is-warning') != null && (document.querySelector('.notification.is-warning').textContent.includes('Hlasovat můžete až') || document.querySelector('.notification.is-warning').textContent.includes('Hlasovať môžete až'))) {
             //Сайт предоставляет когда следующее голосование но не понятно в каком часовом поясе указано время, также не указывается день (пишет только часы и минуты) что ещё больше осложняет определение времени следующего голосования
-            chrome.runtime.sendMessage({ later: Date.now() + 7200000 })
+            const numbers = document.querySelector('.notification.is-warning').textContent.match(/\d+/g).map(Number);
+        const milliseconds = (numbers[0] * 60 * 60 * 1000) + (numbers[1] * 60 * 1000)  * 1000; 
+        chrome.runtime.sendMessage({ later: Date.now() + milliseconds });
             return
         } else {
             const request = {}
@@ -63,6 +64,15 @@ async function vote(first) {
     }
     await wait(1000)
     document.querySelector('footer button.is-primary ').click()
+
+    await wait(1000)
+    if (document.querySelector('.notification.is-warning') != null && (document.querySelector('.notification.is-warning').textContent.includes('Hlasovat můžete až') || document.querySelector('.notification.is-warning').textContent.includes('Hlasovať môžete až'))) {
+        //Сайт предоставляет когда следующее голосование но не понятно в каком часовом поясе указано время, также не указывается день (пишет только часы и минуты) что ещё больше осложняет определение времени следующего голосования
+        const numbers = document.querySelector('.notification.is-warning').textContent.match(/\d+/g).map(Number);
+        const milliseconds = (numbers[0] * 60 * 60 * 1000) + (numbers[1] * 60 * 1000)  * 1000; 
+        chrome.runtime.sendMessage({ later: Date.now() + milliseconds });
+        return
+    }
 }
 
 function checkTurnstileSolved() {
