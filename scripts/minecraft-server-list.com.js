@@ -27,6 +27,7 @@ async function vote(first) {
     const project = await getProject()
     while (document.querySelector('#voteform #ignnn') === null) await new Promise(resolve => setTimeout(resolve, 1000))
     document.querySelector('#voteform #ignnn').value = project.nick
+     await new Promise(resolve => setTimeout(resolve, 1000))
     document.querySelector('#voteform #voteButton').click()
 }
 
