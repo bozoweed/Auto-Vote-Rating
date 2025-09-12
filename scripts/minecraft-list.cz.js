@@ -69,8 +69,12 @@ async function vote(first) {
     if (first) return
 
     const project = await getProject()
-    document.querySelector('input[name="username"]').value = project.nick
-    document.querySelector('#gdpr').checked = true
+    const username = document.querySelector('input[name="username"]')
+    username.value = project.nick
+    
+    username.dispatchEvent(new Event('input', { bubbles: true }));
+    username.dispatchEvent(new Event('change', { bubbles: true }));
+    document.querySelector('#tosgdpr').checked = true
 
-    document.querySelector('div.vote__box__buttonRow__button button[type="submit"]').click()
+    document.querySelector('button[type="submit"].btn.btn-outline-primary').click()
 }
