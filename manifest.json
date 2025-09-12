@@ -30,6 +30,12 @@
 		"tabGroups",
 		"idle"
 	],
+	"content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["scripts/main/api.js", "scripts/main/captchaclicker.js"]  
+        }
+    ],
 	"optional_permissions": [
 		"cookies"
 	],

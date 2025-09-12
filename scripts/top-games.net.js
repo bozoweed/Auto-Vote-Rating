@@ -23,23 +23,18 @@ async function vote(first) {
     }
 
     // Если успешное авто-голосование
-    if (document.querySelector('div.alert.alert-success') != null) {
+    if (window.location.href.endsWith('/success')) {
         chrome.runtime.sendMessage({ successfully: true });
         return;
     }
 
     // Если есть предупреждение
-    if (document.querySelector('div.alert.alert-warning') != null) {
-        if (document.getElementById('voteTimer') != null) {
-            const numbers = document.getElementById('voteTimer').textContent.match(/\d+/g).map(Number);
-            const milliseconds = (numbers[0] * 60 * 1000); // assuming format like "5 minutes"
-            chrome.runtime.sendMessage({ later: Date.now() + milliseconds });
-            return;
-        } else {
-            chrome.runtime.sendMessage({ message: document.querySelector('div.alert.alert-warning').innerText });
-            return;
-        }
-    }
+    if (document.getElementById('digitalCountdown') != null) {
+        const numbers = document.getElementById('digitalCountdown').textContent.match(/\d+/g).map(Number);
+        const milliseconds = (numbers[0] * 60 * 60 * 1000) + (numbers[1] * 60 * 1000) + (numbers[2] * 1000); 
+        chrome.runtime.sendMessage({ later: Date.now() + milliseconds });
+        return;
+    } 
 
     // Если есть ошибка
     for (const el of document.querySelectorAll('div.alert.alert-danger')) {
