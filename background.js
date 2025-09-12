@@ -561,17 +561,18 @@ const webNavigationOnCommittedListener = function(details) {
 
 //Слушатель на обновление вкладок, если вкладка полностью загрузилась, загружает туда скрипт который сам нажимает кнопку проголосовать
 const webNavigationOnCompletedListener = async function(details) {
+    
     await initializeFunc
     let opened = openedProjects.get(details.tabId)
     if (!opened) return
-
+    
     if (details.frameId === 0) {
         // Через эти сайты пользователь может авторизоваться, я пока не поддерживаю автоматическую авторизацию, не мешаем ему в авторизации
         if (details.url.match(/facebook.com\/*/) || details.url.match(/google.com\/*/) || details.url.match(/accounts.google.com\/*/) || details.url.match(/reddit.com\/*/) || details.url.match(/twitter.com\/*/)) {
             return
         }
-
         const project = await db.get('projects', opened.key)
+
 
         // Если пользователь авторизовывается через эти сайты, но у расширения на это нет прав, всё равно не мешаем ему, пускай сам авторизуется не смотря, на то что есть автоматизация авторизации
         // if (details.url.match(/vk.com\/*/) || details.url.match(/discord.com\/*/) || details.url.startsWith('https://steamcommunity.com/openid/login') || details.url.startsWith('https://steamcommunity.com/login/home')) {
@@ -619,8 +620,9 @@ const webNavigationOnCompletedListener = async function(details) {
         } catch (error) {
             catchTabError(error, project)
         }
-    } else if (details.frameId !== 0 && (
+    } else if (details.frameId !== 0 && (        
         details.url.match(/hcaptcha.com\/captcha\/*/)
+        || details.url.includes('smartcaptcha.yandexcloud.net')
         || details.url.match(/https?:\/\/(.+?\.)?google.com\/recaptcha\/api.\/anchor*/)
         || details.url.match(/https?:\/\/(.+?\.)?google.com\/recaptcha\/api.\/bframe*/)
         || details.url.match(/https?:\/\/(.+?\.)?recaptcha.net\/recaptcha\/api.\/anchor*/)

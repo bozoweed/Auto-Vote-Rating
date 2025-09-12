@@ -6,6 +6,7 @@ window.solvedCaptcha = false;
 window.loadedCaptcha = false;
 
 chrome.runtime.onMessage.addListener(function (request/*, sender, sendResponse*/) {
+    console.log('Captchaclicker received message', request);
     if (request.sendProject) {
         if (!window.loadedCaptcha) {
             window.loadedCaptcha = true;
@@ -35,16 +36,21 @@ function run() {
     const isRecaptchaBFrame = /https?:\/\/(.+?\.)?(google\.com|recaptcha\.net)\/recaptcha\/(api\d|enterprise)\/bframe/.test(url);
     const isRecaptchaFallback = /https?:\/\/(.+?\.)?(google\.com|recaptcha\.net)\/recaptcha\/(api|enterprise)\/fallback/.test(url);
     const isHCaptcha = url.includes('.hcaptcha.com/captcha.v');
+    const isSmartCaptcha = url.includes('smartcaptcha.yandexcloud.net');
     const isCloudflareChallengePage = url.startsWith('https://challenges.cloudflare.com');
     const hasTurnstileWidget = document.querySelector('.cf-turnstile, [name="cf-turnstile-response"], iframe[src*="challenges.cloudflare.com/turnstile"]') !== null;
 
     console.log(`[DEBUG] Recaptcha Anchor: ${isRecaptchaAnchor}`);
     console.log(`[DEBUG] Recaptcha BFrame: ${isRecaptchaBFrame}`);
     console.log(`[DEBUG] HCaptcha: ${isHCaptcha}`);
+    console.log(`[DEBUG] SmartCaptcha: ${isSmartCaptcha}`);
     console.log(`[DEBUG] Cloudflare Challenge Page: ${isCloudflareChallengePage}`);
     console.log(`[DEBUG] Has Turnstile Widget: ${hasTurnstileWidget}`);
 
-    if (isRecaptchaAnchor) {
+
+    if (isSmartCaptcha) {
+        handleSmartCaptcha();
+    } else if (isRecaptchaAnchor) {
         handleReCaptchaAnchor();
     } else if (isRecaptchaBFrame && !document.querySelector('head > yandex-captcha-solver')) {
         handleReCaptchaBFrame();
@@ -139,6 +145,29 @@ function run() {
         }
     } else {
         console.log(`[DEBUG] No known CAPTCHA type detected on this page.`);
+    }
+}
+
+
+
+async function handleSmartCaptcha() {
+    try {
+        // Wait for the captcha checkbox to appear in the DOM
+        while (!document.querySelector('.CheckboxCaptcha-Checkbox')) await new Promise(resolve => setTimeout(resolve, 1000));        
+        document.querySelector('.CheckboxCaptcha-Checkbox').setAttribute("data-checked", true);
+
+        // Wait for the button to appear in the DOM
+        const voteButton = document.querySelector('#js-button');
+        voteButton.click();
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        window.solvedCaptcha = true;
+        chrome.runtime.sendMessage({ captchaPassed: true });
+        
+    } catch (error) {
+        // If an element isn't found after the timeout, send an error message and stop.
+        console.error("Error during voting interaction:", error);
+        chrome.runtime.sendMessage({ message: error.message });
+        return; 
     }
 }
 
