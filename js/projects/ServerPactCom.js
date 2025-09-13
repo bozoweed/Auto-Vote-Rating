@@ -6,7 +6,7 @@ export class ServerPactCom extends BaseProject {
   static voteURL(project) { return `https://www.serverpact.com/vote-${project.id}`; }
   static projectName(doc) { return doc.querySelector('h1.sp-title').textContent.trim().replace('Vote for ', ''); }
   static exampleURL() { return ['https://www.serverpact.com/vote-', '26492123', '']; }
-  static URLMain() { return 'www.serverpact.com'; }
+  static URLMain() { return 'serverpact.com'; }
   static parseURL(url) { return { id: url.pathname.split('/')[1].replace('vote-', '') }; }
   static timeout() { return { hours: 11, minutes: 7 }; }
   static oneProject() { return 1; }
