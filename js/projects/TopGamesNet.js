@@ -30,7 +30,6 @@ export class TopGamesNet extends BaseProject {
     return ['https://top-serveurs.net/minecraft/', 'icesword-pvpfaction-depuis-2014-crack-on', ''];
   }
 
-  static URLMain() { return 'top-games.net'; }
 
   static parseURL(url) {
     const paths = url.pathname.split('/');

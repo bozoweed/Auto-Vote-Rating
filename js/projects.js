@@ -211,42 +211,9 @@ TopcraftClub, TopServeursNet, ServerPactNl, MinecraftServerLijstNl, MinecraftSer
 
 
 // Legacy-compatible adapter
-const allProjects = {};
+const allProjects = projectClasses;
 for (const [domain, Cls] of projectClasses.entries()) {
-  allProjects[domain] = {
-    pageURL: (project) => Cls.pageURL(project),
-    voteURL: (project) => Cls.voteURL(project),
-    projectName: (doc, project) => Cls.projectName(doc, project),
-    exampleURL: () => Cls.exampleURL?.(),
-    exampleURLGame: () => Cls.exampleURLGame?.(),
-    exampleURLListing: () => Cls.exampleURLListing?.(),
-    exampleURLLang: () => Cls.exampleURLLang?.(),
-    URLMain: () => Cls.URLMain?.(),
-    parseURL: (url) => Cls.parseURL(url),
-    timeout: (project) => Cls.timeout?.(project),
-    oneProject: () => Cls.oneProject?.(),
-    limitedCountVote: (project) => Cls.limitedCountVote?.(project),
-    notFound: (doc, project) => Cls.notFound?.(doc, project),
-    notRequiredCaptcha: (project) => Cls.notRequiredCaptcha?.(project),
-    notRequiredNick: (project) => Cls.notRequiredNick?.(project),
-    optionalNick: (project) => Cls.optionalNick?.(project),
-    notRequiredId: (project) => Cls.notRequiredId?.(project),
-    silentVote: (project) => Cls.silentVote?.(project),
-    alertManualCaptcha: (project) => Cls.alertManualCaptcha?.(project),
-    focusedTab: (project) => Cls.focusedTab?.(project),
-    ordinalWorld: (project) => Cls.ordinalWorld?.(project),
-    banAttention: (project) => Cls.banAttention?.(project),
-    needPrompt: (project) => Cls.needPrompt?.(project),
-    needIsTrusted: (project) => Cls.needIsTrusted?.(project),
-    defaultGame: () => Cls.defaultGame?.(),
-    defaultListing: () => Cls.defaultListing?.(),
-    defaultLand: () => Cls.defaultLand?.(),
-    gameList: () => Cls.gameList?.(),
-    listingList: () => Cls.listingList?.(),
-    langList: () => Cls.langList?.(),
-    needAdditionalOrigins: (project) => Cls.needAdditionalOrigins?.(project),
-    needAdditionalPermissions: (project) => Cls.needAdditionalPermissions?.(project),
-  };
+  allProjects[domain] = Cls;
 }
 
 export { allProjects, projectClasses };

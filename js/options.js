@@ -233,8 +233,10 @@ function generateDataList() {
     datalist.append(option);
   }
 }
-
+let generating = false;
 async function reloadProjectList() {
+  if (generating) return;
+  generating = true;
   const buttonBlock = document.querySelector('.projectsBlock .buttonBlock');
   const contentBlock = document.querySelector('.projectsBlock .contentBlock');
   buttonBlock.replaceChildren();
@@ -254,7 +256,9 @@ async function reloadProjectList() {
   }
   document.getElementById('notAddedAll').textContent =
     buttonBlock.childElementCount > 0 ? '' : chrome.i18n.getMessage('notAddedAll');
+  generating = false;
 }
+
 
 function generateBtnListRating(rating, count) {
   const button = document.createElement('button');
