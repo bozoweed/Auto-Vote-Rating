@@ -23,9 +23,9 @@ export class BaseProject {
   static defaultGame() { return null; }
   static defaultListing() { return null; }
   static defaultLand() { return null; }
-  static gameList() { return null; }       // Map
-  static listingList() { return null; }    // Map
-  static langList() { return null; }       // Map
+  static gameList() { return []; }       // Map
+  static listingList() { return []; }    // Map
+  static langList() { return []; }       // Map
 
   // Behaviour/timing/limits
   static timeout(project) { return null; }             // { hour, hours, week, month, minutes, ... }
