@@ -1,7 +1,7 @@
 import { BaseProject } from './BaseProject.js';
 
 export class ServerPactCom extends BaseProject {
-  static domain = 'www.serverpact.com';
+  static domain = 'serverpact.com';
   static pageURL(project) { return `https://www.serverpact.com/vote-${project.id}`; }
   static voteURL(project) { return `https://www.serverpact.com/vote-${project.id}`; }
   static projectName(doc) { return doc.querySelector('h1.sp-title').textContent.trim().replace('Vote for ', ''); }
@@ -14,6 +14,6 @@ export class ServerPactCom extends BaseProject {
     const el = doc.querySelector('div.container > div.row > div > center');
     return el && el.textContent.includes('This server does not exist');
   }
-  static silentVote() { return true; }
+//   static silentVote() { return true; }
   static notRequiredCaptcha() { return true; }
 }

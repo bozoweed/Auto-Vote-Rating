@@ -159,14 +159,14 @@ function renderPills(t) {
 function renderKPIs(t) {
   els.kpiMonthLabel.textContent = getMonthLabel();
   els.kpiTotal.textContent = fmt(t.attemptsAll);
-  els.kpiAvg.textContent = i18n("kpiAvgPerDay",`${fmt(t.avgPerDay)}`);
+  els.kpiAvg.textContent = chrome.i18n.getMessage("kpiAvgPerDay",`${fmt(t.avgPerDay)}`);
   els.kpiToday.textContent = fmt(t.todayTotal);
   els.kpiTodaySuccess.textContent = `${t.todayRate}% ${i18n('success')}`;
   els.kpiMonthVotes.textContent = fmt(t.monthSuccess);
   const sign = t.monthDelta > 0 ? '+' : '';
-  els.kpiLastMonthDelta.textContent = i18n("kpiLastMonthDelta",`${sign}${t.monthDelta}`);
+  els.kpiLastMonthDelta.textContent = chrome.i18n.getMessage("kpiLastMonthDelta",`${sign}${t.monthDelta}`);
   els.kpiSuccessRate.textContent = `${t.successRateAll}%`;
-  els.kpiErrors.textContent = `${fmt(t.errorAll)} ${i18n('errors')}`;
+  els.kpiErrors.textContent = `${fmt(t.errorAll)} ${chrome.i18n.getMessage('errors')}`;
 }
 
 function pathFromSeries(series, w=320, h=80, pad=6) {

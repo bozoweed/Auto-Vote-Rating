@@ -14,9 +14,9 @@ export class BaseProject {
   static projectName(doc, project) { return ''; }
 
   // Examples and canonical URLs
-  static exampleURL() { return ['', '', '']; }         // [prefix, id, suffix]
-  static exampleURLGame() { return null; }             // [prefix, game, suffix]
-  static exampleURLListing() { return null; }          // [prefix, listing, suffix]
+  static exampleURL() { return []; }         // [prefix, id, suffix]
+//   static exampleURLGame() { return null; }             // [prefix, game, suffix]
+//   static exampleURLListing() { return null; }          // [prefix, listing, suffix]
   static exampleURLLang() { return null; }             // [prefix, lang, suffix]
   static URLMain() { return this.domain; }                    // canonical host if different
 
@@ -26,7 +26,7 @@ export class BaseProject {
   static defaultLand() { return null; }
   static gameList() { return []; }       // Map
   static listingList() { return []; }    // Map
-  static langList() { return []; }       // Map
+//   static langList() { return []; }       // Map
 
   // Behaviour/timing/limits
   static timeout(project) { return null; }             // { hour, hours, week, month, minutes, ... }
