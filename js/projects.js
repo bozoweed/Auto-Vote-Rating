@@ -166,7 +166,7 @@ import { VRisingServersNet } from './projects/VRisingServersNet.js';
 
 // Registry
 const projectClasses = new Map();
-function register(cls) { projectClasses.set(cls.domain, cls); }
+function register(cls) { projectClasses.set(cls.altdomain  ? cls.altdomain :cls.domain, cls); }
 
 // Register sites Pack 1
 [

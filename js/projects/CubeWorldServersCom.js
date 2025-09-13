@@ -1,2 +1,2 @@
 import { ListForgeNet } from './ListForgeNet.js';
-export class CubeWorldServersCom extends ListForgeNet { static domain = 'cubeworld-servers.com'; }
+export class CubeWorldServersCom extends ListForgeNet { static altdomain = 'cubeworld-servers.com'; }

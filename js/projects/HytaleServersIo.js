@@ -1,2 +1,2 @@
 import { ListForgeNet } from './ListForgeNet.js';
-export class HytaleServersIo extends ListForgeNet { static domain = 'hytale-servers.io'; }
+export class HytaleServersIo extends ListForgeNet { static altdomain = 'hytale-servers.io'; }

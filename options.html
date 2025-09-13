@@ -28,7 +28,7 @@
       <div class="navigation" role="tablist" aria-label="Main tabs">
         <button class="tablinks nav-btn" id="dashboardTab" data-tab="dashboard" role="tab" aria-controls="dashboard" aria-selected="false">
           <img src="images/icons/pie-chart-3.svg" alt="" aria-hidden="true">
-          <div data-resource="dashboard">Dashboard</div>
+          <div data-resource="dashboard"></div>
         </button>
         <button class="tablinks nav-btn" id="addTab" data-tab="append" role="tab" aria-controls="append" aria-selected="false">
           <img src="images/icons/addBtn.svg" alt="" aria-hidden="true">
@@ -59,19 +59,19 @@
         <!-- Global compteur chips -->
         <div class="dashPills">
           <div class="pill" id="pill-total">
-            <span data-resource="totalVotes">Total</span>
+            <span data-resource="totalVotes"></span>
             <strong id="pillTotalValue">—</strong>
           </div>
           <div class="pill" id="pill-today">
-            <span data-resource="today">Today</span>
+            <span data-resource="today"></span>
             <strong id="pillTodayValue">—</strong>
           </div>
           <div class="pill" id="pill-success">
-            <span data-resource="successRate">Success</span>
+            <span data-resource="successRate"></span>
             <strong id="pillSuccessValue">—%</strong>
           </div>
           <div class="pill" id="pill-streak">
-            <span data-resource="streak">Streak</span>
+            <span data-resource="streak"></span>
             <strong id="pillStreakValue">—</strong>
           </div>
         </div>
@@ -80,35 +80,35 @@
         <section class="kpiGrid">
           <article class="kpiCard">
             <header>
-              <span class="kpiTitle" data-resource="totalVotes">Total votes</span>
-              <span class="kpiBadge" data-resource="allTime">All time</span>
+              <span class="kpiTitle" data-resource="totalVotes"></span>
+              <span class="kpiBadge" data-resource="allTime"></span>
             </header>
             <div class="kpiValue" id="kpiTotalVotes">—</div>
-            <div class="kpiSub" id="kpiAvgPerDay">— /day</div>
+            <div class="kpiSub" data-resource="kpiAvgPerDay" id="kpiAvgPerDay">— /day</div>
           </article>
 
           <article class="kpiCard">
             <header>
-              <span class="kpiTitle" data-resource="today">Today</span>
-              <span class="kpiBadge" data-resource="live">Live</span>
+              <span class="kpiTitle" data-resource="today"></span>
+              <span class="kpiBadge" data-resource="live"></span>
             </header>
             <div class="kpiValue" id="kpiTodayVotes">—</div>
-            <div class="kpiSub" id="kpiTodaySuccess">—% success</div>
+            <div class="kpiSub"  id="kpiTodaySuccess">—% success</div>
           </article>
 
           <article class="kpiCard">
             <header>
-              <span class="kpiTitle" data-resource="thisMonth">This month</span>
+              <span class="kpiTitle" data-resource="thisMonth"></span>
               <span class="kpiBadge" id="kpiMonthLabel">—</span>
             </header>
             <div class="kpiValue" id="kpiMonthVotes">—</div>
-            <div class="kpiSub" id="kpiLastMonthDelta">— vs last</div>
+            <div class="kpiSub" data-resource="kpiLastMonthDelta" id="kpiLastMonthDelta">— vs last</div>
           </article>
 
           <article class="kpiCard">
             <header>
-              <span class="kpiTitle" data-resource="reliability">Reliability</span>
-              <span class="kpiBadge" data-resource="successRate">Success</span>
+              <span class="kpiTitle" data-resource="reliability"></span>
+              <span class="kpiBadge" data-resource="successRate"></span>
             </header>
             <div class="kpiValue" id="kpiSuccessRate">—%</div>
             <div class="kpiSub" id="kpiErrors">— errors</div>
@@ -119,10 +119,10 @@
           <!-- Trend -->
           <article class="card">
             <header class="cardHead">
-              <h6 data-resource="monthlyTrend">Monthly trend</h6>
+              <h6 data-resource="monthlyTrend"></h6>
               <div class="legend">
-                <span class="dot ok"></span><span data-resource="successVotes">Success</span>
-                <span class="dot err"></span><span data-resource="errors">Errors</span>
+                <span class="dot ok"></span><span data-resource="successVotes"></span>
+                <span class="dot err"></span><span data-resource="errors"></span>
               </div>
             </header>
             <div class="sparkWrap">
@@ -131,29 +131,29 @@
             </div>
             <div class="sparkAxis">
               <span id="sparkStartLabel">−30d</span>
-              <span id="sparkEndLabel" data-resource="today">Today</span>
+              <span id="sparkEndLabel" data-resource="today"></span>
             </div>
           </article>
 
           <!-- Top vote sites -->
           <article class="card">
             <header class="cardHead">
-              <h6 data-resource="topSites">Top vote sites</h6>
+              <h6 data-resource="topSites"></h6>
               <div class="filters">
                 <button class="chip" data-range="month" aria-pressed="true" id="topRangeMonth">
-                  <span data-resource="thisMonth">This month</span>
+                  <span data-resource="thisMonth"></span>
                 </button>
                 <button class="chip" data-range="all" aria-pressed="false" id="topRangeAll">
-                  <span data-resource="allTime">All time</span>
+                  <span data-resource="allTime"></span>
                 </button>
               </div>
             </header>
             <div class="leaderboard">
               <div class="leaderHead" role="row">
-                <button class="col site" data-sort="site" aria-sort="none" data-resource="site">Site</button>
-                <button class="col count" data-sort="count" aria-sort="descending" data-resource="votes">Votes</button>
-                <button class="col rate" data-sort="rate" aria-sort="none" data-resource="success">Success</button>
-                <div class="col last" data-resource="last">Last</div>
+                <button class="col site" data-sort="site" aria-sort="none" data-resource="site"></button>
+                <button class="col count" data-sort="count" aria-sort="descending" data-resource="votes"></button>
+                <button class="col rate" data-sort="rate" aria-sort="none" data-resource="success"></button>
+                <div class="col last" data-resource="last"></div>
               </div>
               <div class="leaderBody" id="leaderBody" role="rowgroup">
                 <!-- rows injected by JS -->
@@ -165,7 +165,7 @@
         <!-- Recent activity -->
         <section class="card">
           <header class="cardHead">
-            <h6 data-resource="recentActivity">Recent activity</h6>
+            <h6 data-resource="recentActivity"></h6>
           </header>
           <ol class="timeline" id="activityList"></ol>
         </section>

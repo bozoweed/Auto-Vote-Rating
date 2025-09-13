@@ -1,2 +1,2 @@
 import { ListForgeNet } from './ListForgeNet.js';
-export class MinecraftMpCom extends ListForgeNet { static domain = 'minecraft-mp.com'; }
+export class MinecraftMpCom extends ListForgeNet { static altdomain = 'minecraft-mp.com'; }

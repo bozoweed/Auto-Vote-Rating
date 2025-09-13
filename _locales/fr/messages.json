@@ -7,6 +7,7 @@
     "message": "Votes automatiques sur les classements de projets ou de serveurs (jeux)",
     "description": "The description of the application, displayed in the web store."
   },
+  
   "addButton": {
     "message": "Ajouter",
     "description": "Button. Add"
@@ -665,6 +666,50 @@
   "statsInstalled": {
     "message": "Installé"
   },
+  "kpiAvgPerDay": {
+    "message": "$value$/jour",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "kpiLastMonthDelta": {
+    "message": "$value$ vs le mois dernier",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "dashboard": { "message": "Tableau de bord" },
+  "overview": { "message": "Aperçu" },
+
+  "totalVotes": { "message": "Total" },
+  "today": { "message": "Aujourd'hui" },
+  "successRate": { "message": "Taux de réussite" },
+  "streak": { "message": "Série" },
+
+  "allTime": { "message": "Depuis le début" },
+  "live": { "message": "En direct" },
+  "thisMonth": { "message": "Ce mois-ci" },
+  "reliability": { "message": "Fiabilité" },
+
+  "monthlyTrend": { "message": "Tendance mensuelle" },
+  "successVotes": { "message": "Votes réussis" },
+  "errors": { "message": "Erreurs" },
+
+  "topSites": { "message": "Meilleurs sites de vote" },
+  "site": { "message": "Site" },
+  "votes": { "message": "Votes" },
+  "success": { "message": "Réussite" },
+  "last": { "message": "Dernier" },
+
+  "recentActivity": { "message": "Activité récente" },
+
+  "ok": { "message": "Vote réussi" },
+  "err": { "message": "Erreur de vote" },
+
   "generalStats": {
     "message": "Statistiques générales"
   },

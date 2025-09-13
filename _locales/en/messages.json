@@ -7,6 +7,30 @@
     "message": "Automatic voting on ratings for projects or servers (gaming)",
     "description": "The description of the application, displayed in the web store."
   },
+  "dashboard": { "message": "Dashboard" },
+  "overview": { "message": "Overview" },
+
+  "totalVotes": { "message": "Total" },
+  "today": { "message": "Today" },
+  "successRate": { "message": "Success rate" },
+  "streak": { "message": "Streak" },
+
+  "allTime": { "message": "All time" },
+  "live": { "message": "Live" },
+  "thisMonth": { "message": "This month" },
+  "reliability": { "message": "Reliability" },
+
+  "monthlyTrend": { "message": "Monthly trend" },
+  "successVotes": { "message": "Successful votes" },
+  "errors": { "message": "Errors" },
+
+  "topSites": { "message": "Top vote sites" },
+  "site": { "message": "Site" },
+  "votes": { "message": "Votes" },
+  "success": { "message": "Success" },
+  "last": { "message": "Last" },
+
+  "recentActivity": { "message": "Recent activity" },
   "addButton": {
     "message": "Add",
     "description": "Button. Add"

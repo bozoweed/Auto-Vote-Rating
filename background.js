@@ -521,8 +521,8 @@ const webNavigationOnCompletedListener = async (details) => {
         await chrome.scripting.executeScript({ target: { tabId: details.tabId }, world: 'MAIN', func: funcPrompt, args: [project.nick] });
       }
 
-      if (settings.debug) console.log('Injecting scripts/' + allProjects[project.rating].ScriptJs+', scripts/main/api.js to ' + details.url);
-      await chrome.scripting.executeScript({ target: { tabId: details.tabId }, files: ['scripts/main/hacktimer.js', 'scripts/' + allProjects[project.rating].ScriptJs , 'scripts/main/api.js'] });
+      if (settings.debug) console.log('Injecting scripts/' + (project.ratingMain || project.rating)+'.js, scripts/main/api.js to ' + details.url);
+      await chrome.scripting.executeScript({ target: { tabId: details.tabId }, files: ['scripts/main/hacktimer.js', 'scripts/' + (project.ratingMain || project.rating)+'.js' , 'scripts/main/api.js'] });
       if (allProjects[project.rating]?.needWorld?.()) {
         if (settings.debug) console.log('Injecting scripts/' + (project.ratingMain || project.rating) + '_world.js in MAIN');
         await chrome.scripting.executeScript({ target: { tabId: details.tabId }, world: 'MAIN', files: ['scripts/' + (project.ratingMain || project.rating) + '_world.js'] });

@@ -3,6 +3,7 @@
 
 export class BaseProject {
   static domain = '';
+  static altdomain = '';
 
   // URLs
   static pageURL(project) { throw new Error('pageURL(project) not implemented'); }

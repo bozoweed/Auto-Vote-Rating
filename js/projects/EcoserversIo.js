@@ -1,2 +1,2 @@
 import { ListForgeNet } from './ListForgeNet.js';
-export class EcoserversIo extends ListForgeNet { static domain = 'ecoservers.io'; }
+export class EcoserversIo extends ListForgeNet { static altdomain = 'ecoservers.io'; }

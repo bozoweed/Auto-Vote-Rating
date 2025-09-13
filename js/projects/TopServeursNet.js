@@ -2,7 +2,7 @@ import { TopGamesNet } from './TopGamesNet.js';
 
 // top-serveurs.net (FR) – inherits logic from TopGamesNet
 export class TopServeursNet extends TopGamesNet {
-  static domain = 'top-serveurs.net';
+  static altdomain = 'top-serveurs.net';
   // Show “listing” (category) in manual mode hints (e.g., gta, minecraft, fivem…)
   static exampleURLListing() {
     return [
