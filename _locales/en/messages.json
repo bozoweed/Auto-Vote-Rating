@@ -7,6 +7,22 @@
     "message": "Automatic voting on ratings for projects or servers (gaming)",
     "description": "The description of the application, displayed in the web store."
   },
+    "kpiAvgPerDay": {
+    "message": "$value$/day",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
+  "kpiLastMonthDelta": {
+    "message": "$value$ vs last month",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      }
+    }
+  },
   "dashboard": { "message": "Dashboard" },
   "overview": { "message": "Overview" },
 
