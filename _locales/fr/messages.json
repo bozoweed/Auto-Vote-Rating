@@ -1,0 +1,1128 @@
+{
+  "appName": {
+    "message": "Vote automatique de classement",
+    "description": "The title of the application, displayed in the web store."
+  },
+  "appDesc": {
+    "message": "Votes automatiques sur les classements de projets ou de serveurs (jeux)",
+    "description": "The description of the application, displayed in the web store."
+  },
+  "addButton": {
+    "message": "Ajouter",
+    "description": "Button. Add"
+  },
+  "help": {
+    "message": "À propos",
+    "description": "Button. About"
+  },
+  "fastAdd": {
+    "message": "Ajout rapide",
+    "description": "Notification. Fast add"
+  },
+  "load": {
+    "message": "Chargement...",
+    "description": "Notification. Loading message"
+  },
+  "addedButton": {
+    "message": "Ajouté",
+    "description": "Button. Added"
+  },
+  "optionsButton": {
+    "message": "Options",
+    "description": "Button. Options"
+  },
+  "addTitle": {
+    "message": "Ajout d’un nouveau projet",
+    "description": "Header. Add"
+  },
+  "yourNick": {
+    "message": "Votre pseudo",
+    "description": "Label. Nickname"
+  },
+  "enterNick": {
+    "message": "Entrez votre pseudo",
+    "description": "Input. Enter your nick"
+  },
+  "enterNickOptional": {
+    "message": "Entrez votre pseudo (facultatif)"
+  },
+  "siteTop": {
+    "message": "Page de classement",
+    "description": "Label. Ranking page"
+  },
+  "selectTop": {
+    "message": "Sélectionner la page",
+    "description": "Input. Select page"
+  },
+  "custom": {
+    "message": "Personnalisé",
+    "description": "Input. Custom"
+  },
+  "optionsExtension": {
+    "message": "Options de l’extension",
+    "description": "Header. Options"
+  },
+  "settings": {
+    "message": "Paramètres",
+    "description": "Label. Settings"
+  },
+  "disabledNotifStart": {
+    "message": "Désactiver les notifications de début de vote",
+    "description": "Checkbox. Voting start notifications"
+  },
+  "disabledNotifInfo": {
+    "message": "Désactiver les notifications de vote réussi",
+    "description": "Checkbox. Successful notifications"
+  },
+  "disabledNotifWarn": {
+    "message": "Désactiver les notifications d’alerte",
+    "description": "Checkbox. Alert notifications"
+  },
+  "disabledNotifWarnTooltip": {
+    "message": "Par exemple, une notification indiquant que vous avez déjà voté (lorsque l’extension a essayé de voter pour le projet mais que vous aviez déjà voté vous‑même)",
+    "description": "1234"
+  },
+  "disabledNotifError": {
+    "message": "Désactiver les notifications d’erreur",
+    "description": "Checkbox. Error notifications"
+  },
+  "disabledCheckInternet": {
+    "message": "Désactiver la vérification de la connexion Internet"
+  },
+  "disabledOneVote": {
+    "message": "Désactiver le vote simultané sur plusieurs sites à la fois"
+  },
+  "disabledFocusedTab": {
+    "message": "Onglet au premier plan"
+  },
+  "disabledFocusedTabTooltip": {
+    "message": "Ouvrir un onglet et y basculer automatiquement"
+  },
+  "disabledWarnCaptcha": {
+    "message": "Désactiver les notifications indiquant qu’il faut passer le captcha manuellement"
+  },
+  "disabledWarnCaptchaTooltip": {
+    "message": "Désactive les notifications et la journalisation indiquant que le captcha doit être passé manuellement"
+  },
+  "disabledClickCaptcha": {
+    "message": "Ne pas cliquer sur « Je ne suis pas un robot »"
+  },
+  "disabledClickCaptchaTooltip": {
+    "message": "L’extension ne cliquera pas sur « Je ne suis pas un robot » dans reCAPTCHA ou hCaptcha ; utile si votre captcha est résolu automatiquement"
+  },
+  "disabledDebug": {
+    "message": "Débogage"
+  },
+  "debugTooltip": {
+    "message": "Activez ceci uniquement si le développeur vous l’a demandé"
+  },
+  "disableCloseTabsOnSuccess": {
+    "message": "Désactiver la fermeture des onglets après un vote réussi"
+  },
+  "disableCloseTabsOnError": {
+    "message": "Désactiver la fermeture des onglets en cas d’échec du vote"
+  },
+  "disableCheckProjects": {
+    "message": "Désactiver la vérification",
+    "description": "Checkbox. Disable check when adding a project"
+  },
+  "disableCheckProjectsTooltip": {
+    "message": "La désactivation de cette vérification est déconseillée : elle peut provoquer des erreurs dans l’extension et casser le processus d’auto‑vote. Ce paramètre désactive la vérification lors de l’ajout d’un projet, la vérification pour MCRate (comme vous le savez, on ne peut y voter qu’une fois par jour) et désactive aussi l’autorisation VK. Ce paramètre n’est pas conservé lors de l’enregistrement de la configuration.",
+    "description": "Tooltip. Disable check when adding a project"
+  },
+  "priority": {
+    "message": "Ajouter en priorité",
+    "description": "Checkbox. Priority"
+  },
+  "priorityTooltip": {
+    "message": "Lorsque cette option est activée, le projet ajouté sera prioritaire et votera en premier sans délai de 10 minutes.",
+    "description": "Tooltip. Priority"
+  },
+  "enabledSilentVote": {
+    "message": "Mode de vote",
+    "description": "Label. Voting mode"
+  },
+  "enabledSilentVoteTooltip": {
+    "message": "Mode silencieux (recommandé) — vote en arrière‑plan sans ouvrir d’onglets. Mode émulation — émule un véritable utilisateur, ouvre un onglet et clique sur le bouton de vote ; il est préférable de laisser au moins un onglet ouvert dans le navigateur, sinon la fenêtre du navigateur peut passer au premier plan et gêner.",
+    "description": "Tooltip. Silent vote"
+  },
+  "enabledSilentVoteSilent": {
+    "message": "Mode silencieux",
+    "description": "Input. Mode."
+  },
+  "enabledSilentVoteNoSilent": {
+    "message": "Mode émulation",
+    "description": "Input. Mode."
+  },
+  "cooldown": {
+    "message": "Délai entre les projets pour un même classement",
+    "description": "Label. Cooldown input"
+  },
+  "cooldownError": {
+    "message": "Délai en ms en cas d’erreur"
+  },
+  "setCooldown": {
+    "message": "Définir",
+    "description": "Button. Set cooldown"
+  },
+  "settingsFile": {
+    "message": "Exportation/Importation",
+    "description": "Label. Export/Import"
+  },
+  "importSettings": {
+    "message": "Importer les paramètres",
+    "description": "Button. Import"
+  },
+  "exportSettings": {
+    "message": "Exporter les paramètres",
+    "description": "Button. Export"
+  },
+  "exportLogs": {
+    "message": "Exporter les journaux",
+    "description": "Button. Export"
+  },
+  "addedProjects": {
+    "message": "Liste des projets ajoutés",
+    "description": "Header. Added projects"
+  },
+  "notAddedAll": {
+    "message": "Vous n’avez encore rien ajouté ici"
+  },
+  "notAdded": {
+    "message": "Vous n’avez pas encore ajouté de projet à cette page de vote !",
+    "description": "Notification. You haven't added any projects"
+  },
+  "notAvailableInSilent": {
+    "message": "Ceci n’est pas disponible en mode silencieux par défaut !",
+    "description": "Notification. available in silent voting mode"
+  },
+  "supportDev": {
+    "message": "Soutenir le développeur",
+    "description": "Link (Express gratitude)"
+  },
+  "firstInstall": {
+    "message": "Merci d’avoir installé l’extension. Pour continuer, vous devez d’abord la configurer !"
+  },
+  "firstSettings": {
+    "message": "Génération des paramètres par défaut..."
+  },
+  "firstSettingsSave": {
+    "message": "Les paramètres par défaut ont été appliqués et enregistrés avec succès"
+  },
+  "settingsGen": {
+    "message": "Les paramètres du projet ont été générés"
+  },
+  "settingsUpdate": {
+    "message": "Mise à jour des paramètres par défaut..."
+  },
+  "settingsUpdateEnd": {
+    "message": "Les paramètres du projet ont été mis à jour"
+  },
+  "settingsUpdateEnd2": {
+    "message": "Les paramètres par défaut ont été appliqués et enregistrés avec succès"
+  },
+  "confirmDisableErrors": {
+    "message": "Voulez‑vous vraiment désactiver les notifications d’erreur ? En cas de problème lors du vote, l’extension réessaiera toutes les 5 minutes. Si vous ne recevez pas ces erreurs et ne les surveillez pas, l’extension pourrait essayer de voter indéfiniment. Faites attention, vous pourriez être bloqué pour envoi massif de requêtes"
+  },
+  "confirmDisableCheckProjects": {
+    "message": "Voulez‑vous vraiment désactiver la vérification lors de l’ajout d’un projet ? En cas d’erreur lors de l’ajout, le vote pourrait échouer"
+  },
+  "confirmPriority": {
+    "message": "Voulez‑vous vraiment donner la priorité à ce projet ? Si vous activez la priorité sans heure précise, cela peut entraîner un vote tardif. Définissez une heure exacte (à la seconde près) et ne la modifiez pas pour un processus de vote correct"
+  },
+  "deleteButton": {
+    "message": "Supprimer"
+  },
+  "nextVote": {
+    "message": "Prochain vote après :"
+  },
+  "inPriority": {
+    "message": "Prioritaire"
+  },
+  "adding": {
+    "message": "Ajout..."
+  },
+  "lets": {
+    "message": "Bien sûr !"
+  },
+  "alreadyAdded": {
+    "message": "Ce projet a déjà été ajouté"
+  },
+  "oneProjectFairTop": {
+    "message": "Vous ne pouvez voter que pour un seul projet à la fois sur FairTop. Pour voter pour plusieurs projets, empêchez FairTop.in d’enregistrer des cookies (cherchez sur Google comment faire). Désactivez ensuite la vérification lors de l’ajout d’un projet dans les paramètres avancés et réessayez d’ajouter ce projet. Attention à l’ID du projet : avec la vérification désactivée, l’extension acceptera un projet même avec un ID inexistant."
+  },
+  "oneProject": {
+    "message": "Sur $project$, vous ne pouvez voter que pour $count$ projet(s) à la fois",
+    "placeholders": {
+      "project": {
+        "content": "$1"
+      },
+      "count": {
+        "content": "$2"
+      }
+    }
+  },
+  "checkHasProject": {
+    "message": "Validation du projet..."
+  },
+  "notConnectInternet": {
+    "message": "Il semble que vous n’ayez pas de connexion Internet ou que la page ne soit pas disponible ; voir les détails dans la console"
+  },
+  "notFoundProjectCode": {
+    "message": "Ce projet n’existe pas ! Réponse HTTP : $code$. Vérifiez l’exactitude de l’ID saisi (et des autres paramètres, le cas échéant)",
+    "placeholders": {
+      "code": {
+        "content": "$1"
+      }
+    }
+  },
+  "notFoundProject": {
+    "message": "Ce projet n’existe pas ! Vérifiez l’exactitude de l’ID saisi (et des autres paramètres, le cas échéant)"
+  },
+  "notFoundProjectRedirect": {
+    "message": "Une redirection a eu lieu, il est probable que ce projet n’existe pas ! Vérifiez l’URL : $url$. Vérifiez aussi l’exactitude de l’ID saisi (et des autres paramètres, le cas échéant)",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "notConnectInternetVPN": {
+    "message": "Il semble que vous n’ayez pas de connexion Internet ou que la page ne soit pas disponible (Vous êtes en Ukraine ? Activez un VPN et laissez‑le activé pendant l’auto‑vote). Voir les détails dans la console"
+  },
+  "authButton": {
+    "message": "Se connecter"
+  },
+  "authVK": {
+    "message": "Pour voter sur $project$, une authentification via VK est requise",
+    "placeholders": {
+      "project": {
+        "content": "$1"
+      }
+    }
+  },
+  "notConnect": {
+    "message": "Échec de la connexion à $url$, réponse HTTP : $code$",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      },
+      "code": {
+        "content": "$2"
+      }
+    }
+  },
+  "checkHasProjectSuccess": {
+    "message": "Le projet est valide"
+  },
+  "checkAuthVK": {
+    "message": "Vérification de l’authentification VK..."
+  },
+  "checkAuthVKSuccess": {
+    "message": "Authentification VK réussie"
+  },
+  "addSuccess": {
+    "message": "Ajout réussi"
+  },
+  "cooldownChanged": {
+    "message": "Vous devez redémarrer l’extension pour appliquer les modifications. Après le redémarrage, rouvrez les paramètres. Redémarrer l’extension ?"
+  },
+  "storageError": {
+    "message": "Une erreur est survenue lors de la lecture de la configuration : $error$",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "saving": {
+    "message": "Enregistrement..."
+  },
+  "storageErrorSave": {
+    "message": "Une erreur est survenue lors de l’enregistrement des paramètres : $error$",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "successSave": {
+    "message": "Paramètres enregistrés avec succès"
+  },
+  "bodyFetch": {
+    "message": "Corps de la requête"
+  },
+  "urlFetch": {
+    "message": "URL de récupération"
+  },
+  "delayFetch": {
+    "message": "Délai en ms"
+  },
+  "name": {
+    "message": "Nom"
+  },
+  "enterName": {
+    "message": "Créer un nom"
+  },
+  "exporting": {
+    "message": "Exportation..."
+  },
+  "exportingEnd": {
+    "message": "Exportation terminée avec succès"
+  },
+  "importing": {
+    "message": "Importation des paramètres..."
+  },
+  "importingEnd": {
+    "message": "Importation terminée avec succès"
+  },
+  "disableNotifInfo": {
+    "message": "Les notifications de vote réussi sont désactivées"
+  },
+  "disableNotifWarn": {
+    "message": "Les notifications d’avertissement sont désactivées"
+  },
+  "disableNotifStart": {
+    "message": "Les notifications de début de vote sont désactivées"
+  },
+  "retry": {
+    "message": "Réessayer"
+  },
+  "successFastAdd": {
+    "message": "L’extension a été configurée avec succès !"
+  },
+  "closeTab": {
+    "message": "Voulez‑vous fermer cet onglet ?"
+  },
+  "closeTabButton": {
+    "message": "Fermer l’onglet"
+  },
+  "projectIDTooltip": {
+    "message": " du projet peut être obtenu depuis la barre d’adresse de la page du projet, par exemple : "
+  },
+  "gameIDTooltip": {
+    "message": " du jeu peut être obtenu depuis la barre d’adresse de la page du projet, par exemple : "
+  },
+  "listingIDTooltip": {
+    "message": " de l’annonce peut être obtenu depuis la barre d’adresse de la page du projet, par exemple : "
+  },
+  "inputProjectID": {
+    "message": "Saisir l’ID"
+  },
+  "developers": {
+    "message": "Développeurs :"
+  },
+  "developer": {
+    "message": "Développeur :"
+  },
+  "designer": {
+    "message": "Designer :"
+  },
+  "itsFree": {
+    "message": "L’extension est entièrement gratuite !"
+  },
+  "feedback": {
+    "message": "En cas de questions ou de problèmes, contactez‑nous à "
+  },
+  "feedback2": {
+    "message": "ou le support à "
+  },
+  "feedback3": {
+    "message": "ou contactez‑moi sur "
+  },
+  "feedback4": {
+    "message": "ou signalez un bug sur"
+  },
+  "dmDiscord": {
+    "message": "discord"
+  },
+  "dmChromeWebStore": {
+    "message": "Chrome Web Store"
+  },
+  "email": {
+    "message": "E‑mail"
+  },
+  "internetRestored": {
+    "message": "Connexion Internet rétablie"
+  },
+  "internetDisconnected": {
+    "message": "Le vote a été lancé, mais la connexion Internet est perdue ; en attente de rétablissement..."
+  },
+  "startedAutoVote": {
+    "message": "Démarrage de l’auto‑vote"
+  },
+  "successAutoVote": {
+    "message": "Auto‑vote réussi"
+  },
+  "successAutoVoteWarn": {
+    "message": "Auto‑vote réussi, $warn$",
+    "placeholders": {
+      "warn": {
+        "content": "$1"
+      }
+    }
+  },
+  "alreadyVoted": {
+    "message": "Vous avez déjà voté"
+  },
+  "alreadyVotedWarn": {
+    "message": "Vous avez déjà voté, $warn$",
+    "placeholders": {
+      "warn": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorOpenTab": {
+    "message": "Erreur lors de l’ouverture de l’onglet : $error$",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorAuthVK": {
+    "message": "Échec de l’authentification VK ! Votez manuellement cette fois pour corriger cette erreur"
+  },
+  "errorRedirected": {
+    "message": "Erreur de vote ! Redirection vers une page inconnue : $url$. Vérifiez cette URL",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorVote": {
+    "message": "Erreur de vote ! Réponse HTTP : $code$ URL : $url$",
+    "placeholders": {
+      "code": {
+        "content": "$1"
+      },
+      "url": {
+        "content": "$2"
+      }
+    }
+  },
+  "errorVoteNoElement": {
+    "message": "Erreur ! Il semble qu’un élément nécessaire (bouton ou champ de saisie) soit manquant. Détails : $error$. Signalez cette erreur au développeur de l’extension",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorVoteNetwork": {
+    "message": "Erreur lors du vote ! Code d’erreur : $code$ URL : $url$",
+    "placeholders": {
+      "code": {
+        "content": "$1"
+      },
+      "url": {
+        "content": "$2"
+      }
+    }
+  },
+  "errorNextVote": {
+    "message": "La prochaine tentative de vote aura lieu dans $minutes$ minute(s)",
+    "placeholders": {
+      "minutes": {
+        "content": "$1"
+      }
+    }
+  },
+  "timeStamp": {
+    "message": "l’horodatage est défini sur"
+  },
+  "projectID": {
+    "message": "ID du projet"
+  },
+  "firstAddSettings": {
+    "message": "Des paramètres supplémentaires ont été générés"
+  },
+  "secondBonus": {
+    "message": "Sur $project$, vous devez également récupérer la récompense ; on automatise cela ?",
+    "placeholders": {
+      "project": {
+        "content": "$1"
+      }
+    }
+  },
+  "redirectedSecondBonus": {
+    "message": "Redirection vers $url$, mais il semble que vous ne soyez pas connecté, ou qu’un autre problème soit survenu. Vérifiez cette URL",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "dailyBonus": {
+    "message": "Bonus quotidien"
+  },
+  "donate": {
+    "message": "https://paypal.me/serega007ru"
+  },
+  "countVote": {
+    "message": "Combien de votes par jour"
+  },
+  "requiresCaptcha": {
+    "message": "Nécessite de résoudre le captcha manuellement"
+  },
+  "authSteam": {
+    "message": "Nécessite l’authentification Steam"
+  },
+  "privacyPass": {
+    "message": "Installez l’extension "
+  },
+  "privacyPass2": {
+    "message": " pour obtenir 5 passes de captcha gratuits pour hCaptcha"
+  },
+  "privacyPass3": {
+    "message": "Ou inscrivez‑vous sur "
+  },
+  "privacyPass4": {
+    "message": " et suivez les instructions. Après avoir défini les cookies sur hCaptcha, installez une extension capable de modifier les cookies dans le navigateur, par exemple "
+  },
+  "privacyPass5": {
+    "message": " et prolongez la validité de tous les cookies du domaine hcaptcha.com de plusieurs années"
+  },
+  "this": {
+    "message": "ceci"
+  },
+  "randomize": {
+    "message": "Randomiser le prochain vote"
+  },
+  "randomizeTooltip": {
+    "message": "Dans les limites indiquées, l’heure du prochain vote sera aléatoire ; cela sert principalement à rendre plus difficile pour les administrateurs d’identifier que vous utilisez l’auto‑vote"
+  },
+  "inRandomize": {
+    "message": "Randomisé"
+  },
+  "soon": {
+    "message": "Bientôt..."
+  },
+  "inQueue": {
+    "message": "Dans la file d’attente de vote..."
+  },
+  "now": {
+    "message": "Un vote est en cours..."
+  },
+  "timeout": {
+    "message": "Le délai d’attente du vote a expiré"
+  },
+  "chooseLang": {
+    "message": "Choisir la langue/la région"
+  },
+  "chooseGameURL": {
+    "message": "Saisissez l’URL du jeu ou sélectionnez‑la dans la liste"
+  },
+  "chooseListingURL": {
+    "message": "Saisissez l’URL de l’annonce ou sélectionnez‑la dans la liste"
+  },
+  "idGame": {
+    "message": "ID du jeu"
+  },
+  "urlGame": {
+    "message": "URL du jeu"
+  },
+  "urlListing": {
+    "message": "URL de l’annonce"
+  },
+  "stats": {
+    "message": "Statistiques de $project$",
+    "placeholders": {
+      "project": {
+        "content": "$1"
+      }
+    }
+  },
+  "stats2": {
+    "message": "Statistiques"
+  },
+  "statsSuccessVotes": {
+    "message": "Votes réussis"
+  },
+  "statsMonthSuccessVotes": {
+    "message": "Votes réussis ce mois‑ci"
+  },
+  "statsLastMonthSuccessVotes": {
+    "message": "Votes réussis le mois dernier"
+  },
+  "statsErrorVotes": {
+    "message": "Erreurs"
+  },
+  "statsLaterVotes": {
+    "message": "Erreurs « Vous avez déjà voté »"
+  },
+  "statsLastSuccessVote": {
+    "message": "Dernier vote réussi"
+  },
+  "statsLastAttemptVote": {
+    "message": "Dernière tentative de vote"
+  },
+  "statsAdded": {
+    "message": "Ajouté"
+  },
+  "statsInstalled": {
+    "message": "Installé"
+  },
+  "generalStats": {
+    "message": "Statistiques générales"
+  },
+  "todayStats": {
+    "message": "Statistiques du jour"
+  },
+  "selectTime": {
+    "message": "Choisissez le type de délai à utiliser"
+  },
+  "timeoutMS": {
+    "message": "Délai en ms depuis le dernier vote"
+  },
+  "timeoutHour": {
+    "message": "À une heure donnée (une fois par jour)"
+  },
+  "timeoutWeek": {
+    "message": "À une heure donnée (une fois par semaine)"
+  },
+  "timeoutMonth": {
+    "message": "À une heure donnée (une fois par mois)"
+  },
+  "chooseHour": {
+    "message": "Définir l’heure"
+  },
+  "chooseWeek": {
+    "message": "Définir la semaine"
+  },
+  "chooseMonth": {
+    "message": "Définir le numéro (jour)"
+  },
+  "advSettings": {
+    "message": "Paramètre avancé :"
+  },
+  "customTimeOut": {
+    "message": "Personnaliser l’heure du prochain vote (délai)"
+  },
+  "lastDayMonth": {
+    "message": "Appliquer le délai personnalisé uniquement le dernier jour du mois"
+  },
+  "customTimeOut2": {
+    "message": "Délai personnalisé"
+  },
+  "lastDayMonth2": {
+    "message": "le dernier jour du mois"
+  },
+  "scheduleTime": {
+    "message": "Planifier un vote"
+  },
+  "discordLogIn": {
+    "message": "Vous devez être connecté pour voter pour des bots Discord !"
+  },
+  "auth": {
+    "message": "Connectez‑vous pour voter"
+  },
+  "emptySite": {
+    "message": "Il semble que ce site de classement ait renvoyé une page vide"
+  },
+  "ordinalWorld": {
+    "message": "Numéro d’ordre du monde"
+  },
+  "ordinalWorldTooltip": {
+    "message": "Le numéro d’ordre du monde est le numéro situé dans la liste des mondes sélectionnés lors du vote"
+  },
+  "requiredNick": {
+    "message": "Où est le pseudo ? Il n’y a pas de bouton d’authentification Steam, j’ai donc besoin d’un pseudo et c’est nécessaire"
+  },
+  "alertCaptcha": {
+    "message": "Il y a un captcha sur cette page de classement que l’extension ne peut pas résoudre ; vous devrez le passer manuellement. L’extension vous en informera."
+  },
+  "additionURL": {
+    "message": "Paramètres supplémentaires (facultatif)"
+  },
+  "emptyError": {
+    "message": "Erreur vide"
+  },
+  "notificationsDisabled": {
+    "message": "Les notifications sont désactivées ou l’extension n’y a pas accès ! Vous pourriez manquer des notifications importantes de cette extension à propos d’erreurs ou d’avertissements !"
+  },
+  "errorAttemptVote": {
+    "message": "Nombre maximal de tentatives de vote dépassé, $error$",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "voteMode": {
+    "message": "Forcer le mode de vote"
+  },
+  "start": {
+    "message": "Lancement de l’extension v$version$",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "suspended": {
+    "message": "Extension suspendue"
+  },
+  "errordb": {
+    "message": "Erreur avec la base de données $db$ $error$",
+    "placeholders": {
+      "db": {
+        "content": "$1"
+      },
+      "error": {
+        "content": "$2"
+      }
+    }
+  },
+  "errordbTitle": {
+    "message": "Erreur avec la base de données $db$",
+    "placeholders": {
+      "db": {
+        "content": "$1"
+      }
+    }
+  },
+  "errorSelectSiteRating": {
+    "message": "Le « Site de classement » est mal renseigné ; sélectionnez celui dont vous avez besoin dans la liste"
+  },
+  "clearLogs": {
+    "message": "Effacer les journaux"
+  },
+  "clearingLogs": {
+    "message": "Effacement des journaux"
+  },
+  "clearedLogs": {
+    "message": "Journaux effacés avec succès"
+  },
+  "deleteAll": {
+    "message": "Tout supprimer"
+  },
+  "deleteAllRating": {
+    "message": "Voulez‑vous vraiment supprimer tous les projets ajoutés sur ce classement ?"
+  },
+  "notGrantUrl": {
+    "message": "Vous n’avez pas accordé à l’extension l’accès au(x) classement(s) ; l’ajout n’est pas possible"
+  },
+  "grantUrl": {
+    "message": "Accorder à l’extension l’accès au(x) classement(s)"
+  },
+  "grant": {
+    "message": "Accorder"
+  },
+  "permissions": {
+    "message": "Autorisations"
+  },
+  "granted": {
+    "message": "Accordé"
+  },
+  "notgranted": {
+    "message": "Non accordé"
+  },
+  "oldSettings": {
+    "message": "Les paramètres de l’ancienne version $old$ ont été détectés ; mise à niveau vers la nouvelle version $new$",
+    "placeholders": {
+      "old": {
+        "content": "$1"
+      },
+      "new": {
+        "content": "$2"
+      }
+    }
+  },
+  "randomizeInput": {
+    "message": "Indiquez les limites de randomisation (min et max) en millisecondes"
+  },
+  "errorCaptcha": {
+    "message": "Erreur avec le captcha : $error$",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "passageCaptcha": {
+    "message": "Attention ! reCAPTCHA/hCaptcha est utilisé sur ce classement. Si l’on vous demande souvent de passer un captcha manuellement (sélection d’images), vous pouvez voir comment résoudre ce problème "
+  },
+  "here": {
+    "message": "ici"
+  },
+  "notRegVK": {
+    "message": "Erreur d’authentification VKontakte : inscription incomplète (il semble que le numéro de téléphone ne soit pas indiqué)"
+  },
+  "version": {
+    "message": "Version : "
+  },
+  "min": {
+    "message": "Minimum"
+  },
+  "max": {
+    "message": "Maximum"
+  },
+  "translated": {
+    "message": "Traduit en anglais : kadeler#4809"
+  },
+  "notSupportedGroupTabs": {
+    "message": "Il semble que votre navigateur ne prenne pas en charge le regroupement d’onglets"
+  },
+  "projectDeleted": {
+    "message": "Le projet a été supprimé par l’utilisateur"
+  },
+  "banAttention": {
+    "message": "Attention ! Des cas de blocage pour auto‑vote ont été signalés sur ce site. Utilisez l’auto‑vote avec prudence, surveillez les notifications et les erreurs. Si vous êtes banni, cela signifie que l’auteur du site a mis en place un nouveau contournement pour détecter l’auto‑vote ; informez le développeur de l’extension si cela vous arrive !"
+  },
+  "rewardAttention": {
+    "message": "Attention ! Avec les paramètres indiqués, vous ne recevrez aucune récompense pour le vote ! À quoi bon voter si vous n’en tirez rien ?"
+  },
+  "closedTab": {
+    "message": "Il semble que vous ayez fermé l’onglet sur lequel l’extension effectuait l’auto‑vote"
+  },
+  "restart": {
+    "message": "Redémarrer le vote"
+  },
+  "restarted": {
+    "message": "Le vote a été envoyé pour redémarrage"
+  },
+  "disabledUseRemoteCode": {
+    "message": "Désactiver l’utilisation du code distant"
+  },
+  "disabledUseRemoteCodeTooltip": {
+    "message": "Certains propriétaires de sites luttent activement contre cette extension et essaient de la perturber autant que possible. L’extension utilise désormais du code distant, ce qui évite d’avoir à la mettre à jour tout en gardant un code à jour. Si vous désactivez l’utilisation du code distant, vous pouvez rencontrer des erreurs ; nous ne le recommandons pas. Cette option est surtout destinée au développeur pour déboguer du code local."
+  },
+  "rejectDelete": {
+    "message": "Impossible de supprimer pendant l’exécution d’un vote ; redémarrez l’extension si le vote est bloqué"
+  },
+  "disabledSendErrorSentry": {
+    "message": "Désactiver l’envoi de rapports d’erreurs au développeur de l’extension"
+  },
+  "disabledSendErrorSentryTooltip": {
+    "message": "Pour certaines erreurs, l’extension envoie un rapport au développeur via Sentry.io. Ce rapport comprend des détails sur l’erreur, une capture du site (en PNG et HTML) ainsi que des informations sur vos paramètres (votre pseudo, le site sur lequel vous votez et les réglages utilisés). Vous pouvez désactiver cela"
+  },
+  "expertMode": {
+    "message": "Je suis un utilisateur avancé"
+  },
+  "expertModeTooltip": {
+    "message": "Vous aurez accès aux paramètres avancés ; cette fonctionnalité est destinée aux utilisateurs qui maîtrisent bien l’informatique et ses nuances techniques."
+  },
+  "link": {
+    "message": "Lien vers le classement"
+  },
+  "linkPlaceholder": {
+    "message": "Insérez ici un lien vers le classement"
+  },
+  "errorLink": {
+    "message": "$url$ n’est pas pris en charge par l’extension. Veuillez indiquer ici un lien vers le site de monitoring (classement) et non vers le site du projet (serveur). Vous pouvez aussi essayer le mode d’ajout manuel (interrupteur en bas à droite)",
+    "placeholders": {
+      "url": {
+        "content": "$1"
+      }
+    }
+  },
+  "switchAddMode": {
+    "message": "Mode manuel"
+  },
+  "storageUsed": {
+    "message": "Stockage utilisé : $value$ $unit$",
+    "placeholders": {
+      "value": {
+        "content": "$1"
+      },
+      "unit": {
+        "content": "$2"
+      }
+    }
+  },
+  "edit": {
+    "message": "Modifier"
+  },
+  "confirmNow": {
+    "message": "Ce projet est en train de voter ; cela annulera le vote en cours. Voulez‑vous quand même redémarrer le vote ?"
+  },
+  "confirmQueue": {
+    "message": "Un projet de la file est en train de voter ; cela annulera le vote en cours. Voulez‑vous quand même redémarrer le vote ?"
+  },
+  "canceledVote": {
+    "message": "Le vote a été annulé par l’utilisateur"
+  },
+  "projectRestarted": {
+    "message": "Vote redémarré par l’utilisateur"
+  },
+  "restartInQueue": {
+    "message": "Ce projet est dans la file d’attente de vote, le redémarrage n’est pas possible."
+  },
+  "save": {
+    "message": "Enregistrer"
+  },
+  "cancel": {
+    "message": "Annuler"
+  },
+  "editTitle": {
+    "message": "Modification d’un projet existant"
+  },
+  "operaAttention": {
+    "message": "Attention ! Nous avons détecté que vous utilisez le navigateur Opera, avec lequel l’accès au captcha de Google pose problème. Veuillez suivre les instructions ci‑dessous pour donner à l’extension l’accès au captcha Google"
+  },
+  "errorLinkParam": {
+    "message": "D’après le lien fourni, nous n’avons pas pu récupérer le paramètre $param$ ; il est probable que le lien ne soit pas complet. Vous pouvez aussi essayer le mode manuel (interrupteur en bas à droite)",
+    "placeholders": {
+      "param": {
+        "content": "$1"
+      }
+    }
+  },
+  "cooldownVote": {
+    "message": "Délai d’expiration du vote en ms"
+  },
+  "timeoutTooltip": {
+    "message": "Si vous votez sur un classement (monitoring) pour plusieurs projets (serveurs), à la fin d’un vote l’extension attendra le délai indiqué avant de voter pour le projet suivant sur le même classement"
+  },
+  "timeoutErrorTooltip": {
+    "message": "En cas d’erreur de vote, l’extension attendra le délai indiqué avant la prochaine tentative"
+  },
+  "timeoutVoteTooltip": {
+    "message": "Si le vote dure trop longtemps, l’extension le redémarrera après le délai indiqué"
+  },
+  "disabledRestartOnTimeout": {
+    "message": "Désactiver le redémarrage du vote s’il dure trop longtemps"
+  },
+  "monday": {
+    "message": "Lundi"
+  },
+  "tuesday": {
+    "message": "Mardi"
+  },
+  "wednesday": {
+    "message": "Mercredi"
+  },
+  "thursday": {
+    "message": "Jeudi"
+  },
+  "friday": {
+    "message": "Vendredi"
+  },
+  "saturday": {
+    "message": "Samedi"
+  },
+  "sunday": {
+    "message": "Dimanche"
+  },
+  "notSupportedBrowser": {
+    "message": "Opera n’est pas pris en charge par l’extension"
+  },
+  "notSupportedBrowserContent1": {
+    "message": "Votre navigateur n’est pas pris en charge par l’extension. Utilisez un autre navigateur basé sur Chromium (par ex. Google Chrome, Microsoft Edge, Vivaldi, Yandex Browser, etc.)"
+  },
+  "notSupportedBrowserContent2": {
+    "message": "Pourquoi Opera n’est‑il pas pris en charge par l’extension ? Il y a de nombreuses raisons : pas de prise en charge du regroupement d’onglets, pas d’accès au captcha (Google reCAPTCHA), pas de prise en charge de l’API File System Access, pas de prise en charge de l’exécution en arrière‑plan de l’extension (quand tous les onglets du navigateur sont fermés), pas d’activité sur opera.addons.com (impossible d’y publier une extension) et bien d’autres détails"
+  },
+  "deleteExtension": {
+    "message": "Supprimer l’extension"
+  },
+  "limitedModeButton1": {
+    "message": "Je veux quand même utiliser l’extension sur Opera malgré les limitations"
+  },
+  "areYouSure": {
+    "message": "Êtes‑vous sûr ?"
+  },
+  "limitedModeContent": {
+    "message": "Avant d’utiliser cette extension dans le navigateur Opera, comprenez qu’elle fonctionnera en mode limité, à savoir :"
+  },
+  "limitedModeContent1": {
+    "message": "Les onglets ouverts par l’extension ne seront pas regroupés et vous ne saurez pas lesquels proviennent de l’extension. Évitez d’interagir avec le processus de vote (sauf si l’extension vous demande de passer un captcha manuellement), cela peut entraîner des erreurs"
+  },
+  "limitedModeContent2": {
+    "message": "Votre navigateur ne fonctionnera pas en arrière‑plan ; ainsi, lorsque l’heure de voter arrivera et que votre navigateur sera fermé (aucun onglet ouvert), le vote ne commencera pas avant que vous ne lanciez le navigateur."
+  },
+  "limitedModeContent3": {
+    "message": "L’extension n’a pas accès au captcha Google ; vous devrez lui accorder manuellement cet accès, sinon elle ne pourra pas cliquer sur « Je ne suis pas un robot ». Vous pouvez savoir comment accorder l’accès au captcha Google dans cette instruction : "
+  },
+  "limitedModeButton2": {
+    "message": "J’ai tout lu, suivi les instructions et je comprends que l’extension fonctionnera en mode limité"
+  },
+  "waitSeconds": {
+    "message": "Attendez $seconds$ seconde(s)",
+    "placeholders": {
+      "seconds": {
+        "content": "$1"
+      }
+    }
+  },
+  "confirmUninstallSelf": {
+    "message": "Voulez‑vous vraiment supprimer ? Tous les paramètres de l’extension seront définitivement supprimés."
+  },
+  "lagServiceWorker": {
+    "message": "Il semble que nous ne puissions pas contacter le Service Worker (processus d’arrière‑plan de l’extension) ; il est probablement figé. Essayons de redémarrer l’extension ?"
+  },
+  "restartExtension": {
+    "message": "Redémarrer l’extension"
+  },
+  "confirmRestartExtension": {
+    "message": "Redémarrer l’extension ? Après le redémarrage, la page des paramètres sera fermée et devra être rouverte manuellement"
+  },
+  "requiredConfirmTOS": {
+    "message": "Le site nécessite que vous confirmiez quelque chose"
+  },
+  "tooManyVoteAttempts": {
+    "message": "Trop de tentatives de vote à la suite ; quelque chose a dû se casser. Informez le développeur de l’extension de cette erreur"
+  },
+  "access": {
+    "message": "Accorder l’accès"
+  },
+  "alertFocusedTab": {
+    "message": "Attention ! Sur ce site de monitoring, l’onglet de l’extension doit être actif (au premier plan). Au démarrage de l’auto‑vote, l’extension basculera automatiquement sur l’onglet, ce qui peut vous distraire"
+  },
+  "nickWithSpace": {
+    "message": "Un espace a été détecté dans votre pseudo"
+  },
+  "nickWithSpaceConfirm": {
+    "message": "Un espace a été détecté dans votre pseudo ; voulez‑vous vraiment ajouter avec un espace dans votre pseudo ?"
+  },
+  "notSupportedSiteRating": {
+    "message": "Selon les paramètres indiqués, l’extension ne prend pas en charge $rating$. Êtes‑vous sûr d’avoir saisi les données correctement ?",
+    "placeholders": {
+      "rating": {
+        "content": "$1"
+      }
+    }
+  },
+  "usedTranslator": {
+    "message": "Il semble que vous ayez utilisé le traducteur intégré au navigateur ; veuillez le désactiver, il perturbe le fonctionnement de l’extension. Si ce n’est pas le cas et que vous l’avez déjà désactivé, informez le développeur de l’extension"
+  },
+  "failParseUrlFastAdd": {
+    "message": "Impossible de trouver le classement $rating$ ; informez le propriétaire du site $site$ de cette erreur",
+    "placeholders": {
+      "rating": {
+        "content": "$1"
+      },
+      "site": {
+        "content": "$2"
+      }
+    }
+  },
+  "captchaPassedDouble": {
+    "message": "Il semble que le captcha ait été résolu deux fois, ce qui n’est pas bon. Peut‑être que la page s’est rechargée avant la résolution du captcha ou qu’il y a eu des dysfonctionnements. Contactez le développeur de l’extension pour obtenir de l’aide."
+  },
+  "notReadyInject": {
+    "message": "Il semble que l’onglet ait commencé à charger alors que l’extension n’était pas prête, ce qui peut entraîner des erreurs lors du vote"
+  },
+  "siteError": {
+    "message": "Le site a renvoyé une erreur : $error$",
+    "placeholders": {
+      "error": {
+        "content": "$1"
+      }
+    }
+  },
+  "disabledSite": {
+    "message": "Temporairement désactivé par l’extension. Raison : $reason$",
+    "placeholders": {
+      "reason": {
+        "content": "$1"
+      }
+    }
+  },
+  "never": {
+    "message": "Jamais"
+  }
+}
