@@ -1,6 +1,70 @@
-# Auto Vote Rating - Chrome Extension
+# Auto Vote Rating — Active Fork (2025)
+
+Actively maintained fork of AVR. The original project went inactive and a growing number of issues remained unresolved. This fork’s mission is to bring AVR back to a fully functional, modern experience: stable, accessible, and future‑proof.
+
+Why this fork
+- Owner inactivity: upstream stopped resolving issues and fell behind browser changes.
+- Fully functional goal: robust background worker, clean UI, DB fixes, and better diagnostics.
+- Ongoing maintenance: new sites, bug fixes, compatibility updates, and faster triage.
+
+What’s new and modern
+- MV3 + ES Modules: module service worker, ESM IDB (openDB), safer imports.
+- Better stability: fixed IndexedDB “TransactionInactiveError” with safe patterns, fewer race conditions.
+- Contemporary UI: dark theme, keyboard-friendly, reduced-motion support, RTL-safe borders.
+- Dashboard (Options): global counters, today stats, success rate, trend sparkline, top vote sites, recent activity.
+- Clear notifications and logs: more precise errors, optional debug mode, structured logs.
+
+Integrated, free captcha assistance
+- Built‑in detectors and assistance for:
+  - reCAPTCHA (anchor + bframe)
+  - hCaptcha
+  - Yandex SmartCaptcha
+  - Cloudflare challenge / Turnstile
+- Designed to reduce friction, auto‑handle where permitted, and provide clear fallbacks.
+- Respect websites’ ToS. Use responsibly. If automation isn’t appropriate, the extension will prompt for manual solve/delay.
+
+Quick start
+- Install the extension (store links below or load unpacked).
+- Open Options.
+- Add a project:
+  - Link mode: paste a project URL (parser fills the fields).
+  - Manual mode: toggle the switch, choose site and parameters.
+- Open the Dashboard to see global stats and recent activity.
+- Use the Added tab to manage, restart, or inspect per‑project stats.
+
+Troubleshooting (common)
+- Service Worker registration errors (code 3/15): ensure manifest has `"type": "module"` for the background and that ESM paths exist (e.g., `libs/idb.mjs`).
+- IndexedDB TransactionInactiveError: fixed internally by preloading (`getAll`) before rendering.
+- Site parsing quirks: the fork adds parsers/fixes (e.g., top‑serveurs.net now extracts listing + slug). Open an issue with real URLs if something changes.
+
+Privacy and permissions
+- No tracking, analytics, or telemetry.
+- Data stays local in IndexedDB (settings, projects, logs).
+- Host permissions are requested only when needed for the sites you add.
+
+Links to the extension (install)
+- Chrome Web Store:
+  https://chrome.google.com/webstore/detail/auto-vote-minecraft-ratin/mdfmiljoheedihbcfiifopgmlcincadd
+- Firefox Add-ons: no longer supported
+  https://addons.mozilla.org/ru/firefox/addon/auto-vote-rating/
+- Opera Addons: not published (stuck in moderation)
+  https://addons.opera.com/ru/extensions/details/auto-vote-minecraft-rating/
+- Microsoft Edge Add-ons:
+  https://microsoftedge.microsoft.com/addons/detail/auto-vote-rating/ecoifpgiojfhmihcfomafdcmkphafpba
+
+Install from ZIP (unpacked)
+1) Download this repository as ZIP (dev branch or latest release)  
+2) Unzip anywhere  
+3) Open chrome://extensions/ and enable “Developer mode”  
+4) Click “Load unpacked” and select the unzipped folder
+
+Support
+- Discord: https://discord.com/invite/GyvMtbU
+
+Supported sites
 <details>
-<summary>List of sites that the extension supports</summary>
+<summary>View the full list</summary>
+
 <a href="http://topcraft.club/">topcraft.club</a>  
 <a href="https://mctop.su/">mctop.su</a>  
 <a href="http://mcrate.su/">mcrate.su</a>  
@@ -19,7 +83,7 @@
 <a href="http://minecraftservers.biz/">minecraftservers.biz</a>  
 <a href="https://hotmc.ru/">hotmc.ru</a>  
 <a href="https://minecraft-server.net/">minecraft-server.net</a>  
-<a href="https://top-games.net/">top-games.net или top-serveurs.net</a>  
+<a href="https://top-games.net/">top-games.net or top-serveurs.net</a>  
 <a href="https://tmonitoring.com/">tmonitoring.com</a>  
 <a href="https://top.gg/">top.gg</a>  
 <a href="https://discordbotlist.com/">discordbotlist.com</a>  
@@ -116,57 +180,54 @@
 <a href="https://www.minecraftserver.sk/">minecraftserver.sk</a>  
 <a href="https://servidoresdeminecraft.es/">servidoresdeminecraft.es</a>  
 <a href="https://minecraftsurvivalservers.com/">minecraftsurvivalservers.com</a>  
-<a href="https://minecraft.global/">minecraft.global</a>
-<a href="https://ru.warface.com/bonus/">warface.com</a>
-<a href="https://www.curseforge.com/servers/">curseforge.com</a>
-<a href="https://act.hoyolab.com/ys/event/signin-sea-v3/index.html?act_id=e202102251931481">hoyolab.com</a>
-<a href="https://trackingservers.cloud/">trackingservers.cloud</a>
-<a href="https://mclist.io/">mclist.io</a>
-<a href="https://loliland.ru/">loliland.ru</a>
-<a href="https://mcservers.top/">mcservers.top</a>
-<a href="https://discadia.com/">discadia.com</a>
-<a href="https://minecraftsurvivalservers.net/">minecraftsurvivalservers.net</a>
-<a href="https://topservers.com/">topservers.com</a>
-<a href="https://genshindrop.com/">genshindrop.com</a>
-<a href="https://emeraldservers.com/">emeraldservers.com</a>
-<a href="https://loliland.ru/">loliland.ru</a>
-<a href="https://40servidoresmc.es/">40servidoresmc.es</a>
-<a href="https://minecraft-servers.biz/">minecraft-servers.biz</a>
-<a href="https://top-mc-servers.net/">top-mc-servers.net</a>
-<a href="https://minecraft-serverlist.com/">minecraft-serverlist.com</a>
-<a href="https://findmcserver.com/">findmcserver.com</a>
-<a href="https://serveurliste.com/">serveurliste.com</a>
-<a href="https://craftbook.cz/">craftbook.cz</a>
-<a href="https://rovelstars.com/">rovelstars.com</a>
-<a href="https://infinitybots.gg/">infinitybots.gg</a>
-<a href="https://botlist.me/">botlist.me</a>
-<a href="https://topminecraft.io/">topminecraft.io</a>
-<a href="https://minelist.net/">minelist.net</a>
-<a href="https://liste-serv-minecraft.fr/">liste-serv-minecraft.fr</a>
-<a href="https://play-minecraft-servers.com/">play-minecraft-servers.com</a>
-<a href="https://minecraft.menu/">minecraft.menu</a>
+<a href="https://minecraft.global/">minecraft.global</a>  
+<a href="https://ru.warface.com/bonus/">warface.com</a>  
+<a href="https://www.curseforge.com/servers/">curseforge.com</a>  
+<a href="https://act.hoyolab.com/ys/event/signin-sea-v3/index.html?act_id=e202102251931481">hoyolab.com</a>  
+<a href="https://trackingservers.cloud/">trackingservers.cloud</a>  
+<a href="https://mclist.io/">mclist.io</a>  
+<a href="https://loliland.ru/">loliland.ru</a>  
+<a href="https://mcservers.top/">mcservers.top</a>  
+<a href="https://discadia.com/">discadia.com</a>  
+<a href="https://minecraftsurvivalservers.net/">minecraftsurvivalservers.net</a>  
+<a href="https://topservers.com/">topservers.com</a>  
+<a href="https://genshindrop.com/">genshindrop.com</a>  
+<a href="https://emeraldservers.com/">emeraldservers.com</a>  
+<a href="https://40servidoresmc.es/">40servidoresmc.es</a>  
+<a href="https://minecraft-servers.biz/">minecraft-servers.biz</a>  
+<a href="https://top-mc-servers.net/">top-mc-servers.net</a>  
+<a href="https://minecraft-serverlist.com/">minecraft-serverlist.com</a>  
+<a href="https://findmcserver.com/">findmcserver.com</a>  
+<a href="https://serveurliste.com/">serveurliste.com</a>  
+<a href="https://craftbook.cz/">craftbook.cz</a>  
+<a href="https://rovelstars.com/">rovelstars.com</a>  
+<a href="https://infinitybots.gg/">infinitybots.gg</a>  
+<a href="https://botlist.me/">botlist.me</a>  
+<a href="https://topminecraft.io/">topminecraft.io</a>  
+<a href="https://minelist.net/">minelist.net</a>  
+<a href="https://liste-serv-minecraft.fr/">liste-serv-minecraft.fr</a>  
+<a href="https://play-minecraft-servers.com/">play-minecraft-servers.com</a>  
+<a href="https://minecraft.menu/">minecraft.menu</a>  
+
 </details>
 
-### Links to the extension where you can install it:
-[Chrome Web Store](https://chrome.google.com/webstore/detail/auto-vote-minecraft-ratin/mdfmiljoheedihbcfiifopgmlcincadd)   
-[Firefox Add-ons](https://addons.mozilla.org/ru/firefox/addon/auto-vote-rating/) (no longer supported)   
-[Opera Addons](https://addons.opera.com/ru/extensions/details/auto-vote-minecraft-rating/) (not published, waiting for an endless moderation check)   
-[Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/auto-vote-rating/ecoifpgiojfhmihcfomafdcmkphafpba)
+Tech stack / libraries
+- IDB (ESM, openDB): https://github.com/jakearchibald/idb
+- LinkeDOM (or ESM polyfill): https://github.com/WebReflection/linkedom
+- HackTimer (timers in background/hidden contexts): https://github.com/turuslan/HackTimer
 
-### Support via Discord: https://discord.com/invite/GyvMtbU
+Contributing
+- Issues: include site URL(s), steps, and console output if possible
+- Pull Requests: welcome — focused diffs with a brief test plan
+- New sites: provide vote URL patterns and expected params (id/listing/lang)
 
-## Install the extension from zip archive
-Here is a short guide how to install an unpacked extension on Google Chrome or Chromium-based browsers
-1. [Download](https://github.com/Serega007RU/Auto-Vote-Rating/archive/refs/heads/dev.zip) this repository
-2. Unzip the archive to any convenient location
-3. Open the "Extensions" page `chrome://extensions/` in the browser and turn on the "Developer mode"
+Credits
+- Original author: Serega007
+- UI/Design: Qworte
+- Active fork maintainer: You (this repository)
+- Community contributors: thank you!
 
-![](https://i.imgur.com/iQ4DXVu.png)
+License
+- See LICENSE in this repository
 
-4. Click on the "Load unpacked" button and select the directory where you unpacked the archive.
-
-
-## Libraries used
-### [IDB](https://github.com/jakearchibald/idb)
-### [LinkeDOM](https://github.com/WebReflection/linkedom) (also [Polyfill](https://github.com/regseb/castkodi/tree/main/src/polyfill))
-### [HackTimer](https://github.com/turuslan/HackTimer)
+If something feels off or breaks on a site, open an issue — we’re shipping fixes actively.
