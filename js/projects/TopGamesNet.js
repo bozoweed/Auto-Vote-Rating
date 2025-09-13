@@ -50,7 +50,6 @@ export class TopGamesNet extends BaseProject {
 
   static exampleURLGame() { return ['https://top-serveurs.net/', 'minecraft', '/hailcraft']; }
   static defaultGame() { return 'minecraft'; }
-  static ScriptJs() { return "top-games.net.js" }
   static gameList() {
     return new Map([
       ['ark','ARK'],['dayz','Dayz'],['discord','Discord'],['garrys-mod',"Garry's mod"],
