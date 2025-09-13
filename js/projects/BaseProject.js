@@ -18,7 +18,7 @@ export class BaseProject {
   static exampleURLListing() { return null; }          // [prefix, listing, suffix]
   static exampleURLLang() { return null; }             // [prefix, lang, suffix]
   static URLMain() { return this.domain; }                    // canonical host if different
-
+  static ScriptJs() { return this.domain+".js" }                   // canonical host if different
   // Lists and defaults
   static defaultGame() { return null; }
   static defaultListing() { return null; }
