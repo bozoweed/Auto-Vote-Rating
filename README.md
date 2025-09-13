@@ -56,6 +56,7 @@ Install from ZIP (unpacked)
 1) Download this repository as ZIP (dev branch or latest release)  
 2) Unzip anywhere  
 3) Open chrome://extensions/ and enable “Developer mode”  
+![](https://i.imgur.com/iQ4DXVu.png)
 4) Click “Load unpacked” and select the unzipped folder
 
 Support
