@@ -11,7 +11,7 @@
 - Respect websites’ ToS. Use responsibly. If automation isn’t appropriate, the extension will prompt for manual solve/delay.
 - Free audio to text api ( 100 usage per day free or replace by yours )
 
-Supported sites
+# Supported sites
 <details>
 <summary>View the full list</summary>
 
