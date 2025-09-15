@@ -10,6 +10,7 @@ Actively maintained fork of AVR. The original project went inactive and a growin
   - Cloudflare challenge / Turnstile
 - Designed to reduce friction, auto‑handle where permitted, and provide clear fallbacks.
 - Respect websites’ ToS. Use responsibly. If automation isn’t appropriate, the extension will prompt for manual solve/delay.
+- Free audio to text api ( 100 usage per day free or replace by yours )
 
 
 Supported sites
