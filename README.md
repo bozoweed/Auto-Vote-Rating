@@ -2,7 +2,7 @@
 
 Actively maintained fork of AVR. The original project went inactive and a growing number of issues remained unresolved. This fork’s mission is to bring AVR back to a fully functional, modern experience: stable, accessible, and future‑proof.
 
-# Integrated, free captcha assistance
+# # Integrated, free captcha assistance
 - Built‑in detectors and assistance for:
   - reCAPTCHA (anchor + bframe)
   - hCaptcha
@@ -13,7 +13,7 @@ Actively maintained fork of AVR. The original project went inactive and a growin
 - Free audio to text api ( 100 usage per day free or replace by yours )
 
 
-Supported sites
+# Supported sites
 <details>
 <summary>View the full list</summary>
 
