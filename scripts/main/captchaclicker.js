@@ -150,12 +150,126 @@ function run() {
         console.log(`[DEBUG] No known CAPTCHA type detected on this page.`);
     }
 }
+  function neutralizePlay(media) {
+  if (media.__autoplayPatched) return; // évite les doubles patchs
+  media.__autoplayPatched = true;
 
+  media.muted = true;
+  media.volume = 0;
+  media.setAttribute('muted', '');
+  media.setAttribute('playsinline', '');
+  media.preload = 'auto';
+
+  media.addEventListener('play', () => media.pause(), { once: true });
+
+  const nativePlay = media.play.bind(media);
+  media.play = (...args) => {
+    media.muted = true;
+    media.volume = 0;
+    try {
+      const p = nativePlay(...args);
+      if (p && typeof p.catch === 'function') p.catch(() => {}); // avale NotAllowedError
+      return p || Promise.resolve();
+    } catch {
+      return Promise.resolve();
+    }
+  };
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function setNativeValue(el, value) {
+  // Makes React/Vue/etc pick up the change
+  const proto = el.constructor.prototype;
+  const desc = Object.getOwnPropertyDescriptor(proto, 'value');
+  if (desc && desc.set) desc.set.call(el, value);
+  else el.value = value;
+}
+
+function keyDataForChar(ch) {
+  if (ch === '\n') return { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, charCode: 13, shiftKey: false };
+  if (ch === '\b') return { key: 'Backspace', code: 'Backspace', keyCode: 8, which: 8, charCode: 8, shiftKey: false };
+  const isSpace = ch === ' ';
+  const key = isSpace ? ' ' : ch;
+  const keyCode = isSpace ? 32 : ch.toUpperCase().charCodeAt(0) || 0;
+  const which = keyCode;
+  const charCode = ch.charCodeAt(0) || 0;
+  const shiftKey = ch.toUpperCase() === ch && ch.toLowerCase() !== ch;
+  const code = /^[a-z]$/i.test(ch) ? `Key${ch.toUpperCase()}` : (isSpace ? 'Space' : '');
+  return { key, code, keyCode, which, charCode, shiftKey };
+}
+
+function fire(el, type, init = {}) {
+  let ev;
+  if (type === 'input' || type === 'beforeinput') {
+    ev = new InputEvent(type, {
+      bubbles: true,
+      cancelable: type === 'beforeinput',
+      data: init.data ?? null,
+      inputType: init.inputType ?? 'insertText'
+    });
+  } else if (type === 'keypress' || type === 'keydown' || type === 'keyup') {
+    ev = new KeyboardEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      key: init.key,
+      code: init.code,
+      keyCode: init.keyCode,
+      which: init.which,
+      charCode: init.charCode,
+      shiftKey: init.shiftKey
+    });
+    // Legacy getters some libs check
+    Object.defineProperty(ev, 'keyCode', { get: () => init.keyCode });
+    Object.defineProperty(ev, 'which', { get: () => init.which });
+    Object.defineProperty(ev, 'charCode', { get: () => init.charCode });
+  } else if (type === 'change') {
+    ev = new Event('change', { bubbles: true });
+  } else {
+    ev = new Event(type, { bubbles: type.endsWith('in') || type.endsWith('out') || type === 'focus', cancelable: false });
+  }
+  el.dispatchEvent(ev);
+  return ev;
+}
+
+async function typeText(el, text, { delay = 50, focus = true, blur = false, react = true } = {}) {
+  if (focus) el.focus(); // will fire focus/focusin naturally
+
+  for (const ch of text) {
+    const kd = keyDataForChar(ch);
+
+    fire(el, 'keydown', kd);
+    fire(el, 'keypress', kd);
+    fire(el, 'beforeinput', { inputType: 'insertText', data: ch });
+
+    // Insert at caret
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
+    const newVal = el.value.slice(0, start) + ch + el.value.slice(end);
+
+    if (react) setNativeValue(el, newVal);
+    else el.value = newVal;
+
+    if (el.setSelectionRange) el.setSelectionRange(start + ch.length, start + ch.length);
+
+    fire(el, 'input', { inputType: 'insertText', data: ch });
+    fire(el, 'keyup', kd);
+
+    if (delay) await sleep(delay);
+  }
+
+  if (blur) {
+    el.blur();          // fires blur/focusout
+    fire(el, 'change'); // some frameworks expect change after blur
+  }
+}
 
 async function handleMTCaptcha() {
 
     const client = new window.LettersASRClient({ baseUrl: "https://bozoweed.ddns.net/api/ocr" });
     while (!document.querySelector('#mtcap-audio-1')) await new Promise(resolve => setTimeout(resolve, 1000));
+    neutralizePlay(document.querySelector('#mtcap-audio-1'));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     document.querySelector('#mtcap-audioctrl-1').click();
     await new Promise(resolve => setTimeout(resolve, 1000));
     const filename = 'audio.webm';
@@ -166,40 +280,26 @@ async function handleMTCaptcha() {
             stream: true,        // non-streaming endpoint returns full JSON
             filename
         });
-        if (res.letters.length < 4) {
+        if (res.letters_array.length < 4) {
             document.querySelector('#mtcap-statusbutton-1').click();
             await new Promise(resolve => setTimeout(resolve, 2000));
         } else {
 
             let input = document.querySelector('#mtcap-inputtext-1');
             const inputField = input;
-            inputField.focus();
-            await new Promise(resolve => setTimeout(resolve, 100));
-            for (const letter of res.letters.split(' ')) {
+            await typeText(inputField, res.letters, { delay: 50, focus: true, blur: true, react: true });
+            document.body.focus();
+            await new Promise(resolve => setTimeout(resolve, 7000));
 
-                inputField.value += letter;
-                inputField.dispatchEvent(new InputEvent('input', { bubbles: true }));
-                await new Promise(resolve => setTimeout(resolve, 50));
-
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
-            inputField.dispatchEvent(new KeyboardEvent('keydown', {
-                bubbles: true,
-                cancelable: true,
-                key: 'Enter',
-                code: 'Enter',
-                which: 13
-            }));
-            inputField.dispatchEvent(new InputEvent('input', { bubbles: true }));
-            inputField.dispatchEvent(new Event('change', { bubbles: true }));
-            inputField.dispatchEvent(new Event('blur', { bubbles: true }));
-            window.solvedCaptcha = true;
+            window.solvedCaptcha = !document.querySelector(".mtcap-msgbox .mtcap-invalidmsg");
         }
     } while (!window.solvedCaptcha);
 
 
     chrome.runtime.sendMessage({ captchaPassed: true });
 }
+
+
 
 
 async function handleSmartCaptcha() {
