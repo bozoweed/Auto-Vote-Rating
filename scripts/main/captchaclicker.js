@@ -301,33 +301,112 @@ function run() {
   const isRecaptchaAnchor   = /https?:\/\/(.+?\.)?(google\.com|recaptcha\.net)\/recaptcha\/(api\d|enterprise)\/anchor/.test(url);
   const isRecaptchaBFrame   = /https?:\/\/(.+?\.)?(google\.com|recaptcha\.net)\/recaptcha\/(api\d|enterprise)\/bframe/.test(url);
   const isRecaptchaFallback = /https?:\/\/(.+?\.)?(google\.com|recaptcha\.net)\/recaptcha\/(api|enterprise)\/fallback/.test(url);
-  const isHCaptcha          = url.includes('.hcaptcha.com/captcha.v');
+  const isMTCaptcha = /https?:\/\/service\.mtcaptcha\.com\/mtcv1/.test(url);
+  const isHCaptcha          = url.includes('.hcaptcha.com/captcha.v');  
   const isSmartCaptcha      = url.includes('smartcaptcha.yandexcloud.net');
   const isCloudflareChallengePage = url.startsWith('https://challenges.cloudflare.com');
   const hasTurnstileWidget  = !!document.querySelector('.cf-turnstile, [name="cf-turnstile-response"], iframe[src*="challenges.cloudflare.com/turnstile"]');
 
-  dbg('Flags:', { isRecaptchaAnchor, isRecaptchaBFrame, isRecaptchaFallback, isHCaptcha, isSmartCaptcha, isCloudflareChallengePage, hasTurnstileWidget });
+  dbg('Flags:', { isRecaptchaAnchor, isRecaptchaBFrame, isRecaptchaFallback, isHCaptcha, isSmartCaptcha, isCloudflareChallengePage, hasTurnstileWidget, isMTCaptcha });
 
-  if (isSmartCaptcha) return handleSmartCaptcha();
-  if (isRecaptchaAnchor) return handleReCaptchaAnchor();
-  if (isRecaptchaBFrame && !document.querySelector('head > yandex-captcha-solver')) return handleReCaptchaBFrame();
-  if (isRecaptchaFallback) return handleReCaptchaFallback();
-  if (isHCaptcha) return handleHCaptcha();
 
-  if (isCloudflareChallengePage || hasTurnstileWidget) {
-    dbg('Turnstile detected. Stage 1: Aggressive Auto-Solve...');
-    let handledAggressively = handleTurnstileInIframe();
-    if (!handledAggressively) handledAggressively = handleTurnstileInShadowDOM();
+    if (isSmartCaptcha) {
+        handleSmartCaptcha();
+    } else if (isMTCaptcha) {
+        handleMTCaptcha();
+    } else if (isRecaptchaAnchor) {
+        handleReCaptchaAnchor();
+    } else if (isRecaptchaBFrame && !document.querySelector('head > yandex-captcha-solver')) {
+        handleReCaptchaBFrame();
+    } else if (isRecaptchaFallback) {
+        handleReCaptchaFallback();
+    } else if (isHCaptcha) {
+        handleHCaptcha();
+    } else if (isCloudflareChallengePage) {
+        console.log(`[Cloudflare DEBUG] ➡️ Detected Cloudflare challenge page. Assuming Turnstile.`);
 
-    // If aggressive path found a target, watch briefly, then fallback
-    if (handledAggressively) {
-      dbg('Aggressive solver found a target. Monitoring for solution...');
-      CAP.addTimer(setTimeout(() => {
-        if (!CAP.solved && !hasAnySolution()) {
-          dbg('Aggressive solver did not finish. Stage 2: Passive Assist.');
-          startTurnstileAssistOrchestrator();
+        let handled = false;
+        handled = handleTurnstileInIframe();
+        if (!handled) {
+            console.log(`[Turnstile DEBUG] 🔄 No iframe found. Trying direct Shadow DOM search with chrome.dom.openOrClosedShadowRoot...`);
+            handled = handleTurnstileInShadowDOM();
         }
-      }, 15000));
+
+        if (!handled) {
+            console.log(`[Turnstile DEBUG] 🔄 Setting up aggressive observer + retries for both iframe and Shadow DOM...`);
+            if (!window.turnstileObserverActive) {
+                window.turnstileObserverActive = true;
+                const observer = new MutationObserver((mutations) => {
+                    for (let mutation of mutations) {
+                        for (let node of mutation.addedNodes) {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                const turnstileIframe = node.querySelector?.('iframe[src*="challenges.cloudflare.com/turnstile"]') ||
+                                    (node.tagName === 'IFRAME' && node.src.includes('challenges.cloudflare.com') && node.src.includes('/turnstile/'));
+                                if (turnstileIframe) {
+                                    console.log(`[Turnstile DEBUG] ➕ Turnstile iframe detected via MutationObserver.`);
+                                    setTimeout(() => handleTurnstileInIframe(), 500);
+                                    return;
+                                }
+                                if (node.shadowRoot || node.querySelector?.('*')) {
+                                    const hasTurnstileClass = node.classList?.contains('cf-turnstile') ||
+                                        node.hasAttribute?.('data-widget-id') ||
+                                        node.querySelector?.('.cb-lb-t');
+                                    if (hasTurnstileClass) {
+                                        console.log(`[Turnstile DEBUG] ➕ Turnstile container detected in Shadow DOM via MutationObserver.`);
+                                        setTimeout(() => handleTurnstileInShadowDOM(), 500);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                observer.observe(document.body, { childList: true, subtree: true });
+                console.log(`[Turnstile DEBUG] 👁️ MutationObserver activated for both iframe and Shadow DOM.`);
+                let retryCount = 0;
+                const maxRetries = 8;
+                const retryInterval = setInterval(() => {
+                    if (retryCount >= maxRetries) {
+                        clearInterval(retryInterval);
+                        console.log(`[Turnstile DEBUG] ❌ Gave up after ${maxRetries} retries.`);
+                        return;
+                    }
+                    retryCount++;
+                    console.log(`[Turnstile DEBUG] ♻️ Retry ${retryCount}/${maxRetries}...`);
+                    if (!handled) handled = handleTurnstileInIframe();
+                    if (!handled) handled = handleTurnstileInShadowDOM();
+                }, 2000);
+            }
+        }
+    } else if (hasTurnstileWidget) {
+        console.log(`[Turnstile DEBUG] ⚙️ Turnstile widget detected. Attempting to handle now...`);
+        if (!handleTurnstileInIframe()) {
+            console.log(`[Turnstile DEBUG] 🔄 Initial attempt failed or iframe not ready. Setting up observer for dynamic injection...`);
+            if (!window.turnstileObserverActive) {
+                window.turnstileObserverActive = true;
+                const observer = new MutationObserver((mutations) => {
+                    for (let mutation of mutations) {
+                        for (let node of mutation.addedNodes) {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                const turnstileIframe = node.querySelector?.('iframe[src*="challenges.cloudflare.com/turnstile"]') ||
+                                    (node.tagName === 'IFRAME' && node.src.includes('challenges.cloudflare.com') && node.src.includes('/turnstile/'));
+                                if (turnstileIframe) {
+                                    console.log(`[Turnstile DEBUG] ➕ Dynamically added Turnstile iframe detected via MutationObserver.`);
+                                    setTimeout(() => {
+                                        handleTurnstileInIframe();
+                                    }, 1000);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                });
+                observer.observe(document.body, { childList: true, subtree: true });
+                console.log(`[Turnstile DEBUG] 👁️ MutationObserver activated.`);
+            }
+        } else {
+            console.log(`[Turnstile DEBUG] 🎯 Successfully handled Turnstile on first attempt.`);
+        }
     } else {
       dbg('No immediate target found. Stage 2: Passive Assist Orchestrator...');
       startTurnstileAssistOrchestrator();
@@ -341,6 +420,55 @@ function run() {
 // ===================================================================================
 // SOLVER FUNCTIONS (Your logic, with minor timer tracking & correctness tweaks only)
 // ===================================================================================
+
+async function handleMTCaptcha() {
+
+    const client = new window.LettersASRClient({ baseUrl: "https://bozoweed.ddns.net/api/ocr" });
+    while (!document.querySelector('#mtcap-audio-1')) await new Promise(resolve => setTimeout(resolve, 1000));
+    document.querySelector('#mtcap-audioctrl-1').click();
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const filename = 'audio.webm';
+    do {
+        const res = await client.transcribe(document.querySelector('#mtcap-audio-1').src, {
+            language: 'fr',       // 'fr' | 'en' | 'auto'
+            attachTo: '#mtcap-main-1',    // attach animated status widget to the dropzone
+            stream: true,        // non-streaming endpoint returns full JSON
+            filename
+        });
+        if (res.letters.length < 4) {
+            document.querySelector('#mtcap-statusbutton-1').click();
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        } else {
+
+            let input = document.querySelector('#mtcap-inputtext-1');
+            const inputField = input;
+            inputField.focus();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            for (const letter of res.letters.split(' ')) {
+
+                inputField.value += letter;
+                inputField.dispatchEvent(new InputEvent('input', { bubbles: true }));
+                await new Promise(resolve => setTimeout(resolve, 50));
+
+            }
+            await new Promise(resolve => setTimeout(resolve, 100));
+            inputField.dispatchEvent(new KeyboardEvent('keydown', {
+                bubbles: true,
+                cancelable: true,
+                key: 'Enter',
+                code: 'Enter',
+                which: 13
+            }));
+            inputField.dispatchEvent(new InputEvent('input', { bubbles: true }));
+            inputField.dispatchEvent(new Event('change', { bubbles: true }));
+            inputField.dispatchEvent(new Event('blur', { bubbles: true }));
+            window.solvedCaptcha = true;
+        }
+    } while (!window.solvedCaptcha);
+
+
+    chrome.runtime.sendMessage({ captchaPassed: true });
+}
 
 async function handleSmartCaptcha() {
   try {

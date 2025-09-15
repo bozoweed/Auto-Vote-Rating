@@ -36,7 +36,8 @@
 		"https://*.google.com/recaptcha/*",
 		"https://*.recaptcha.net/recaptcha/*",
 		"https://challenges.cloudflare.com/*",
-		"https://*.yandexcloud.net/*"
+		"https://*.yandexcloud.net/*",
+		"https://*.mtcaptcha.com/*"
 	],
 	"optional_host_permissions": [
 		"<all_urls>"

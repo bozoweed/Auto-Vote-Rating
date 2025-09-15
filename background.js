@@ -541,6 +541,7 @@ const webNavigationOnCompletedListener = async (details) => {
     details.frameId !== 0 && (
       details.url.match(/hcaptcha.com\/captcha\/*/) ||
       details.url.includes('smartcaptcha.yandexcloud.net') ||
+      details.url.includes('service.mtcaptcha.com') ||
       details.url.match(/https?:\/\/(.+?\.)?google.com\/recaptcha\/api.\/anchor*/) ||
       details.url.match(/https?:\/\/(.+?\.)?google.com\/recaptcha\/api.\/bframe*/) ||
       details.url.match(/https?:\/\/(.+?\.)?recaptcha.net\/recaptcha\/api.\/anchor*/) ||
@@ -556,7 +557,7 @@ const webNavigationOnCompletedListener = async (details) => {
     const project = await db.get('projects', opened.key);
     try {
       if (settings.debug) console.log('Injecting scripts/main/captchaclicker.js to ' + details.url);
-      await chrome.scripting.executeScript({ target: { tabId: details.tabId, frameIds: [details.frameId] }, files: ['scripts/main/hacktimer.js', 'scripts/main/captchaclicker.js'] });
+      await chrome.scripting.executeScript({ target: { tabId: details.tabId, frameIds: [details.frameId] }, files: ['scripts/main/hacktimer.js', 'scripts/main/audio_captcha.js', 'scripts/main/captchaclicker.js'] });
 
       const tab = await chrome.tabs.get(details.tabId);
       // Kiwi browser quirk: tab.status may be undefined
