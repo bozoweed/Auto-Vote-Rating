@@ -409,13 +409,13 @@ function run() {
         }
     } else {
       dbg('No immediate target found. Stage 2: Passive Assist Orchestrator...');
+      
+      dbg('No known CAPTCHA type detected.');
       startTurnstileAssistOrchestrator();
     }
     return;
   }
 
-  dbg('No known CAPTCHA type detected.');
-}
 
 // ===================================================================================
 // SOLVER FUNCTIONS (Your logic, with minor timer tracking & correctness tweaks only)
