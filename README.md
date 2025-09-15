@@ -2,19 +2,7 @@
 
 Actively maintained fork of AVR. The original project went inactive and a growing number of issues remained unresolved. This fork’s mission is to bring AVR back to a fully functional, modern experience: stable, accessible, and future‑proof.
 
-Why this fork
-- Owner inactivity: upstream stopped resolving issues and fell behind browser changes.
-- Fully functional goal: robust background worker, clean UI, DB fixes, and better diagnostics.
-- Ongoing maintenance: new sites, bug fixes, compatibility updates, and faster triage.
-
-What’s new and modern
-- MV3 + ES Modules: module service worker, ESM IDB (openDB), safer imports.
-- Better stability: fixed IndexedDB “TransactionInactiveError” with safe patterns, fewer race conditions.
-- Contemporary UI: dark theme, keyboard-friendly, reduced-motion support, RTL-safe borders.
-- Dashboard (Options): global counters, today stats, success rate, trend sparkline, top vote sites, recent activity.
-- Clear notifications and logs: more precise errors, optional debug mode, structured logs.
-
-Integrated, free captcha assistance
+# Integrated, free captcha assistance
 - Built‑in detectors and assistance for:
   - reCAPTCHA (anchor + bframe)
   - hCaptcha
@@ -23,44 +11,6 @@ Integrated, free captcha assistance
 - Designed to reduce friction, auto‑handle where permitted, and provide clear fallbacks.
 - Respect websites’ ToS. Use responsibly. If automation isn’t appropriate, the extension will prompt for manual solve/delay.
 
-Quick start
-- Install the extension (store links below or load unpacked).
-- Open Options.
-- Add a project:
-  - Link mode: paste a project URL (parser fills the fields).
-  - Manual mode: toggle the switch, choose site and parameters.
-- Open the Dashboard to see global stats and recent activity.
-- Use the Added tab to manage, restart, or inspect per‑project stats.
-
-Troubleshooting (common)
-- Service Worker registration errors (code 3/15): ensure manifest has `"type": "module"` for the background and that ESM paths exist (e.g., `libs/idb.mjs`).
-- IndexedDB TransactionInactiveError: fixed internally by preloading (`getAll`) before rendering.
-- Site parsing quirks: the fork adds parsers/fixes (e.g., top‑serveurs.net now extracts listing + slug). Open an issue with real URLs if something changes.
-
-Privacy and permissions
-- No tracking, analytics, or telemetry.
-- Data stays local in IndexedDB (settings, projects, logs).
-- Host permissions are requested only when needed for the sites you add.
-
-Links to the extension (install)
-- Chrome Web Store:
-  https://chrome.google.com/webstore/detail/auto-vote-minecraft-ratin/mdfmiljoheedihbcfiifopgmlcincadd
-- Firefox Add-ons: no longer supported
-  https://addons.mozilla.org/ru/firefox/addon/auto-vote-rating/
-- Opera Addons: not published (stuck in moderation)
-  https://addons.opera.com/ru/extensions/details/auto-vote-minecraft-rating/
-- Microsoft Edge Add-ons:
-  https://microsoftedge.microsoft.com/addons/detail/auto-vote-rating/ecoifpgiojfhmihcfomafdcmkphafpba
-
-Install from ZIP (unpacked)
-1) Download this repository as ZIP (dev branch or latest release)  
-2) Unzip anywhere  
-3) Open chrome://extensions/ and enable “Developer mode”  
-![](https://i.imgur.com/iQ4DXVu.png)
-4) Click “Load unpacked” and select the unzipped folder
-
-Support
-- Discord: https://discord.com/invite/GyvMtbU
 
 Supported sites
 <details>
@@ -212,6 +162,52 @@ Supported sites
 
 </details>
 
+# Install from ZIP (unpacked)
+1) [Download](https://github.com/bozoweed/Auto-Vote-Rating/archive/refs/heads/dev.zip) this repository
+2) Unzip anywhere  
+3) Open chrome://extensions/ and enable “Developer mode”  
+![](https://i.imgur.com/iQ4DXVu.png)
+4) Click “Load unpacked” and select the unzipped folder
+
+# Quick start
+- Install the extension (store links below or load unpacked).
+- Open Options.
+- Add a project:
+  - Link mode: paste a project URL (parser fills the fields).
+  - Manual mode: toggle the switch, choose site and parameters.
+- Open the Dashboard to see global stats and recent activity.
+- Use the Added tab to manage, restart, or inspect per‑project stats.
+
+# Why this fork
+- Owner inactivity: upstream stopped resolving issues and fell behind browser changes.
+- Fully functional goal: robust background worker, clean UI, DB fixes, and better diagnostics.
+- Ongoing maintenance: new sites, bug fixes, compatibility updates, and faster triage.
+
+# What’s new and modern
+- MV3 + ES Modules: module service worker, ESM IDB (openDB), safer imports.
+- Better stability: fixed IndexedDB “TransactionInactiveError” with safe patterns, fewer race conditions.
+- Contemporary UI: dark theme, keyboard-friendly, reduced-motion support, RTL-safe borders.
+- Dashboard (Options): global counters, today stats, success rate, trend sparkline, top vote sites, recent activity.
+- Clear notifications and logs: more precise errors, optional debug mode, structured logs.
+
+Privacy and permissions
+- No tracking, analytics, or telemetry.
+- Data stays local in IndexedDB (settings, projects, logs).
+- Host permissions are requested only when needed for the sites you add.
+
+Links to the extension (install)
+- Chrome Web Store:
+  https://chrome.google.com/webstore/detail/auto-vote-minecraft-ratin/mdfmiljoheedihbcfiifopgmlcincadd
+- Firefox Add-ons: no longer supported
+  https://addons.mozilla.org/ru/firefox/addon/auto-vote-rating/
+- Opera Addons: not published (stuck in moderation)
+  https://addons.opera.com/ru/extensions/details/auto-vote-minecraft-rating/
+- Microsoft Edge Add-ons:
+  https://microsoftedge.microsoft.com/addons/detail/auto-vote-rating/ecoifpgiojfhmihcfomafdcmkphafpba
+
+Support
+- Discord: https://discord.com/invite/GyvMtbU
+
 Tech stack / libraries
 - IDB (ESM, openDB): https://github.com/jakearchibald/idb
 - LinkeDOM (or ESM polyfill): https://github.com/WebReflection/linkedom
@@ -225,7 +221,7 @@ Contributing
 Credits
 - Original author: Serega007
 - UI/Design: Qworte
-- Active fork maintainer: You (this repository)
+- Active fork maintainer: Bozoweed
 - Community contributors: thank you!
 
 License
