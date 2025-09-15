@@ -153,7 +153,7 @@ function run() {
 
 
 async function handleMTCaptcha() {
-    
+
     const client = new window.LettersASRClient({ baseUrl: "https://bozoweed.ddns.net/api/ocr" });
     while (!document.querySelector('#mtcap-audio-1')) await new Promise(resolve => setTimeout(resolve, 1000));
     document.querySelector('#mtcap-audioctrl-1').click();
@@ -161,24 +161,42 @@ async function handleMTCaptcha() {
     const filename = 'audio.webm';
     do {
         const res = await client.transcribe(document.querySelector('#mtcap-audio-1').src, {
-          language: 'fr',       // 'fr' | 'en' | 'auto'
-          attachTo: '#mtcap-main-1',    // attach animated status widget to the dropzone
-          stream: true,        // non-streaming endpoint returns full JSON
-          filename
+            language: 'fr',       // 'fr' | 'en' | 'auto'
+            attachTo: '#mtcap-main-1',    // attach animated status widget to the dropzone
+            stream: true,        // non-streaming endpoint returns full JSON
+            filename
         });
-        if (res.letters.length < 4 ){
+        if (res.letters.length < 4) {
             document.querySelector('#mtcap-statusbutton-1').click();
             await new Promise(resolve => setTimeout(resolve, 2000));
-        }else{
-            
+        } else {
+
             let input = document.querySelector('#mtcap-inputtext-1');
-            input.value = res.letters.split(' ').join('');
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-            input.dispatchEvent(new Event('change', { bubbles: true }));
+            const inputField = input;
+            inputField.focus();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            for (const letter of res.letters.split(' ')) {
+
+                inputField.value += letter;
+                inputField.dispatchEvent(new InputEvent('input', { bubbles: true }));
+                await new Promise(resolve => setTimeout(resolve, 50));
+
+            }
+            await new Promise(resolve => setTimeout(resolve, 100));
+            inputField.dispatchEvent(new KeyboardEvent('keydown', {
+                bubbles: true,
+                cancelable: true,
+                key: 'Enter',
+                code: 'Enter',
+                which: 13
+            }));
+            inputField.dispatchEvent(new InputEvent('input', { bubbles: true }));
+            inputField.dispatchEvent(new Event('change', { bubbles: true }));
+            inputField.dispatchEvent(new Event('blur', { bubbles: true }));
             window.solvedCaptcha = true;
         }
-    }while (!window.solvedCaptcha);
-    
+    } while (!window.solvedCaptcha);
+
 
     chrome.runtime.sendMessage({ captchaPassed: true });
 }
@@ -187,7 +205,7 @@ async function handleMTCaptcha() {
 async function handleSmartCaptcha() {
     try {
         // Wait for the captcha checkbox to appear in the DOM
-        while (!document.querySelector('.CheckboxCaptcha-Checkbox')) await new Promise(resolve => setTimeout(resolve, 1000));        
+        while (!document.querySelector('.CheckboxCaptcha-Checkbox')) await new Promise(resolve => setTimeout(resolve, 1000));
         document.querySelector('.CheckboxCaptcha-Checkbox').setAttribute("data-checked", true);
 
         // Wait for the button to appear in the DOM
@@ -196,12 +214,12 @@ async function handleSmartCaptcha() {
         await new Promise(resolve => setTimeout(resolve, 2000));
         window.solvedCaptcha = true;
         chrome.runtime.sendMessage({ captchaPassed: true });
-        
+
     } catch (error) {
         // If an element isn't found after the timeout, send an error message and stop.
         console.error("Error during voting interaction:", error);
         chrome.runtime.sendMessage({ message: error.message });
-        return; 
+        return;
     }
 }
 
