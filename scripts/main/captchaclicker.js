@@ -291,7 +291,11 @@ async function handleMTCaptcha() {
             document.body.focus();
             await new Promise(resolve => setTimeout(resolve, 7000));
 
-            window.solvedCaptcha = !document.querySelector(".mtcap-msgbox .mtcap-invalidmsg");
+            window.solvedCaptcha = document.querySelector("#mtcap-statusimg-1[style*='color: rgb(0, 238, 0)']");
+            if (!window.solvedCaptcha) {                
+                document.querySelector('#mtcap-statusbutton-1').click();
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
         }
     } while (!window.solvedCaptcha);
 
