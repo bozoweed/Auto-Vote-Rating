@@ -1,6 +1,21 @@
-# Auto Vote Rating - Chrome Extension
+# Auto Vote Rating Reborn - Chrome Extension
+# Thanks to Serega007RU original creator of this extension
+
+
+Integrated, free captcha assistance
+- Built‑in detectors and assistance for:
+  - reCAPTCHA (anchor + bframe)
+  - hCaptcha
+  - Yandex SmartCaptcha
+  - Cloudflare challenge / Turnstile
+  - MTCaptcha
+- Designed to reduce friction, auto‑handle where permitted, and provide clear fallbacks.
+- Respect websites’ ToS. Use responsibly. If automation isn’t appropriate, the extension will prompt for manual solve/delay.
+
+Supported sites
 <details>
-<summary>List of sites that the extension supports</summary>
+<summary>View the full list</summary>
+
 <a href="http://topcraft.club/">topcraft.club</a>  
 <a href="https://mctop.su/">mctop.su</a>  
 <a href="http://mcrate.su/">mcrate.su</a>  
@@ -19,7 +34,7 @@
 <a href="http://minecraftservers.biz/">minecraftservers.biz</a>  
 <a href="https://hotmc.ru/">hotmc.ru</a>  
 <a href="https://minecraft-server.net/">minecraft-server.net</a>  
-<a href="https://top-games.net/">top-games.net или top-serveurs.net</a>  
+<a href="https://top-games.net/">top-games.net or top-serveurs.net</a>  
 <a href="https://tmonitoring.com/">tmonitoring.com</a>  
 <a href="https://top.gg/">top.gg</a>  
 <a href="https://discordbotlist.com/">discordbotlist.com</a>  
@@ -116,35 +131,35 @@
 <a href="https://www.minecraftserver.sk/">minecraftserver.sk</a>  
 <a href="https://servidoresdeminecraft.es/">servidoresdeminecraft.es</a>  
 <a href="https://minecraftsurvivalservers.com/">minecraftsurvivalservers.com</a>  
-<a href="https://minecraft.global/">minecraft.global</a>
-<a href="https://ru.warface.com/bonus/">warface.com</a>
-<a href="https://www.curseforge.com/servers/">curseforge.com</a>
-<a href="https://act.hoyolab.com/ys/event/signin-sea-v3/index.html?act_id=e202102251931481">hoyolab.com</a>
-<a href="https://trackingservers.cloud/">trackingservers.cloud</a>
-<a href="https://mclist.io/">mclist.io</a>
-<a href="https://loliland.ru/">loliland.ru</a>
-<a href="https://mcservers.top/">mcservers.top</a>
-<a href="https://discadia.com/">discadia.com</a>
-<a href="https://minecraftsurvivalservers.net/">minecraftsurvivalservers.net</a>
-<a href="https://topservers.com/">topservers.com</a>
-<a href="https://genshindrop.com/">genshindrop.com</a>
-<a href="https://emeraldservers.com/">emeraldservers.com</a>
-<a href="https://loliland.ru/">loliland.ru</a>
-<a href="https://40servidoresmc.es/">40servidoresmc.es</a>
-<a href="https://minecraft-servers.biz/">minecraft-servers.biz</a>
-<a href="https://top-mc-servers.net/">top-mc-servers.net</a>
-<a href="https://minecraft-serverlist.com/">minecraft-serverlist.com</a>
-<a href="https://findmcserver.com/">findmcserver.com</a>
-<a href="https://serveurliste.com/">serveurliste.com</a>
-<a href="https://craftbook.cz/">craftbook.cz</a>
-<a href="https://rovelstars.com/">rovelstars.com</a>
-<a href="https://infinitybots.gg/">infinitybots.gg</a>
-<a href="https://botlist.me/">botlist.me</a>
-<a href="https://topminecraft.io/">topminecraft.io</a>
-<a href="https://minelist.net/">minelist.net</a>
-<a href="https://liste-serv-minecraft.fr/">liste-serv-minecraft.fr</a>
-<a href="https://play-minecraft-servers.com/">play-minecraft-servers.com</a>
-<a href="https://minecraft.menu/">minecraft.menu</a>
+<a href="https://minecraft.global/">minecraft.global</a>  
+<a href="https://ru.warface.com/bonus/">warface.com</a>  
+<a href="https://www.curseforge.com/servers/">curseforge.com</a>  
+<a href="https://act.hoyolab.com/ys/event/signin-sea-v3/index.html?act_id=e202102251931481">hoyolab.com</a>  
+<a href="https://trackingservers.cloud/">trackingservers.cloud</a>  
+<a href="https://mclist.io/">mclist.io</a>  
+<a href="https://loliland.ru/">loliland.ru</a>  
+<a href="https://mcservers.top/">mcservers.top</a>  
+<a href="https://discadia.com/">discadia.com</a>  
+<a href="https://minecraftsurvivalservers.net/">minecraftsurvivalservers.net</a>  
+<a href="https://topservers.com/">topservers.com</a>  
+<a href="https://genshindrop.com/">genshindrop.com</a>  
+<a href="https://emeraldservers.com/">emeraldservers.com</a>  
+<a href="https://40servidoresmc.es/">40servidoresmc.es</a>  
+<a href="https://minecraft-servers.biz/">minecraft-servers.biz</a>  
+<a href="https://top-mc-servers.net/">top-mc-servers.net</a>  
+<a href="https://minecraft-serverlist.com/">minecraft-serverlist.com</a>  
+<a href="https://findmcserver.com/">findmcserver.com</a>  
+<a href="https://serveurliste.com/">serveurliste.com</a>  
+<a href="https://craftbook.cz/">craftbook.cz</a>  
+<a href="https://rovelstars.com/">rovelstars.com</a>  
+<a href="https://infinitybots.gg/">infinitybots.gg</a>  
+<a href="https://botlist.me/">botlist.me</a>  
+<a href="https://topminecraft.io/">topminecraft.io</a>  
+<a href="https://minelist.net/">minelist.net</a>  
+<a href="https://liste-serv-minecraft.fr/">liste-serv-minecraft.fr</a>  
+<a href="https://play-minecraft-servers.com/">play-minecraft-servers.com</a>  
+<a href="https://minecraft.menu/">minecraft.menu</a>  
+
 </details>
 
 ### Links to the extension where you can install it:
@@ -157,7 +172,7 @@
 
 ## Install the extension from zip archive
 Here is a short guide how to install an unpacked extension on Google Chrome or Chromium-based browsers
-1. [Download](https://github.com/Serega007RU/Auto-Vote-Rating/archive/refs/heads/dev.zip) this repository
+1. [Download](https://github.com/bozoweed/Auto-Vote-Rating/archive/refs/heads/dev.zip) this repository
 2. Unzip the archive to any convenient location
 3. Open the "Extensions" page `chrome://extensions/` in the browser and turn on the "Developer mode"
 
