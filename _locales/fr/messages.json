@@ -675,7 +675,7 @@
     }
   },
   "kpiLastMonthDelta": {
-    "message": "$value$ vs le mois dernier",
+    "message": "$value$% vs le mois dernier",
     "placeholders": {
       "value": {
         "content": "$1"

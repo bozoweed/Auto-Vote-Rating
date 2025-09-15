@@ -649,7 +649,7 @@ hr {
   nav .navigation > button.tablinks > div { font-size: 0; height: 0; overflow: hidden; }
 }
 @media (max-width: 950px) {
-  :root { --nav-w: 260px; }
+  :root { --nav-w: 130px; }
   nav { left: -260px; }
   nav.active { left: 0; }
   .burger { display: block; }
