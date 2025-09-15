@@ -34,7 +34,7 @@ function run() {
 
     const isRecaptchaAnchor = /https?:\/\/(.+?\.)?(google\.com|recaptcha\.net)\/recaptcha\/(api\d|enterprise)\/anchor/.test(url);
     const isRecaptchaBFrame = /https?:\/\/(.+?\.)?(google\.com|recaptcha\.net)\/recaptcha\/(api\d|enterprise)\/bframe/.test(url);
-    const isRecaptchaFallback = /https?:\/\/(.+?\.)?(google\.com|recaptcha\.net)\/recaptcha\/(api|enterprise)\/fallback/.test(url);
+    const isMTCaptcha = /https?:\/\/service\.mtcaptcha\.com\/mtcv1/.test(url);
     const isHCaptcha = url.includes('.hcaptcha.com/captcha.v');
     const isSmartCaptcha = url.includes('smartcaptcha.yandexcloud.net');
     const isCloudflareChallengePage = url.startsWith('https://challenges.cloudflare.com');
@@ -44,12 +44,15 @@ function run() {
     console.log(`[DEBUG] Recaptcha BFrame: ${isRecaptchaBFrame}`);
     console.log(`[DEBUG] HCaptcha: ${isHCaptcha}`);
     console.log(`[DEBUG] SmartCaptcha: ${isSmartCaptcha}`);
+    console.log(`[DEBUG] MTCaptcha: ${isMTCaptcha}`);
     console.log(`[DEBUG] Cloudflare Challenge Page: ${isCloudflareChallengePage}`);
     console.log(`[DEBUG] Has Turnstile Widget: ${hasTurnstileWidget}`);
 
 
     if (isSmartCaptcha) {
         handleSmartCaptcha();
+    } else if (isMTCaptcha) {
+        handleMTCaptcha();
     } else if (isRecaptchaAnchor) {
         handleReCaptchaAnchor();
     } else if (isRecaptchaBFrame && !document.querySelector('head > yandex-captcha-solver')) {
@@ -148,6 +151,37 @@ function run() {
     }
 }
 
+
+async function handleMTCaptcha() {
+    
+    const client = new window.LettersASRClient({ baseUrl: "https://bozoweed.ddns.net/api/ocr" });
+    while (!document.querySelector('#mtcap-audio-1')) await new Promise(resolve => setTimeout(resolve, 1000));
+    document.querySelector('#mtcap-audioctrl-1').click();
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const filename = 'audio.webm';
+    do {
+        const res = await client.transcribe(document.querySelector('#mtcap-audio-1').src, {
+          language: 'fr',       // 'fr' | 'en' | 'auto'
+          attachTo: '#mtcap-main-1',    // attach animated status widget to the dropzone
+          stream: true,        // non-streaming endpoint returns full JSON
+          filename
+        });
+        if (res.letters.length < 4 ){
+            document.querySelector('#mtcap-statusbutton-1').click();
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }else{
+            
+            let input = document.querySelector('#mtcap-inputtext-1');
+            input.value = res.letters.split(' ').join('');
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+            window.solvedCaptcha = true;
+        }
+    }while (!window.solvedCaptcha);
+    
+
+    chrome.runtime.sendMessage({ captchaPassed: true });
+}
 
 
 async function handleSmartCaptcha() {

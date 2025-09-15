@@ -623,6 +623,7 @@ const webNavigationOnCompletedListener = async function(details) {
     } else if (details.frameId !== 0 && (        
         details.url.match(/hcaptcha.com\/captcha\/*/)
         || details.url.includes('smartcaptcha.yandexcloud.net')
+        || details.url.includes('service.mtcaptcha.com')
         || details.url.match(/https?:\/\/(.+?\.)?google.com\/recaptcha\/api.\/anchor*/)
         || details.url.match(/https?:\/\/(.+?\.)?google.com\/recaptcha\/api.\/bframe*/)
         || details.url.match(/https?:\/\/(.+?\.)?recaptcha.net\/recaptcha\/api.\/anchor*/)
@@ -631,14 +632,14 @@ const webNavigationOnCompletedListener = async function(details) {
         || details.url.match(/https?:\/\/(.+?\.)?recaptcha.net\/recaptcha\/api\/fallback*/)
         || details.url.match(/https?:\/\/(.+?\.)?recaptcha.net\/recaptcha\/enterprise\/fallback*/)
         || details.url.match(/https?:\/\/(.+?\.)?google.com\/recaptcha\/enterprise\/anchor*/)
-        || details.url.match(/https?:\/\/(.+?\.)?recaptcha.net\/recaptcha\/enterprise\/bframe*/)
+        || details.url.match(/https?:\/\/(.+?\.)?service\.mtcaptcha\.com\/mtcv1/)
         || details.url.match(/https:\/\/challenges.cloudflare.com\/*/))) {
 
         const project = await db.get('projects', opened.key)
 
         try {
             if (settings.debug) console.log('Injecting scripts/main/captchaclicker.js to ' + details.url)
-            await chrome.scripting.executeScript({target: {tabId: details.tabId, frameIds: [details.frameId]}, files: ['scripts/main/hacktimer.js', 'scripts/main/captchaclicker.js']})
+            await chrome.scripting.executeScript({target: {tabId: details.tabId, frameIds: [details.frameId]}, files: ['scripts/main/hacktimer.js', 'scripts/main/audio_captcha.js', 'scripts/main/captchaclicker.js']})
 
             // Если вкладка уже загружена, повторно туда высылаем sendProject который обозначает что мы готовы к голосованию
             const tab = await chrome.tabs.get(details.tabId)
