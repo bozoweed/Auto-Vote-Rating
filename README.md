@@ -1,8 +1,6 @@
-# Auto Vote Rating Reborn - Chrome Extension
-# Thanks to Serega007RU original creator of this extension
+# Auto Vote Rating Reborn - Chrome Extension - Thanks to Serega007RU original creator of this extension
 
-
-Integrated, free captcha assistance
+# Integrated, free captcha assistance
 - Built‑in detectors and assistance for:
   - reCAPTCHA (anchor + bframe)
   - hCaptcha
