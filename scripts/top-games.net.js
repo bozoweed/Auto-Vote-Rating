@@ -120,11 +120,11 @@ async function vote(first) {
     if (!captchaSolved) {
         console.log("[VOTE] Waiting for CAPTCHA to be solved...");
 
-        // Optional: timeout after 60s
-        const timeoutId = setTimeout(() => {
-            console.warn("[VOTE] Timeout waiting for CAPTCHA solve.");
-            chrome.runtime.onMessage.removeListener(captchaListener);
-        }, 60000);
+        // // Optional: timeout after 60s
+        // const timeoutId = setTimeout(() => {
+        //     console.warn("[VOTE] Timeout waiting for CAPTCHA solve.");
+        //     chrome.runtime.onMessage.removeListener(captchaListener);
+        // }, 60000);
 
         // Wait until captchaSolved becomes true
         await new Promise(resolve => {
@@ -135,8 +135,7 @@ async function vote(first) {
                         console.log("[VOTE] Turnstile solved by direct check!");
                         captchaSolved = true;
                     }
-                    clearInterval(checkInterval);
-                    clearTimeout(timeoutId);
+                    clearInterval(checkInterval);;
                     resolve();
                 }
             }, 500);
