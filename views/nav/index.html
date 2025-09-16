@@ -1,0 +1,41 @@
+<section class="navShell" data-view-root>
+    <!-- Mobile burger -->
+    <button class="burger" type="button" aria-label="Open menu" aria-controls="primaryNav" aria-expanded="false">
+        <span aria-hidden="true"></span>
+        <span class="sr-only" data-resource="openMenu">Open menu</span>
+    </button>
+    <!-- Navigation -->
+    <nav id="primaryNav" aria-label="Main">
+        <div class="logo">
+            <img src="images/logo.png" alt="AVR logo">
+            <div>A.V.R.</div>
+        </div>
+        <div class="navigation" role="tablist" aria-label="Main tabs" data-i18n-mode="replace" data-resource="mainTabs">
+            <button class="tablinks nav-btn" data-view="dashboard" role="tab" aria-selected="false">
+                <img src="images/icons/pie-chart-3.svg" alt="" aria-hidden="true">
+                <div data-i18n-mode="replace" data-resource="dashboard">Dashboard</div>
+            </button>
+            <button class="tablinks nav-btn" data-view="add" role="tab" aria-selected="false">
+                <img src="images/icons/addBtn.svg" alt="" aria-hidden="true">
+                <div data-i18n-mode="replace" data-resource="addButton">Add</div>
+            </button>
+            <button class="tablinks nav-btn" data-view="projects" role="tab" aria-selected="false">
+                <img src="images/icons/addedBtn.svg" alt="" aria-hidden="true">
+                <div data-i18n-mode="replace" data-resource="addedButton">Added</div>
+            </button>
+            <button class="tablinks nav-btn" data-view="settings" role="tab" aria-selected="false">
+                <img src="images/icons/optionsBtn.svg" alt="" aria-hidden="true">
+                <div data-i18n-mode="replace" data-resource="optionsButton">Settings</div>
+            </button>
+            <button class="tablinks nav-btn" data-view="stats" role="tab" aria-selected="false">
+                <img src="images/icons/stats.svg" alt="" aria-hidden="true">
+                <div data-i18n-mode="replace" data-resource="stats2">Stats</div>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main container (content host) -->
+    <div class="container">
+        <div id="app-content"></div>
+    </div>
+</section>

@@ -1,0 +1,96 @@
+:root{
+  --bg:#0e1116; --surface-1:#141821; --surface-2:#1a1f2a; --surface-3:#222838;
+  --text:#e9eef6; --muted:#a7b1c2; --brand:#4f8cff; --brand-hover:#3f78e2;
+  --border:rgba(255,255,255,0.08); --shadow:0 8px 26px rgba(0,0,0,0.2);
+  --nav-w: 96px;
+}
+
+/* Base */
+.navShell { position: relative; min-height: 100vh; display:block; }
+.navShell .container{
+  margin: 60px auto auto;
+  width: min(1000px, calc(100% - 28px));
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+/* Burger */
+/* Visually hidden (for the text label) */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important; height: 1px !important;
+  margin: -1px !important; padding: 0 !important; border: 0 !important;
+  overflow: hidden !important; clip: rect(0 0 0 0) !important; clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+}
+
+/* Burger button */
+.burger {
+  z-index: 11; position: fixed; top: 8px; left: 8px;
+  width: 40px; height: 40px; padding: 6px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 10px; display: none; cursor: pointer; color: var(--text);
+}
+
+/* Burger icon (3 bars -> X) */
+.burger span, .burger::before, .burger::after {
+  content: ""; position: absolute; left: 9px; right: 9px; height: 3px;
+  background: var(--text); border-radius: 2px;
+  transition: transform .3s ease, top .3s ease, opacity .2s ease;
+}
+.burger::before { top: 12px; }
+.burger span { top: 18px; }
+.burger::after { top: 24px; }
+
+/* Active state = close icon */
+.burger.active::before { top: 18px; transform: rotate(45deg); }
+.burger.active span { opacity: 0; }
+.burger.active::after { top: 18px; transform: rotate(-45deg); }
+
+
+/* Nav */
+#primaryNav{
+  z-index: 10; position: fixed; top: 0; left: 0;
+  width: var(--nav-w); height: 100%;
+  background: var(--surface-2);
+  border-right: 1px solid var(--border);
+}
+#primaryNav .logo{
+  padding: 14px 10px; color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+#primaryNav .logo img{ width: 74%; margin: 0 auto 8px; display:block; }
+#primaryNav .logo div{ text-align:center; font-weight: 600; }
+
+#primaryNav .navigation > .nav-btn{
+  width: 100%; height: 76px; border: none; background: transparent; color: var(--text);
+  opacity: .9; transition: background .2s ease, opacity .15s ease;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  cursor: pointer;
+}
+#primaryNav .navigation > .nav-btn:hover{ opacity: 1; }
+#primaryNav .navigation > .nav-btn.active{
+  opacity: 1; background: linear-gradient(90deg, rgba(79,140,255,0.16), transparent 70%);
+  border-inline-start: 3px solid var(--brand);
+}
+#primaryNav .navigation > .nav-btn img{ width: 24px; height: 24px; display: block; }
+#primaryNav .navigation > .nav-btn > div{ font-size: 12px; }
+
+
+
+
+/* Responsive */
+@media (max-width: 1250px){
+  :root{ --nav-w: 64px; }
+  #primaryNav .navigation > .nav-btn > div { font-size: 0; height: 0; overflow: hidden; }
+}
+@media (max-width: 950px){
+  :root{ --nav-w: 130px; }
+  #primaryNav { left: -260px; transition: left .25s ease; }
+  #primaryNav.active { left: 0; }
+  .burger { display: block; }
+  .navShell .container{ width: calc(100% - 24px); margin-left:auto; margin-right:auto; }
+}

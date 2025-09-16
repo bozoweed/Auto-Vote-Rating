@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title data-resource="appName"></title>
+    <meta name="color-scheme" content="dark light">
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/main.css">
+  </head>
+  <body>
+    <!-- Notifications -->
+    <div id="notifBlock"></div>
+    <div id="notifBlock2"></div>
+
+    <!-- Mobile burger -->
+    <button class="burger" type="button" aria-label="Open menu" aria-controls="primaryNav" aria-expanded="false">
+      <span aria-hidden="true"></span>
+    </button>
+
+    <!-- Navigation -->
+    <nav id="primaryNav">
+      <div class="logo">
+        <img src="images/logo.png" alt="AVR logo">
+        <div>A.V.R.</div>
+        <a id="versionLabel" class="link" target="_blank" href="https://github.com/Serega007RU/Auto-Vote-Rating/wiki/Common-or-MultiVote%3F-What-does-it-mean%3F">Common</a>
+      </div>
+      <div class="navigation" role="tablist" aria-label="Main tabs">
+        <button class="tablinks nav-btn" id="dashboardTab" data-tab="dashboard" role="tab" aria-controls="dashboard" aria-selected="false">
+          <img src="images/icons/pie-chart-3.svg" alt="" aria-hidden="true">
+          <div data-resource="dashboard"></div>
+        </button>
+        <button class="tablinks nav-btn" id="addTab" data-tab="append" role="tab" aria-controls="append" aria-selected="false">
+          <img src="images/icons/addBtn.svg" alt="" aria-hidden="true">
+          <div data-resource="addButton"></div>
+        </button>
+        <button class="tablinks nav-btn" id="addedTab" data-tab="added" role="tab" aria-controls="added" aria-selected="false">
+          <img src="images/icons/addedBtn.svg" alt="" aria-hidden="true">
+          <div data-resource="addedButton"></div>
+        </button>
+        <button class="tablinks nav-btn" id="settingsTab" data-tab="settings" role="tab" aria-controls="settings" aria-selected="false">
+          <img src="images/icons/optionsBtn.svg" alt="" aria-hidden="true">
+          <div data-resource="optionsButton"></div>
+        </button>
+        <button class="tablinks nav-btn" id="helpTab" data-tab="help" role="tab" aria-controls="help" aria-selected="false">
+          <img src="images/icons/helpBtn.svg" alt="" aria-hidden="true">
+          <div data-resource="help"></div>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main container -->
+    <div class="container">
+      <!-- Dashboard (NEW) -->
+      <div id="dashboard" class="tabcontent" style="display: none;" role="tabpanel" aria-labelledby="dashboardTab">
+        <h4 data-resource="overview"></h4>
+        <hr>
+
+        <!-- Global compteur chips -->
+        <div class="dashPills">
+          <div class="pill" id="pill-total">
+            <span data-resource="totalVotes"></span>
+            <strong id="pillTotalValue">—</strong>
+          </div>
+          <div class="pill" id="pill-today">
+            <span data-resource="today"></span>
+            <strong id="pillTodayValue">—</strong>
+          </div>
+          <div class="pill" id="pill-success">
+            <span data-resource="successRate"></span>
+            <strong id="pillSuccessValue">—%</strong>
+          </div>
+          <div class="pill" id="pill-streak">
+            <span data-resource="streak"></span>
+            <strong id="pillStreakValue">—</strong>
+          </div>
+        </div>
+
+        <!-- KPI cards -->
+        <section class="kpiGrid">
+          <article class="kpiCard">
+            <header>
+              <span class="kpiTitle" data-resource="totalVotes"></span>
+              <span class="kpiBadge" data-resource="allTime"></span>
+            </header>
+            <div class="kpiValue" id="kpiTotalVotes">—</div>
+            <div class="kpiSub" data-resource="kpiAvgPerDay" id="kpiAvgPerDay">— /day</div>
+          </article>
+
+          <article class="kpiCard">
+            <header>
+              <span class="kpiTitle" data-resource="today"></span>
+              <span class="kpiBadge" data-resource="live"></span>
+            </header>
+            <div class="kpiValue" id="kpiTodayVotes">—</div>
+            <div class="kpiSub"  id="kpiTodaySuccess">—% success</div>
+          </article>
+
+          <article class="kpiCard">
+            <header>
+              <span class="kpiTitle" data-resource="thisMonth"></span>
+              <span class="kpiBadge" id="kpiMonthLabel">—</span>
+            </header>
+            <div class="kpiValue" id="kpiMonthVotes">—</div>
+            <div class="kpiSub" data-resource="kpiLastMonthDelta" id="kpiLastMonthDelta">— vs last</div>
+          </article>
+
+          <article class="kpiCard">
+            <header>
+              <span class="kpiTitle" data-resource="reliability"></span>
+              <span class="kpiBadge" data-resource="successRate"></span>
+            </header>
+            <div class="kpiValue" id="kpiSuccessRate">—%</div>
+            <div class="kpiSub" id="kpiErrors">— errors</div>
+          </article>
+        </section>
+
+        <section class="dashGrid">
+          <!-- Trend -->
+          <article class="card">
+            <header class="cardHead">
+              <h6 data-resource="monthlyTrend"></h6>
+              <div class="legend">
+                <span class="dot ok"></span><span data-resource="successVotes"></span>
+                <span class="dot err"></span><span data-resource="errors"></span>
+              </div>
+            </header>
+            <div class="sparkWrap">
+              <svg id="sparklineSuccess" class="sparkline" viewBox="0 0 320 80" aria-label="Success per day"></svg>
+              <svg id="sparklineErrors" class="sparkline" viewBox="0 0 320 80" aria-label="Errors per day"></svg>
+            </div>
+            <div class="sparkAxis">
+              <span id="sparkStartLabel">−30d</span>
+              <span id="sparkEndLabel" data-resource="today"></span>
+            </div>
+          </article>
+
+          <!-- Top vote sites -->
+          <article class="card">
+            <header class="cardHead">
+              <h6 data-resource="topSites"></h6>
+              <div class="filters">
+                <button class="chip" data-range="month" aria-pressed="true" id="topRangeMonth">
+                  <span data-resource="thisMonth"></span>
+                </button>
+                <button class="chip" data-range="all" aria-pressed="false" id="topRangeAll">
+                  <span data-resource="allTime"></span>
+                </button>
+              </div>
+            </header>
+            <div class="leaderboard">
+              <div class="leaderHead" role="row">
+                <button class="col site" data-sort="site" aria-sort="none" data-resource="site"></button>
+                <button class="col count" data-sort="count" aria-sort="descending" data-resource="votes"></button>
+                <button class="col rate" data-sort="rate" aria-sort="none" data-resource="success"></button>
+                <div class="col last" data-resource="last"></div>
+              </div>
+              <div class="leaderBody" id="leaderBody" role="rowgroup">
+                <!-- rows injected by JS -->
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <!-- Recent activity -->
+        <section class="card">
+          <header class="cardHead">
+            <h6 data-resource="recentActivity"></h6>
+          </header>
+          <ol class="timeline" id="activityList"></ol>
+        </section>
+
+        <!-- Row template for leaderboard -->
+        <template id="tmplLeaderRow">
+          <div class="leaderRow" role="row">
+            <div class="cell site">
+              <img class="ico" alt="" aria-hidden="true">
+              <div class="meta">
+                <div class="name"></div>
+                <div class="muted domain"></div>
+              </div>
+            </div>
+            <div class="cell count"><strong></strong></div>
+            <div class="cell rate"><span class="bar"><i></i></span><span class="val"></span></div>
+            <div class="cell last"><time></time></div>
+          </div>
+        </template>
+      </div>
+
+      <!-- Add -->
+      <div id="append" class="tabcontent" style="display: none;" role="tabpanel" aria-labelledby="addTab">
+        <h4 data-resource="addTitle"></h4>
+        <div class="editSubtitle" style="display: none;"></div>
+        <hr>
+        <form id="addProject" class="addProject addProjectExpertManual">
+          <input type="checkbox" name="switchAddMode" id="switchAddMode" class="switchAddMode">
+          <label for="switchAddMode" data-resource="switchAddMode"></label>
+          <div id="emptyDiv"></div>
+          <div>
+            <div class="input-block">
+              <label data-resource="link" for="link"></label>
+              <input class="input" name="link" id="link" required placeholder="linkPlaceholder" type="text" spellcheck="false">
+            </div>
+            <div style="display: none;" class="input-block">
+              <label data-resource="siteTop" for="rating"></label>
+              <input class="input" name="project" type="text" id="rating" placeholder="selectTop" list="ratingList" spellcheck="false">
+              <datalist id="ratingList"></datalist>
+            </div>
+            <div class="input-block" style="display: none">
+              <label data-resource="yourNick" for="nick"></label>
+              <input class="input" name="nick" id="nick" placeholder="enterNick" type="text" spellcheck="false">
+            </div>
+            <div style="display: none;" class="input-block">
+              <label for="id" data-resource="projectID">
+                <span class="tooltip1" tabindex="0">
+                  <span class="tooltip1text" role="tooltip">
+                    <span style="color:#d32f2f;">ID</span>
+                    <span data-resource="projectIDTooltip"></span>
+                    <br>
+                    <span id="projectIDTooltip1"></span><span id="projectIDTooltip2" style="color:#d32f2f;"></span><span id="projectIDTooltip3"></span>
+                  </span>
+                </span>
+              </label>
+              <input class="input" name="id" id="id" placeholder="inputProjectID" type="text" spellcheck="false">
+            </div>
+            <div style="display: none;" class="input-block">
+              <label data-resource="additionURL" for="additionURL">
+                <span class="tooltip1" tabindex="0">
+                  <span class="tooltip1text" role="tooltip">
+                    <span id="additionURLTooltip1"></span><span id="additionURLTooltip2" style="color:#d32f2f;"></span><span id="additionURLTooltip3"></span>
+                  </span>
+                </span>
+              </label>
+              <input id="additionURL" name="additionURL" placeholder="additionURL" type="text" class="input" spellcheck="false"/>
+            </div>
+            <div style="display: none;" class="input-block">
+              <label data-resource="urlGame" for="chooseGame">
+                <span class="tooltip1" tabindex="0">
+                  <span class="tooltip1text" role="tooltip">
+                    <span style="color:red;">URL</span>
+                    <span data-resource="gameIDTooltip"></span>
+                    <br>
+                    <span id="urlGameTooltip1"></span><span id="urlGameTooltip2" style="color:#d32f2f;"></span><span id="urlGameTooltip3"></span>
+                  </span>
+                </span>
+              </label>
+              <input class="input" name="chooseGame" type="text" id="chooseGame" placeholder="chooseGameURL" list="gameList" spellcheck="false">
+              <datalist id="gameList"></datalist>
+            </div>
+            <div style="display: none;" class="input-block">
+              <label data-resource="urlListing" for="chooseListing">
+                <span class="tooltip1" tabindex="0">
+                  <span class="tooltip1text" role="tooltip">
+                    <span style="color:red;">URL</span>
+                    <span data-resource="listingIDTooltip"></span>
+                    <br>
+                    <span id="urlListingTooltip1"></span><span id="urlListingTooltip2" style="color:#d32f2f;"></span><span id="urlListingTooltip3"></span>
+                  </span>
+                </span>
+              </label>
+              <input class="input" name="chooseListing" type="text" id="chooseListing" placeholder="chooseListingURL" list="listingList" spellcheck="false">
+              <datalist id="listingList"></datalist>
+            </div>
+            <div style="display: none;" class="input-block">
+              <label data-resource="chooseLang" for="chooseLang"></label>
+              <input class="input" name="chooseLang" type="text" id="chooseLang" placeholder="chooseLang" list="langList" spellcheck="false">
+              <datalist id="langList"></datalist>
+            </div>
+            <div style="display: none;" class="input-block">
+              <label for="countVote" data-resource="countVote"></label>
+              <input id="countVote" name="countVote" type="number" min="1" max="16" placeholder="countVote" class="input" value="5">
+            </div>
+            <div style="display: none;" class="input-block">
+              <label for="ordinalWorld" data-resource="ordinalWorld">
+                <span class="tooltip1" tabindex="0">
+                  <span class="tooltip1text" role="tooltip">
+                    <span data-resource="ordinalWorldTooltip"></span>
+                  </span>
+                </span>
+              </label>
+              <input id="ordinalWorld" name="ordinalWorld" type="number" min="1" max="16" placeholder="ordinalWorld" class="input">
+            </div>
+            <div style="display: none;" class="input-block">
+              <label for="selectTime" data-resource="selectTime"></label>
+              <select required id="selectTime" class="select">
+                <option value="ms" data-resource="timeoutMS"></option>
+                <option value="hour" data-resource="timeoutHour"></option>
+                <option value="week" data-resource="timeoutWeek"></option>
+                <option value="month" data-resource="timeoutMonth"></option>
+              </select>
+            </div>
+            <div style="display: none;" class="input-block">
+              <label for="time" data-resource="delayFetch"></label>
+              <input id="time" name="customTime" placeholder="delayFetch" type="number" min="10000" class="input"/>
+            </div>
+            <div style="display: none;" class="input-block">
+              <label for="hour" data-resource="chooseHour"></label>
+              <input id="hour" name="chooseHour" placeholder="chooseHour" type="time" step="0.001" min="0" max="23" class="input"/>
+            </div>
+            <div style="display: none;" class="input-block">
+              <label for="week" data-resource="chooseWeek"></label>
+              <select required id="week" class="select">
+                <option value="1" data-resource="monday"></option>
+                <option value="2" data-resource="tuesday"></option>
+                <option value="3" data-resource="wednesday"></option>
+                <option value="4" data-resource="thursday"></option>
+                <option value="5" data-resource="friday"></option>
+                <option value="6" data-resource="saturday"></option>
+                <option value="0" data-resource="sunday"></option>
+              </select>
+            </div>
+            <div style="display: none;" class="input-block">
+              <label for="month" data-resource="chooseMonth"></label>
+              <input id="month" name="chooseMonth" placeholder="chooseMonth" type="number" min="1" max="31" class="input"/>
+            </div>
+            <div style="display: none;" class="input-block">
+              <label for="scheduleTime" data-resource="scheduleTime"></label>
+              <input id="scheduleTime" type="datetime-local" class="input" step="0.001">
+            </div>
+            <div style="display: none;" class="input-block">
+              <label for="randomizeMin" data-resource="randomizeInput"></label>
+              <input id="randomizeMin" type="number" class="input" placeholder="min">
+              <input id="randomizeMax" type="number" class="input" placeholder="max">
+            </div>
+            <div style="display: none;" class="input-block">
+              <label for="responseURL" data-resource="urlFetch"></label>
+              <input id="responseURL" name="customURL" placeholder="urlFetch" type="text" class="input" spellcheck="false"/>
+            </div>
+            <div style="display: none;" class="input-block">
+              <label for="customBody" data-resource="bodyFetch"></label>
+              <textarea id="customBody" name="customBody" placeholder="bodyFetch" class="textarea" spellcheck="false"></textarea>
+            </div>
+            <div style="display: none;" class="input-block">
+              <label for="voteModeSelect" data-resource="enabledSilentVote">
+                <span class="tooltip2" tabindex="0">
+                  <span data-resource="enabledSilentVoteTooltip" class="tooltip2text" role="tooltip"></span>
+                </span>
+              </label>
+              <select id="voteModeSelect" class="select">
+                <option data-resource="enabledSilentVoteSilent" value="silentMode"></option>
+                <option data-resource="enabledSilentVoteNoSilent" value="emulateMode"></option>
+              </select>
+            </div>
+
+            <button class="submitBtn" data-resource="addButton" id="submitAddProject" type="submit"></button>
+
+            <div class="editProjectButtons" style="display: none;">
+              <button class="submitBtn" data-resource="save" id="submitEditProject" type="submit"></button>
+              <button class="submitBtn redBtn" data-resource="cancel" id="submitCancelProject" type="button"></button>
+            </div>
+
+            <div data-resource="banAttention" id="banAttention" style="display: none"></div>
+            <div data-resource="rewardAttention" id="rewardAttention" style="display: none"></div>
+            <div data-resource="operaAttention" id="operaAttention" style="display: none">
+              <br><br>
+              <a class="link" target="_blank" href="https://github.com/Serega007RU/Auto-Vote-Rating/wiki/Problems-with-Opera">Problems with Opera</a>
+            </div>
+          </div>
+
+          <div id="advSettingsAdd" style="display: none">
+            <div class="label-block">
+              <label data-resource="advSettings"></label>
+            </div>
+            <div class="check-block">
+              <input class="checkbox" id="customTimeOut" type="checkbox" name="customTimeOut"/>
+              <label data-resource="customTimeOut" for="customTimeOut"></label>
+            </div>
+            <div class="check-block">
+              <input class="checkbox" id="lastDayMonth" type="checkbox" name="lastDayMonth" disabled/>
+              <label data-resource="lastDayMonth" for="lastDayMonth"></label>
+            </div>
+            <div class="check-block">
+              <input class="checkbox" id="scheduleTimeCheckbox" type="checkbox" name="scheduleTimeCheckbox"/>
+              <label data-resource="scheduleTime" for="scheduleTimeCheckbox"></label>
+            </div>
+            <div class="check-block">
+              <input class="checkbox" id="disableCheckProjects" type="checkbox" name="disableCheckProjects"/>
+              <label data-resource="disableCheckProjects" for="disableCheckProjects"></label>
+            </div>
+            <div class="check-block">
+              <input class="checkbox" id="priority" type="checkbox" name="priority"/>
+              <label data-resource="priority" for="priority">
+                <span class="tooltip1" tabindex="0">
+                  <span data-resource="priorityTooltip" class="tooltip1text" role="tooltip"></span>
+                </span>
+              </label>
+            </div>
+            <div class="check-block">
+              <input class="checkbox" id="randomize" type="checkbox" name="randomize"/>
+              <label data-resource="randomize" for="randomize">
+                <span class="tooltip1" tabindex="0">
+                  <span data-resource="randomizeTooltip" class="tooltip1text" role="tooltip"></span>
+                </span>
+              </label>
+            </div>
+            <div class="check-block">
+              <input class="checkbox" id="voteMode" type="checkbox" name="voteMode" disabled/>
+              <label data-resource="voteMode" for="voteMode"></label>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Settings -->
+      <div id="settings" class="tabcontent" style="display: none;" role="tabpanel" aria-labelledby="settingsTab">
+        <h4 data-resource="optionsExtension"></h4>
+        <hr>
+        <div class="settingsGrid">
+          <section class="settingsCard">
+            <h5><span>🔔</span><span data-resource="settings"></span></h5>
+            <div class="check-block">
+              <input class="checkbox" id="disabledNotifStart" type="checkbox" name="checkbox"/>
+              <label data-resource="disabledNotifStart" for="disabledNotifStart"></label>
+            </div>
+            <div class="check-block">
+              <input class="checkbox" id="disabledNotifInfo" type="checkbox" name="checkbox"/>
+              <label data-resource="disabledNotifInfo" for="disabledNotifInfo"></label>
+            </div>
+            <div class="check-block">
+              <input class="checkbox" id="disabledNotifWarn" type="checkbox" name="checkbox"/>
+              <label data-resource="disabledNotifWarn" for="disabledNotifWarn">
+                <span class="tooltip1" tabindex="0">
+                  <span data-resource="disabledNotifWarnTooltip" class="tooltip1text" role="tooltip"></span>
+                </span>
+              </label>
+            </div>
+            <div class="check-block">
+              <input class="checkbox" id="disabledNotifError" type="checkbox" name="checkbox"/>
+              <label data-resource="disabledNotifError" for="disabledNotifError"></label>
+            </div>
+          </section>
+
+          <section class="settingsCard">
+            <h5><span>⚙️</span><span>Behavior</span></h5>
+            <div class="check-block">
+              <input class="checkbox" id="disabledCheckInternet" type="checkbox" name="checkbox"/>
+              <label data-resource="disabledCheckInternet" for="disabledCheckInternet"></label>
+            </div>
+            <div class="check-block" style="display: none">
+              <input class="checkbox" id="disabledOneVote" type="checkbox" name="checkbox"/>
+              <label data-resource="disabledOneVote" for="disabledOneVote"></label>
+            </div>
+            <div class="check-block">
+              <input class="checkbox" id="disabledRestartOnTimeout" type="checkbox" name="checkbox"/>
+              <label data-resource="disabledRestartOnTimeout" for="disabledRestartOnTimeout"></label>
+            </div>
+            <div class="check-block">
+              <input class="checkbox" id="disabledFocusedTab" type="checkbox" name="checkbox"/>
+              <label data-resource="disabledFocusedTab" for="disabledFocusedTab">
+                <span class="tooltip1" tabindex="0">
+                  <span data-resource="disabledFocusedTabTooltip" class="tooltip1text" role="tooltip"></span>
+                </span>
+              </label>
+            </div>
+          </section>
+
+          <section class="settingsCard">
+            <h5><span>🛡️</span><span>Captcha</span></h5>
+            <div class="check-block">
+              <input class="checkbox" id="disabledWarnCaptcha" type="checkbox" name="checkbox"/>
+              <label data-resource="disabledWarnCaptcha" for="disabledWarnCaptcha">
+                <span class="tooltip1" tabindex="0">
+                  <span data-resource="disabledWarnCaptchaTooltip" class="tooltip1text" role="tooltip"></span>
+                </span>
+              </label>
+            </div>
+            <div class="check-block">
+              <input class="checkbox" id="disabledClickCaptcha" type="checkbox" name="checkbox"/>
+              <label data-resource="disabledClickCaptcha" for="disabledClickCaptcha">
+                <span class="tooltip1" tabindex="0">
+                  <span data-resource="disabledClickCaptchaTooltip" class="tooltip1text" role="tooltip"></span>
+                </span>
+              </label>
+            </div>
+          </section>
+
+          <section class="settingsCard">
+            <h5><span>🧪</span><span>Advanced</span></h5>
+            <div class="check-block">
+              <input class="checkbox" id="expertMode" type="checkbox" name="checkbox"/>
+              <label data-resource="expertMode" for="expertMode">
+                <span class="tooltip1" tabindex="0">
+                  <span data-resource="expertModeTooltip" class="tooltip1text" role="tooltip"></span>
+                </span>
+              </label>
+            </div>
+
+            <div class="check-block" style="display: none">
+              <input class="checkbox" id="disabledDebug" type="checkbox" name="checkbox"/>
+              <label data-resource="disabledDebug" for="disabledDebug">
+                <span class="tooltip1" tabindex="0">
+                  <span data-resource="debugTooltip" class="tooltip1text" role="tooltip"></span>
+                </span>
+              </label>
+            </div>
+            <div class="check-block" style="display: none">
+              <input class="checkbox" id="disableCloseTabsOnSuccess" type="checkbox" name="checkbox"/>
+              <label data-resource="disableCloseTabsOnSuccess" for="disableCloseTabsOnSuccess">
+                <span class="tooltip1" tabindex="0">
+                  <span data-resource="debugTooltip" class="tooltip1text" role="tooltip"></span>
+                </span>
+              </label>
+            </div>
+            <div class="check-block" style="display: none">
+              <input class="checkbox" id="disableCloseTabsOnError" type="checkbox" name="checkbox"/>
+              <label data-resource="disableCloseTabsOnError" for="disableCloseTabsOnError">
+                <span class="tooltip1" tabindex="0">
+                  <span data-resource="debugTooltip" class="tooltip1text" role="tooltip"></span>
+                </span>
+              </label>
+            </div>
+
+            <div class="input-block" style="display: none">
+              <label data-resource="cooldown" for="timeoutValue">
+                <span class="tooltip2" tabindex="0">
+                  <span data-resource="timeoutTooltip" class="tooltip2text" role="tooltip"></span>
+                </span>
+              </label>
+              <form id="timeout" class="inlineForm">
+                <input class="input" name="cooldown" id="timeoutValue" required type="number" min="0">
+                <button data-resource="setCooldown" type="submit" class="justBtn"></button>
+              </form>
+            </div>
+            <div class="input-block" style="display: none">
+              <label data-resource="cooldownError" for="timeoutErrorValue">
+                <span class="tooltip2" tabindex="0">
+                  <span data-resource="timeoutErrorTooltip" class="tooltip2text" role="tooltip"></span>
+                </span>
+              </label>
+              <form id="timeoutError" class="inlineForm">
+                <input class="input" name="cooldownError" id="timeoutErrorValue" required type="number" min="0">
+                <button data-resource="setCooldown" type="submit" class="justBtn"></button>
+              </form>
+            </div>
+            <div class="input-block" style="display: none">
+              <label data-resource="cooldownVote" for="timeoutVoteValue">
+                <span class="tooltip2" tabindex="0">
+                  <span data-resource="timeoutVoteTooltip" class="tooltip2text" role="tooltip"></span>
+                </span>
+              </label>
+              <form id="timeoutVote" class="inlineForm">
+                <input class="input" name="cooldownVote" id="timeoutVoteValue" required type="number" min="1000">
+                <button data-resource="setCooldown" type="submit" class="justBtn"></button>
+              </form>
+            </div>
+          </section>
+
+          <section class="settingsCard">
+            <h5><span>📁</span><span data-resource="settingsFile"></span></h5>
+            <div class="fileSystem">
+              <div>
+                <label for="file-upload" class="file">
+                  <span data-resource="importSettings"></span>
+                  <img src="images/icons/importBtn.svg" alt="" aria-hidden="true">
+                </label>
+                <input id="file-upload" style="display: none;" type="file" accept="application/json"/>
+              </div>
+              <div>
+                <button id="file-download" class="file" type="button">
+                  <span data-resource="exportSettings"></span>
+                  <img src="images/icons/exportBtn.svg" alt="" aria-hidden="true">
+                </button>
+              </div>
+              <div>
+                <button id="logs-download" class="file" type="button">
+                  <span data-resource="exportLogs"></span>
+                  <img src="images/icons/exportBtn.svg" alt="" aria-hidden="true">
+                </button>
+              </div>
+              <div>
+                <button id="logs-clear" class="file" type="button">
+                  <span data-resource="clearLogs"></span>
+                  <img src="images/icons/pie-chart-3.svg" alt="" aria-hidden="true">
+                </button>
+              </div>
+            </div>
+            <div id="storageUsed"></div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Added -->
+      <div id="added" class="tabcontent" style="display: none;" role="tabpanel" aria-labelledby="addedTab">
+        <h4 data-resource="addedProjects"></h4>
+        <hr>
+        <p id="addedLoading" data-resource="load"></p>
+        <p id="notAddedAll" data-resource="notAddedAll" style="display: none;"></p>
+        <div class="projectsBlock">
+          <div class="buttonBlock"></div>
+          <div class="contentBlock"></div>
+        </div>
+      </div>
+
+      <!-- Help -->
+      <div id="help" class="tabcontent" style="display: none;" role="tabpanel" aria-labelledby="helpTab">
+        <h4 data-resource="help"></h4>
+        <hr>
+        <div class="aboutProject">
+          <a target="_blank" href="https://discord.gg/GyvMtbU" class="social"><img src="images/icons/ds.svg" alt="Discord"></a>
+          <div class="cont">
+            <div data-resource="version" class="version"></div>
+            <div data-resource="developers"></div>
+            <div data-resource="developer">
+              <a class="link" target="_blank" href="https://discord.com/users/441823506200788992">
+                <span>Serega007</span>
+              </a>
+            </div>
+            <div data-resource="designer">
+              <a class="link" target="_blank" href="https://discord.com/users/279936883277168640">
+                <span>Qworte</span>
+              </a>
+            </div>
+            <div data-resource="translated"></div>
+            <div class="free" data-resource="itsFree"></div>
+            <div class="text">
+              <span data-resource="feedback"></span>
+              <a class="link" target="_blank" href="https://discord.gg/GyvMtbU"><span data-resource="dmDiscord"></span></a>
+              <span data-resource="feedback4">
+                <a class="link" target="_blank" href="https://github.com/Serega007RU/Auto-Vote-Rating/issues">
+                  <span>GitHub</span>
+                </a>
+              </span>
+            </div>
+          </div>
+          <a target="_blank" href="https://github.com/Serega007RU/Auto-Vote-Rating" class="social"><img src="images/icons/git.svg" alt="GitHub"></a>
+        </div>
+      </div>
+
+      <!-- Bottom -->
+      <div class="bottomLabel">
+        <a id="generalStats" data-resource="generalStats"></a>
+        <a id="todayStats" data-resource="todayStats"></a>
+        <a class="link" id="donate" target="_blank" href="https://my.qiwi.com/Sergei-EV-7E02hYH"></a>
+      </div>
+
+      <!-- Loading -->
+      <div id="load" style="display: block;">
+        <div>Loading...</div>
+        <img src="images/icons/spinner.svg" alt="spinner">
+      </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modals">
+      <div class="overlay"></div>
+
+      <div class="modal" id="addFastProject">
+        <div class="head">
+          <h3 data-resource="fastAdd"></h3>
+          <div class="close"></div>
+        </div>
+        <div class="content">
+          <div class="message"></div>
+          <div class="events"></div>
+        </div>
+      </div>
+
+      <div class="modal" id="loading">
+        <img src="images/icons/spinner.svg" alt="loading">
+      </div>
+
+      <div class="modal notSupportedBrowser" id="notSupportedBrowser">
+        <div class="head">
+          <h3 data-resource="notSupportedBrowser"></h3>
+        </div>
+        <div class="content">
+          <div class="message">
+            <div data-resource="notSupportedBrowserContent1"></div>
+            <br>
+            <div data-resource="notSupportedBrowserContent2"></div>
+          </div>
+          <div class="events">
+            <button class="btn" data-resource="deleteExtension"></button>
+            <button class="btn redBtn" data-resource="limitedModeButton1" style="width: 340px"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal notSupportedBrowser" id="notSupportedBrowser2">
+        <div class="head">
+          <h3 data-resource="areYouSure"></h3>
+          <div class="close"></div>
+        </div>
+        <div class="content">
+          <div class="message">
+            <div data-resource="limitedModeContent"></div>
+            <br>
+            <div data-resource="limitedModeContent3"></div>
+            <a class="link" target="_blank" href="https://github.com/Serega007RU/Auto-Vote-Rating/wiki/Problems-with-Opera">Problems with Opera</a>
+            <br><br>
+            <div data-resource="limitedModeContent1"></div>
+            <br>
+            <div data-resource="limitedModeContent2"></div>
+          </div>
+          <div class="events">
+            <button class="btn" data-resource="deleteExtension"></button>
+            <button class="btn redBtn" data-resource="limitedModeButton2" style="width: 400px" disabled></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="stats">
+        <div class="head">
+          <div class="title">
+            <h3 data-resource="stats2"></h3>
+            <div class="statsSubtitle"></div>
+          </div>
+          <div class="close"></div>
+        </div>
+        <div class="content">
+          <div class="message">
+            <table>
+              <tbody>
+                <tr>
+                  <td data-resource="statsSuccessVotes"></td>
+                  <th></th>
+                </tr>
+                <tr>
+                  <td data-resource="statsMonthSuccessVotes"></td>
+                  <th></th>
+                </tr>
+                <tr>
+                  <td data-resource="statsLastMonthSuccessVotes"></td>
+                  <th></th>
+                </tr>
+                <tr>
+                  <td data-resource="statsLaterVotes"></td>
+                  <th></th>
+                </tr>
+                <tr>
+                  <td data-resource="statsErrorVotes"></td>
+                  <th></th>
+                </tr>
+                <tr>
+                  <td data-resource="statsLastSuccessVote"></td>
+                  <th></th>
+                </tr>
+                <tr>
+                  <td data-resource="statsLastAttemptVote"></td>
+                  <th></th>
+                </tr>
+                <tr>
+                  <td data-resource="statsAdded"></td>
+                  <th></th>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal" id="statsToday">
+        <div class="head">
+          <div class="title">
+            <h3 data-resource="stats2"></h3>
+            <div class="statsSubtitle" data-resource="todayStats"></div>
+          </div>
+          <div class="close"></div>
+        </div>
+        <div class="content">
+          <div class="message">
+            <table>
+              <tbody>
+                <tr>
+                  <td data-resource="statsSuccessVotes"></td>
+                  <th></th>
+                </tr>
+                <tr>
+                  <td data-resource="statsLaterVotes"></td>
+                  <th></th>
+                </tr>
+                <tr>
+                  <td data-resource="statsErrorVotes"></td>
+                  <th></th>
+                </tr>
+                <tr>
+                  <td data-resource="statsLastSuccessVote"></td>
+                  <th></th>
+                </tr>
+                <tr>
+                  <td data-resource="statsLastAttemptVote"></td>
+                  <th></th>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JS -->
+    <script type="module" src="js/options.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
+  </body>
+</html>

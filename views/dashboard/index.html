@@ -1,0 +1,132 @@
+<section class="dash" id="dashboard" data-view-root>
+  <h4 data-i18n-mode="replace" data-resource="overview">Overview</h4>
+  <hr>
+
+  <!-- Pills -->
+  <div class="dashPills">
+    <div class="pill" id="pill-total">
+      <span data-i18n-mode="replace" data-resource="totalVotes">Total votes</span>
+      <strong id="pillTotalValue">—</strong>
+    </div>
+    <div class="pill" id="pill-today">
+      <span data-i18n-mode="replace" data-resource="today">Today</span>
+      <strong id="pillTodayValue">—</strong>
+    </div>
+    <div class="pill" id="pill-success">
+      <span data-i18n-mode="replace" data-resource="successRate">Success rate</span>
+      <strong id="pillSuccessValue">—%</strong>
+    </div>
+    <div class="pill" id="pill-streak">
+      <span data-i18n-mode="replace" data-resource="streak">Streak</span>
+      <strong id="pillStreakValue">—</strong>
+    </div>
+  </div>
+
+  <!-- KPI cards -->
+  <section class="kpiGrid">
+    <article class="kpiCard">
+      <header>
+        <span class="kpiTitle" data-i18n-mode="replace" data-resource="totalVotes">Total votes</span>
+        <span class="kpiBadge" data-i18n-mode="replace" data-resource="allTime">All time</span>
+      </header>
+      <div class="kpiValue" id="kpiTotalVotes">—</div>
+      <div class="kpiSub" id="kpiAvgPerDay">— /day</div>
+    </article>
+
+    <article class="kpiCard">
+      <header>
+        <span class="kpiTitle" data-i18n-mode="replace" data-resource="today">Today</span>
+        <span class="kpiBadge" data-i18n-mode="replace" data-resource="live">Live</span>
+      </header>
+      <div class="kpiValue" id="kpiTodayVotes">—</div>
+      <div class="kpiSub" id="kpiTodaySuccess">—% success</div>
+    </article>
+
+    <article class="kpiCard">
+      <header>
+        <span class="kpiTitle" data-i18n-mode="replace" data-resource="thisMonth">This month</span>
+        <span class="kpiBadge" id="kpiMonthLabel">—</span>
+      </header>
+      <div class="kpiValue" id="kpiMonthVotes">—</div>
+      <div class="kpiSub" id="kpiLastMonthDelta">— vs last</div>
+    </article>
+
+    <article class="kpiCard">
+      <header>
+        <span class="kpiTitle" data-i18n-mode="replace" data-resource="reliability">Reliability</span>
+        <span class="kpiBadge" data-i18n-mode="replace" data-resource="successRate">Success rate</span>
+      </header>
+      <div class="kpiValue" id="kpiSuccessRate">—%</div>
+      <div class="kpiSub" id="kpiErrors">— errors</div>
+    </article>
+  </section>
+
+  <section class="dashGrid">
+    <!-- Trend -->
+    <article class="card">
+      <header class="cardHead">
+        <h6 data-i18n-mode="replace" data-resource="monthlyTrend">Monthly trend</h6>
+        <div class="legend">
+          <span class="dot ok" title="Success"></span><span data-i18n-mode="replace" data-resource="successVotes">Vote success</span>
+          <span class="dot err" title="Errors"></span><span data-i18n-mode="replace" data-resource="errors">Errors</span>
+        </div>
+      </header>
+      <div class="sparkWrap">
+        <svg id="sparklineSuccess" class="sparkline" viewBox="0 0 320 80" aria-label="Success per day"></svg>
+        <svg id="sparklineErrors" class="sparkline" viewBox="0 0 320 80" aria-label="Errors per day"></svg>
+      </div>
+      <div class="sparkAxis">
+        <span id="sparkStartLabel">−30d</span>
+        <span id="sparkEndLabel" data-i18n-mode="replace" data-resource="today">Today</span>
+      </div>
+    </article>
+
+    <!-- Top vote sites -->
+    <article class="card">
+      <header class="cardHead">
+        <h6 data-i18n-mode="replace" data-resource="topSites">Top vote sites</h6>
+        <div class="filters">
+          <button class="chip" data-range="month" aria-pressed="true" id="topRangeMonth">
+            <span data-i18n-mode="replace" data-resource="thisMonth">This month</span>
+          </button>
+          <button class="chip" data-range="all" aria-pressed="false" id="topRangeAll">
+            <span data-i18n-mode="replace" data-resource="allTime">All time</span>
+          </button>
+        </div>
+      </header>
+      <div class="leaderboard">
+        <div class="leaderHead" role="row">
+          <button class="col site" data-sort="site" aria-sort="none" data-i18n-mode="replace" data-resource="site">Site</button>
+          <button class="col count" data-sort="count" aria-sort="descending" data-i18n-mode="replace" data-resource="votes">Votes</button>
+          <button class="col rate" data-sort="rate" aria-sort="none" data-i18n-mode="replace" data-resource="success">Success</button>
+          <div class="col last" data-i18n-mode="replace" data-resource="last">Last</div>
+        </div>
+        <div class="leaderBody" id="leaderBody" role="rowgroup"></div>
+      </div>
+    </article>
+  </section>
+
+  <!-- Recent activity -->
+  <section class="card">
+    <header class="cardHead">
+      <h6 data-i18n-mode="replace" data-resource="recentActivity">Recent activity</h6>
+    </header>
+    <ol class="timeline" id="activityList"></ol>
+  </section>
+
+  <!-- Row template for leaderboard -->
+  <template id="tmplLeaderRow">
+    <div class="leaderRow" role="row">
+      <div class="cell site">
+        <img class="ico" alt="" aria-hidden="true">
+        <div class="meta">
+          <div class="name"></div>
+          <div class="muted domain"></div>
+        </div>
+      </div>
+      <div class="cell count"><strong></strong></div>
+      <div class="cell rate"></div>
+      <div class="cell last"><time></time></div>
+    </div>
+  </template>
+</section>

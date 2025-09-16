@@ -1,0 +1,17 @@
+/* Styles spécifiques aux lignes de la modale Fast Add */
+#addFastProject .content .message { display: grid; gap: 8px; }
+.fastAddEl {
+  display: grid; grid-template-columns: auto 1fr; gap: 10px;
+  align-items: start; background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08); border-radius: 8px; padding: 8px 10px;
+}
+.fastAddEl img { width: 22px; height: 22px; }
+.successFastAdd {
+  margin-top: 8px; padding: 8px 10px; border-radius: 8px;
+  background: rgba(55,199,133,.15); border: 1px solid rgba(55,199,133,.4);
+}
+#addFastProject .events { display: flex; gap: 8px; margin-top: 10px; }
+#addFastProject .btn {
+  background: #4f8cff; color:#fff; border:none; border-radius:8px; padding:8px 12px; cursor:pointer;
+}
+#addFastProject .btn.redBtn { background:#ff6b6b; }

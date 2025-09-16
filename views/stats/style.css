@@ -1,0 +1,10 @@
+:root { --brand:#4f8cff; --text:#e9eef6; --muted:#a7b1c2; --border:rgba(255,255,255,.08); --surface-3:#222838; }
+.statsView h4 { color:var(--brand); text-align:center; font-size:19px; font-weight:700; margin:4px 0 2px; }
+.chips { display:flex; gap:10px; justify-content:center; margin:10px 0 14px; }
+.chip {
+  display:inline-flex; align-items:center; gap:8px; padding:6px 12px;
+  border-radius:999px; border:1px solid var(--border); background:var(--surface-3); color:var(--text);
+  cursor:pointer;
+}
+.chip:hover { outline:1px solid var(--border); }
+.muted { color:var(--muted); text-align:center; }

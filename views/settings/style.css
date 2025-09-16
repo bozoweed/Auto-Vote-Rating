@@ -1,0 +1,13 @@
+.settings h4 { color: #4f8cff; text-align: center; font-size: 19px; font-weight: 700; margin: 4px 0 2px; }
+.settingsGrid { display: grid; grid-template-columns: repeat(2, minmax(320px, 1fr)); gap: 12px; align-items: start; }
+.settingsCard { background:#1a1f2a; border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px; }
+.settingsCard h5 { display:flex; align-items:center; gap:10px; font-size:15px; margin:2px 0 8px; }
+.check-block { position:relative; padding:10px 12px; border:1px solid rgba(255,255,255,.08); background:#222838; border-radius:10px; margin-bottom:8px; }
+.checkbox { position:absolute; clip: rect(0,0,0,0); }
+.checkbox + label{ padding-left:0; display:block; cursor:pointer; }
+.input-block { margin: 10px 0; }
+.inlineForm { display:grid; grid-template-columns:1fr auto; gap:8px; }
+.input { width:100%; background:#141821; border:1px solid rgba(255,255,255,.08); color:#e9eef6; border-radius:8px; padding:10px 12px; outline:none; }
+.justBtn, .file { background:#1a1f2a; border:1px solid rgba(255,255,255,.08); color:#e9eef6; padding:8px 10px; border-radius:8px; cursor:pointer; }
+.fileSystem { display:grid; grid-template-columns: repeat(2, minmax(160px, 1fr)); gap:8px; margin-top:6px; }
+@media (max-width: 700px){ .settingsGrid{ grid-template-columns:1fr; } }

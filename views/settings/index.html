@@ -1,0 +1,138 @@
+<section class="settings" data-view-root>
+  <h4 data-i18n-mode="replace" data-resource="optionsExtension">Options</h4>
+  <hr>
+
+  <div class="settingsGrid">
+    <!-- Notifications -->
+    <section class="settingsCard">
+      <h5><span>🔔</span><span data-i18n-mode="replace" data-resource="settings">Settings</span></h5>
+      <div class="check-block">
+        <input class="checkbox" id="disabledNotifStart" type="checkbox" name="checkbox"/>
+        <label data-i18n-mode="replace" data-resource="disabledNotifStart" for="disabledNotifStart">Disable start notifications</label>
+      </div>
+      <div class="check-block">
+        <input class="checkbox" id="disabledNotifInfo" type="checkbox" name="checkbox"/>
+        <label data-i18n-mode="replace" data-resource="disabledNotifInfo" for="disabledNotifInfo">Disable info notifications</label>
+      </div>
+      <div class="check-block">
+        <input class="checkbox" id="disabledNotifWarn" type="checkbox" name="checkbox"/>
+        <label data-i18n-mode="replace" data-resource="disabledNotifWarn" for="disabledNotifWarn">Disable warnings</label>
+      </div>
+      <div class="check-block">
+        <input class="checkbox" id="disabledNotifError" type="checkbox" name="checkbox"/>
+        <label data-i18n-mode="replace" data-resource="disabledNotifError" for="disabledNotifError">Disable errors</label>
+      </div>
+    </section>
+
+    <!-- Behavior -->
+    <section class="settingsCard">
+      <h5><span>⚙️</span><span>Behavior</span></h5>
+      <div class="check-block">
+        <input class="checkbox" id="disabledCheckInternet" type="checkbox" name="checkbox"/>
+        <label data-i18n-mode="replace" data-resource="disabledCheckInternet" for="disabledCheckInternet">Disable internet check</label>
+      </div>
+      <div class="check-block" style="display:none">
+        <input class="checkbox" id="disabledOneVote" type="checkbox" name="checkbox"/>
+        <label data-i18n-mode="replace" data-resource="disabledOneVote" for="disabledOneVote">Disable one vote limit</label>
+      </div>
+      <div class="check-block">
+        <input class="checkbox" id="disabledRestartOnTimeout" type="checkbox" name="checkbox"/>
+        <label data-i18n-mode="replace" data-resource="disabledRestartOnTimeout" for="disabledRestartOnTimeout">Disable restart on timeout</label>
+      </div>
+      <div class="check-block">
+        <input class="checkbox" id="disabledFocusedTab" type="checkbox" name="checkbox"/>
+        <label data-i18n-mode="replace" data-resource="disabledFocusedTab" for="disabledFocusedTab">Disable focused tab check</label>
+      </div>
+    </section>
+
+    <!-- Captcha -->
+    <section class="settingsCard">
+      <h5><span>🛡️</span><span>Captcha</span></h5>
+      <div class="check-block">
+        <input class="checkbox" id="disabledWarnCaptcha" type="checkbox" name="checkbox"/>
+        <label data-i18n-mode="replace" data-resource="disabledWarnCaptcha" for="disabledWarnCaptcha">Disable captcha warning</label>
+      </div>
+      <div class="check-block">
+        <input class="checkbox" id="disabledClickCaptcha" type="checkbox" name="checkbox"/>
+        <label data-i18n-mode="replace" data-resource="disabledClickCaptcha" for="disabledClickCaptcha">Disable captcha auto-click</label>
+      </div>
+    </section>
+
+    <!-- Advanced -->
+    <section class="settingsCard">
+      <h5><span>🧪</span><span>Advanced</span></h5>
+      <div class="check-block">
+        <input class="checkbox" id="expertMode" type="checkbox" name="checkbox"/>
+        <label data-i18n-mode="replace" data-resource="expertMode" for="expertMode">Expert mode</label>
+      </div>
+
+      <div class="check-block" style="display:none">
+        <input class="checkbox" id="disabledDebug" type="checkbox" name="checkbox"/>
+        <label data-i18n-mode="replace" data-resource="disabledDebug" for="disabledDebug">Debug</label>
+      </div>
+      <div class="check-block" style="display:none">
+        <input class="checkbox" id="disableCloseTabsOnSuccess" type="checkbox" name="checkbox"/>
+        <label data-i18n-mode="replace" data-resource="disableCloseTabsOnSuccess" for="disableCloseTabsOnSuccess">Do not close success tabs</label>
+      </div>
+      <div class="check-block" style="display:none">
+        <input class="checkbox" id="disableCloseTabsOnError" type="checkbox" name="checkbox"/>
+        <label data-i18n-mode="replace" data-resource="disableCloseTabsOnError" for="disableCloseTabsOnError">Do not close error tabs</label>
+      </div>
+
+      <div class="input-block" style="display:none">
+        <label data-i18n-mode="replace" data-resource="cooldown" for="timeoutValue">Cooldown</label>
+        <form id="timeout" class="inlineForm">
+          <input class="input" name="cooldown" id="timeoutValue" required type="number" min="0">
+          <button data-i18n-mode="replace" data-resource="setCooldown" type="submit" class="justBtn">Set</button>
+        </form>
+      </div>
+      <div class="input-block" style="display:none">
+        <label data-i18n-mode="replace" data-resource="cooldownError" for="timeoutErrorValue">Cooldown (error)</label>
+        <form id="timeoutError" class="inlineForm">
+          <input class="input" name="cooldownError" id="timeoutErrorValue" required type="number" min="0">
+          <button data-i18n-mode="replace" data-resource="setCooldown" type="submit" class="justBtn">Set</button>
+        </form>
+      </div>
+      <div class="input-block" style="display:none">
+        <label data-i18n-mode="replace" data-resource="cooldownVote" for="timeoutVoteValue">Cooldown (vote)</label>
+        <form id="timeoutVote" class="inlineForm">
+          <input class="input" name="cooldownVote" id="timeoutVoteValue" required type="number" min="1000">
+          <button data-i18n-mode="replace" data-resource="setCooldown" type="submit" class="justBtn">Set</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Files -->
+    <section class="settingsCard">
+      <h5><span>📁</span><span data-i18n-mode="replace" data-resource="settingsFile">Settings file</span></h5>
+      <div class="fileSystem">
+        <div>
+          <label for="file-upload" class="file">
+            <span data-i18n-mode="replace" data-resource="importSettings">Import settings</span>
+            <img src="images/icons/importBtn.svg" alt="" aria-hidden="true">
+          </label>
+          <input id="file-upload" style="display:none" type="file" accept="application/json"/>
+        </div>
+        <div>
+          <button id="file-download" class="file" type="button">
+            <span data-i18n-mode="replace" data-resource="exportSettings">Export settings</span>
+            <img src="images/icons/exportBtn.svg" alt="" aria-hidden="true">
+          </button>
+        </div>
+        <div>
+          <button id="logs-download" class="file" type="button">
+            <span data-i18n-mode="replace" data-resource="exportLogs">Export logs</span>
+            <img src="images/icons/exportBtn.svg" alt="" aria-hidden="true">
+          </button>
+        </div>
+        <div>
+          <button id="logs-clear" class="file" type="button">
+            <span data-i18n-mode="replace" data-resource="clearLogs">Clear logs</span>
+            <img src="images/icons/pie-chart-3.svg" alt="" aria-hidden="true">
+          </button>
+        </div>
+      </div>
+      <div id="storageUsed"></div>
+    </section>
+  </div>
+</section>
