@@ -1,63 +1,67 @@
 {
-	"key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlVWvJq5iqtShA8l+gsv52P1PZyWFZ4sS++yguLUl01MwUjpI2swMSi8LukdUMJeeqBdUvXHvtKA1WTeGH2R+LUX4+UXTM2vSqm1qMboGb1A6dbLCYVEStZhl5WiTP9Vocc4vauTWKRN8mPn00TxFym9EoVcdOtSdem4npnyE/CZUW5dfZr3dPqDhrbEPQgrmp0Fr+jcdW8XNhzVXHyXH6lVD5TkuR5rZhkKatw/WrQ2lHn+jU/exZu/J2InTTSdm+jyZ16Z1rt/7rD3nmOrN+aju/NI1+i9ehY3Gio4tk9zmL3HTFiRWOxFYVRVcytECBiEcPRDe2CIY7gNfVn4DDQIDAQAB",
-	"short_name": "AVR",
-	"author": "Serega007",
-	"background": { "service_worker": "background/index.js", "type": "module" },
-	"description": "__MSG_appDesc__",
-	"manifest_version": 3,
-	"name": "__MSG_appName__",
-	"options_ui": {
-		"open_in_tab": true,
-		"page": "options.html"
-	},
-	"icons": {
-		"16": "images/icon16.png",
-		"32": "images/icon32.png",
-		"48": "images/icon48.png",
-		"64": "images/icon64.png",
-		"128": "images/icon128.png"
-	},
-	"permissions": [
-		"notifications",
-		"background",
-		"webNavigation",
-		"webRequest",
-		"alarms",
-		"unlimitedStorage",
-		"scripting",
-		"tabGroups",
-		"idle"
-	],
-	"optional_permissions": [
-		"cookies"
-	],
-	"host_permissions": [
-		"https://*.hcaptcha.com/captcha/*",
-		"https://*.google.com/recaptcha/*",
-		"https://*.recaptcha.net/recaptcha/*",
-		"https://challenges.cloudflare.com/*",
-		"https://*.yandexcloud.net/*",
-		"https://*.mtcaptcha.com/*"
-	],
-	"optional_host_permissions": [
-		"<all_urls>"
-	],
-	"web_accessible_resources": [
-		{
-			"resources": [
-				"options.html"
-			],
-			"matches": [
-				"https://*.dogecraft.net/*",
-				"https://*.mythicalworld.su/*",
-				"https://votify.mrspeedy.tk/*",
-				"https://*.cubixworld.net/*",
-				"https://*.hylexmc.net/*"
-			]
-		}
-	],
-	"update_url": "https://clients2.google.com/service/update2/crx",
-	"version": "7.2.5",
-	"minimum_chrome_version": "105.0",
-	"default_locale": "en"
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlVWvJq5iqtShA8l+gsv52P1PZyWFZ4sS++yguLUl01MwUjpI2swMSi8LukdUMJeeqBdUvXHvtKA1WTeGH2R+LUX4+UXTM2vSqm1qMboGb1A6dbLCYVEStZhl5WiTP9Vocc4vauTWKRN8mPn00TxFym9EoVcdOtSdem4npnyE/CZUW5dfZr3dPqDhrbEPQgrmp0Fr+jcdW8XNhzVXHyXH6lVD5TkuR5rZhkKatw/WrQ2lHn+jU/exZu/J2InTTSdm+jyZ16Z1rt/7rD3nmOrN+aju/NI1+i9ehY3Gio4tk9zmL3HTFiRWOxFYVRVcytECBiEcPRDe2CIY7gNfVn4DDQIDAQAB",
+  "manifest_version": 3,
+  "name": "__MSG_appName__",
+  "short_name": "AVR",
+  "description": "__MSG_appDesc__",
+  "version": "7.2.5",
+  "minimum_chrome_version": "105.0",
+  "default_locale": "en",
+
+  "background": { "service_worker": "background/index.js", "type": "module" },
+
+  "options_ui": { "page": "options.html", "open_in_tab": true },
+
+  "icons": {
+    "16":  "images/icon16.png",
+    "32":  "images/icon32.png",
+    "48":  "images/icon48.png",
+    "64":  "images/icon64.png",
+    "128": "images/icon128.png"
+  },
+
+  "permissions": [
+    "notifications",
+    "webNavigation",
+    "webRequest",
+    "alarms",
+    "unlimitedStorage",
+    "scripting",
+    "tabGroups",
+    "idle",
+    "cookies"            
+  ],
+
+  "optional_permissions": [
+  ],
+
+  "host_permissions": [
+    "https://*.hcaptcha.com/captcha/*",
+    "https://*.google.com/recaptcha/*",
+    "https://*.recaptcha.net/recaptcha/*",
+    "https://challenges.cloudflare.com/*",
+    "https://*.yandexcloud.net/*",
+    "https://*.mtcaptcha.com/*"
+  ],
+  "optional_host_permissions": [
+    "<all_urls>"
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "view/**",
+        "views/**",
+        "scripts/**",
+        "images/**",
+        "modules/**",
+        "jsv2/**",
+        "libs/*.mjs"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+
+  "update_url": "https://clients2.google.com/service/update2/crx",
+  "author": "Serega007"
 }

@@ -2,6 +2,12 @@
    - Mode lien / manuel avec champs conditionnels par rating (allProjects)
    - Vérification permissions + présence (fetch), notFound, projectName
    - Sauvegarde DB (add / edit), scheduling, timeout, randomize, vote modes, Custom body
+
+   Dépendances via DI:
+   ctx.app.inject('backend') → {
+     DB, SETTINGS, allProjects,
+     attachGlobalErrorHandlers, utils: { getDomainWithoutSubdomain }
+   }
 */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) define([], function(){ return factory(root.AVRFW, root.OptionsCore); });
@@ -71,7 +77,10 @@
       OptionsCore.ensureContainers();
       var notif = OptionsCore.getNotif();
 
-      var be = root.AVRFW_OPTIONS_BACKEND || {};
+      // Injected backend (DI); no per-view initializeConfig
+      var be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) || null;
+      if (!be) { notif.create('Backend not available', 'error'); return; }
+
       var db = be.DB, settings = be.SETTINGS || {}, allProjects = be.allProjects || {};
       var getDomainWithoutSubdomain = be.utils && be.utils.getDomainWithoutSubdomain;
 
@@ -632,10 +641,9 @@
       generateDataList();
       OptionsCore.i18nInjectExtras();
 
-      // Edit mode if params.key
+      // Edit mode if params.key (backend already initialized globally)
       (async function boot(){
         try { be.attachGlobalErrorHandlers && be.attachGlobalErrorHandlers(function(err){ OptionsCore.getNotif().create(err, 'error'); }); } catch(e){}
-        if (be.initializeConfig) await be.initializeConfig({ background:false });
         if (ctx.params && ctx.params.key != null) {
           var proj = await db.get('projects', Number(ctx.params.key));
           if (proj) setEditMode(proj);

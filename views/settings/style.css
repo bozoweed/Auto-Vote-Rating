@@ -10,4 +10,83 @@
 .input { width:100%; background:#141821; border:1px solid rgba(255,255,255,.08); color:#e9eef6; border-radius:8px; padding:10px 12px; outline:none; }
 .justBtn, .file { background:#1a1f2a; border:1px solid rgba(255,255,255,.08); color:#e9eef6; padding:8px 10px; border-radius:8px; cursor:pointer; }
 .fileSystem { display:grid; grid-template-columns: repeat(2, minmax(160px, 1fr)); gap:8px; margin-top:6px; }
+/* Right-side switch in settings rows (overrides any global .checkbox hiding) */
+.settingsCard .check-block {
+  position: relative;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: var(--surface-3, #222838);
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+/* Make the input itself the switch (visible), override any 'visually hidden' style */
+.settingsCard .check-block > input.checkbox {
+  position: absolute !important;
+  inset-block-start: 50%;
+  inset-inline-end: 12px; /* RTL-aware */
+  transform: translateY(-50%);
+  width: 48px !important;
+  height: 26px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  clip: auto !important;
+  clip-path: none !important;
+  overflow: visible !important;
+  white-space: normal !important;
+
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--surface-2, #1a1f2a);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+/* Switch knob */
+.settingsCard .check-block > input.checkbox::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 4px;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.25);
+  transition: transform .2s ease;
+}
+
+/* Checked state */
+.settingsCard .check-block > input.checkbox:checked {
+  background: var(--brand, #4f8cff);
+  border-color: var(--brand, #4f8cff);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.12);
+}
+.settingsCard .check-block > input.checkbox:checked::after {
+  transform: translateY(-50%) translateX(22px); /* 48 - 18 - 4 - 4 */
+}
+
+/* Keyboard focus for accessibility */
+.settingsCard .check-block > input.checkbox:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79,140,255,0.22);
+}
+
+/* Make the whole row label clickable, keep space on the right for the switch */
+.settingsCard .checkbox + label {
+  display: block;
+  width: 100%;
+  padding: 4px 78px 4px 0; /* room for the switch */
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+/* Ensure any older label-based switch styling is neutralized here */
+.settingsCard .checkbox + label::before,
+.settingsCard .checkbox + label::after {
+  content: none !important;
+}
 @media (max-width: 700px){ .settingsGrid{ grid-template-columns:1fr; } }

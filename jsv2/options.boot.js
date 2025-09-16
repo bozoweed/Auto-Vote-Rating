@@ -1,21 +1,17 @@
-// jsv2/options.boot.js — mount Nav only; Nav loads children lazily
-(function () {
-  // translate static header labels
+(async function () {
   if (window.AVRFW && AVRFW.translate) AVRFW.translate(document);
-
-  // Provide global createNotif (used by main.js on DB upgrade paths)
-  if (!window.createNotif && window.OptionsCore && OptionsCore.getNotif) {
-    window.createNotif = (...args) => OptionsCore.getNotif().create(...args);
-  }
 
   const app = AVRFW.createApp({ defaultHost: '#app' });
 
-  // Load only Nav; it will lazy-load dashboard/projects/add/settings/stats/fast-add
-  app.loadView('nav', 'views/nav/').then(() => {
-    app.mountHost('default', 'nav');
+  // Install the backend service once (live getters for DB/SETTINGS/…)
+  if (window.AVRFW_installBackend) {
+    await window.AVRFW_installBackend(app, { background: false });
+  }
 
-    // Header button -> ask Nav to go dashboard (simplest: use hash route)
-    const btnDash = document.getElementById('btnDashboard');
-    if (btnDash) btnDash.addEventListener('click', () => { location.hash = '#view=dashboard'; });
+  await app.loadView('nav', 'views/nav/');
+  app.mountHost('default', 'nav');
+
+  document.getElementById('btnDashboard')?.addEventListener('click', () => {
+    location.hash = '#view=dashboard';
   });
 })();

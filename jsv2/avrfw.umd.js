@@ -342,6 +342,9 @@
 
   // ---------- App / Views ----------
   function createApp(opts={}) {
+     const services = new Map();
+    function provide(name, value) { services.set(name, value); return app; }
+    function inject(name) { return services.get(name); }
     const app = {
       name: opts.name || 'app',
       views: new Map(),
@@ -352,7 +355,7 @@
       // core
       reactive, effect, createStore,
       defineView, setGlobalCSS, registerHost, mountHost, unmountHost, navigate,
-      on, off, emit,
+      on, off, emit, provide, inject,
       // loader
       loadView,
     };

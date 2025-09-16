@@ -25,8 +25,8 @@ self.addEventListener('install', (evt) => {
     ));
   })());
 });
-
-await ensureState(); // initializeConfig + load live bindings
+const _self = self;
+ensureState().then(() => {
 
 // Alarms/idle -> scheduler
 chrome.alarms.onAlarm.addListener(() => {
@@ -65,6 +65,10 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   }
 });
 
+  reloadAllAlarms();
+  if (state.settings?.debug) log('info', 'ensureState done');
+  
+_self.__AVR_checkVote = checkVote;
+_self.__AVR_reloadAllAlarms = reloadAllAlarms;
+});
 // Expose helper if you want to trigger checkVote from DevTools
-self.__AVR_checkVote = checkVote;
-self.__AVR_reloadAllAlarms = reloadAllAlarms;

@@ -1,8 +1,7 @@
 /* view/dashboard/main.js — UMD provider "dashboard"
-   - Parité avec le dashboard original (sparklines interactives, legend, leaderboard ellipse, favicons)
+   - Sparklines interactives, légende cliquable, leaderboard, favicons
    - i18n via AVRFW.t / chrome.i18n
-   - Backend pluggable: window.AVRFW_DASHBOARD_BACKEND = { initializeConfig, DB }
-     (DB doit fournir: get(store,key), getAll(store))
+   - Backend via DI: ctx.app.inject('backend') (fallback __AVRFW_SERVICES__.backend)
 */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) define([], function(){ return factory(root.AVRFW); });
@@ -15,33 +14,28 @@
     var g = (typeof self !== 'undefined' ? self : this);
     var hub = g.__AVRFW_PROVIDERS__ = g.__AVRFW_PROVIDERS__ || { defs:{}, waiters:{} };
     hub.defs[name] = def;
-    var w = hub.waiters[name] || [];
-    w.forEach(function(fn){ try{ fn(def); }catch(e){} });
+    var w = hub.waiters[name] || []; w.forEach(function(fn){ try{ fn(def); }catch(e){} });
     hub.waiters[name] = [];
   }
 
   function makeI18n(){
     return function i18n(k, a){
       try {
-        if (AVRFW && AVRFW.t) {
-          var s = AVRFW.t(k, a);
-          if (s) return s;
-        }
-        if (root.chrome && root.chrome.i18n && typeof root.chrome.i18n.getMessage === 'function') {
-          var m = root.chrome.i18n.getMessage(k, a);
+        if (AVRFW && AVRFW.t) { var s = AVRFW.t(k, a); if (s) return s; }
+        if (chrome?.i18n?.getMessage) {
+          var m = chrome.i18n.getMessage(k, a);
           if (m) return m;
         }
       } catch(e){}
-      var fallback = {
-        dashboard: 'Dashboard', overview:'Overview', totalVotes:'Total votes', today:'Today',
+      var fb = {
+        dashboard:'Dashboard', overview:'Overview', totalVotes:'Total votes', today:'Today',
         thisMonth:'This month', allTime:'All time', live:'Live', reliability:'Reliability',
         successRate:'Success rate', errors:'Errors', monthlyTrend:'Monthly trend',
         topSites:'Top vote sites', votes:'Votes', success:'Success', last:'Last',
         recentActivity:'Recent activity', streak:'Streak', site:'Site', ok:'Vote success', err:'Vote error',
-        kpiAvgPerDay: 'Avg per day: ' + (Array.isArray(a)?a[0]:a||''),
-        kpiLastMonthDelta: (Array.isArray(a)?a[0]:a||'') + '% vs last'
+        kpiAvgPerDay:'Avg per day: ' + (Array.isArray(a)?a[0]:a||''), kpiLastMonthDelta:(Array.isArray(a)?a[0]:a||'') + '% vs last'
       };
-      return fallback[k] || k;
+      return fb[k] || k;
     };
   }
 
@@ -60,27 +54,19 @@
       'https://' + domain + '/favicon.ico',
       'http://' + domain + '/favicon.ico'
     ];
-    var step = 0;
-    var tryNext = function(){ if (step >= sources.length) { imgEl.src = 'images/icons/link.svg'; return; } imgEl.src = sources[step++]; };
+    var step = 0; var tryNext = function(){ if (step >= sources.length) { imgEl.src = 'images/icons/link.svg'; return; } imgEl.src = sources[step++]; };
     imgEl.onerror = tryNext; tryNext();
   }
-  function rateColor(rate) {
-    var h = Math.max(0, Math.min(120, Math.round(rate * 1.2)));
-    return 'hsl(' + h + ' 70% 40%)';
-  }
+  function rateColor(rate) { var h = Math.max(0, Math.min(120, Math.round(rate * 1.2))); return 'hsl(' + h + ' 70% 40%)'; }
 
   function pathFromSeries(series, w, h, pad) {
     if (w===void 0) w=320; if (h===void 0) h=80; if (pad===void 0) pad=6;
     var max = Math.max(1, 0, ...series);
     var stepX = (w - pad*2) / Math.max(1, series.length - 1);
     var scaleY = (h - pad*2) / max;
-    var points = series.map(function(v,i){
-      var x = pad + i*stepX;
-      var y = h - pad - v*scaleY;
-      return {x:x, y:y};
-    });
+    var points = series.map(function(v,i){ return { x: pad + i*stepX, y: h - pad - v*scaleY }; });
     var d = points.map(function(p,i){ return (i?'L':'M') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
-    return { d:d, points:points, max:max, stepX:stepX, scaleY:scaleY, pad:pad, w:w, h:h };
+    return { d, points, max, stepX, scaleY, pad, w, h };
   }
   function dayStart(ts){ var d = new Date(ts); d.setHours(0,0,0,0); return +d; }
   function fmt(n){ return isFinite(n) ? n.toLocaleString() : '—'; }
@@ -89,8 +75,7 @@
     var rootEl = ctx.root;
     var i18n = makeI18n();
 
-    // Scoped selectors
-    var $ = function(sel){ return rootEl.querySelector(sel); };
+    var $  = function(sel){ return rootEl.querySelector(sel); };
     var $$ = function(sel){ return Array.prototype.slice.call(rootEl.querySelectorAll(sel)); };
 
     var showOk = true, showErr = true;
@@ -125,12 +110,22 @@
 
     function getMonthLabel(d){ d = d||new Date(); return new Intl.DateTimeFormat(undefined, { month:'long' }).format(d); }
 
-    // Backend adapter (optional)
-    var backend = root.AVRFW_DASHBOARD_BACKEND || (AVRFW && AVRFW.backend) || null;
+    // Resolve backend via DI (auto-install if missing)
+    var be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||
+             (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) || null;
+    var beReady = (async function ensureBackend(){
+      if (be) return;
+      if (root.AVRFW_installBackend) {
+        await root.AVRFW_installBackend(ctx.app, { background:false });
+        be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||
+             (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) || null;
+      }
+    })();
 
     async function fetchData() {
-      if (!backend || !backend.DB) {
-        // Demo fallback
+      await beReady;
+      if (!be || !be.DB) {
+        // Demo fallback if backend not available yet
         return {
           general: { successVotes: 1200, errorVotes: 80, laterVotes: 20, monthSuccessVotes: 90, lastMonthSuccessVotes: 70, added: Date.now()-20*86400000 },
           today: { successVotes: 5, errorVotes: 1, laterVotes: 0, lastSuccessVote: Date.now()-3600000, lastAttemptVote: Date.now()-1800000 },
@@ -141,11 +136,11 @@
           ]
         };
       }
-      await (backend.initializeConfig ? backend.initializeConfig({ background:false }) : Promise.resolve());
+      // No per-view initializeConfig; backend is already installed
       var res = await Promise.all([
-        backend.DB.get('other','generalStats'),
-        backend.DB.get('other','todayStats'),
-        backend.DB.getAll('projects')
+        be.DB.get('other','generalStats'),
+        be.DB.get('other','todayStats'),
+        be.DB.getAll('projects')
       ]);
       return { general: res[0]||{}, today: res[1]||{}, projects: res[2]||[] };
     }
@@ -215,22 +210,22 @@
     }
 
     function renderPills(t) {
-      els.pillTotal.textContent = fmt(t.attemptsAll);
-      els.pillToday.textContent = fmt(t.todayTotal);
-      els.pillSuccess.textContent = (t.successRateAll||0) + '%';
-      els.pillStreak.textContent = t.streak ? (t.streak + 'd') : '—';
+      if (els.pillTotal) els.pillTotal.textContent   = fmt(t.attemptsAll);
+      if (els.pillToday) els.pillToday.textContent   = fmt(t.todayTotal);
+      if (els.pillSuccess) els.pillSuccess.textContent = (t.successRateAll||0) + '%';
+      if (els.pillStreak) els.pillStreak.textContent = t.streak ? (t.streak + 'd') : '—';
     }
     function renderKPIs(t) {
-      els.kpiMonthLabel.textContent = getMonthLabel();
-      els.kpiTotal.textContent = fmt(t.attemptsAll);
-      els.kpiAvg.textContent = i18n('kpiAvgPerDay', fmt(t.avgPerDay));
-      els.kpiToday.textContent = fmt(t.todayTotal);
-      els.kpiTodaySuccess.textContent = (t.todayRate||0) + '% ' + (i18n('success')||'Success');
-      els.kpiMonthVotes.textContent = fmt(t.monthSuccess);
+      if (els.kpiMonthLabel) els.kpiMonthLabel.textContent = getMonthLabel();
+      if (els.kpiTotal) els.kpiTotal.textContent = fmt(t.attemptsAll);
+      if (els.kpiAvg) els.kpiAvg.textContent = i18n('kpiAvgPerDay', fmt(t.avgPerDay));
+      if (els.kpiToday) els.kpiToday.textContent = fmt(t.todayTotal);
+      if (els.kpiTodaySuccess) els.kpiTodaySuccess.textContent = (t.todayRate||0) + '% ' + (i18n('success')||'Success');
+      if (els.kpiMonthVotes) els.kpiMonthVotes.textContent = fmt(t.monthSuccess);
       var sign = t.monthDelta > 0 ? '+' : '';
-      els.kpiLastMonthDelta.textContent = i18n('kpiLastMonthDelta', sign + t.monthDelta);
-      els.kpiSuccessRate.textContent = (t.successRateAll||0) + '%';
-      els.kpiErrors.textContent = fmt(t.errorAll) + ' ' + (i18n('errors')||'Errors');
+      if (els.kpiLastMonthDelta) els.kpiLastMonthDelta.textContent = i18n('kpiLastMonthDelta', sign + t.monthDelta);
+      if (els.kpiSuccessRate) els.kpiSuccessRate.textContent = (t.successRateAll||0) + '%';
+      if (els.kpiErrors) els.kpiErrors.textContent = fmt(t.errorAll) + ' ' + (i18n('errors')||'Errors');
     }
 
     function renderSparklines(tr) {
@@ -262,17 +257,15 @@
         '<circle class="marker-err" r="3.5" fill="var(--error)" stroke="#000" stroke-width="1" style="display:none"/>';
 
       setupSparkInteractions(tr, ok, er);
-      $('#sparkStartLabel').textContent = '−30d';
-      $('#sparkEndLabel').textContent = i18n('today') || 'Today';
+      var lblStart = $('#sparkStartLabel'), lblEnd = $('#sparkEndLabel');
+      if (lblStart) lblStart.textContent = '−30d';
+      if (lblEnd)   lblEnd.textContent   = i18n('today') || 'Today';
     }
 
     function setupSparkInteractions(tr, ok, er) {
       if (!els.sparkWrap) return;
       var tip = els.sparkWrap.querySelector('.sparkTooltip');
-      if (!tip) {
-        tip = document.createElement('div'); tip.className='sparkTooltip'; tip.style.display='none';
-        els.sparkWrap.appendChild(tip);
-      }
+      if (!tip) { tip = document.createElement('div'); tip.className='sparkTooltip'; tip.style.display='none'; els.sparkWrap.appendChild(tip); }
 
       var update = function(svg, which, idx, clientX){
         var points = which==='ok'? ok.points : er.points;
@@ -312,23 +305,14 @@
       };
 
       els.sparkSuccess.onmousemove = function(e){ onMove(els.sparkSuccess, 'ok', e); };
-      els.sparkErrors.onmousemove = function(e){ onMove(els.sparkErrors, 'err', e); };
+      els.sparkErrors.onmousemove  = function(e){ onMove(els.sparkErrors,  'err', e); };
       els.sparkSuccess.onmouseleave = function(){ onLeave(els.sparkSuccess); };
-      els.sparkErrors.onmouseleave = function(){ onLeave(els.sparkErrors); };
+      els.sparkErrors.onmouseleave  = function(){ onLeave(els.sparkErrors); };
 
-      // Legend toggles
       if (els.legend) {
         var dots = els.legend.querySelectorAll('.dot');
-        dots[0] && dots[0].addEventListener('click', function(){
-          showOk = !showOk;
-          var d = els.legend.querySelector('.dot.ok'); if (d) d.classList.toggle('off', !showOk);
-          renderSparklines(tr);
-        });
-        dots[1] && dots[1].addEventListener('click', function(){
-          showErr = !showErr;
-          var d = els.legend.querySelector('.dot.err'); if (d) d.classList.toggle('off', !showErr);
-          renderSparklines(tr);
-        });
+        dots[0] && dots[0].addEventListener('click', function(){ showOk = !showOk; var d = els.legend.querySelector('.dot.ok'); d && d.classList.toggle('off', !showOk); renderSparklines(tr); });
+        dots[1] && dots[1].addEventListener('click', function(){ showErr = !showErr; var d = els.legend.querySelector('.dot.err'); d && d.classList.toggle('off', !showErr); renderSparklines(tr); });
       }
     }
 
@@ -411,7 +395,6 @@
     }
 
     function renderChips(totals){
-      // Optionnel: éléments externes (#todayStats / #generalStats) — ignorés s'ils n'existent pas.
       var chipToday = document.querySelector('#todayStats');
       var chipTotal = document.querySelector('#generalStats');
       if (chipToday && chipTotal) {
@@ -435,7 +418,6 @@
 
         if (!refreshTimer) {
           refreshTimer = setInterval(async function(){
-            // visible + toujours dans le DOM
             var visible = !!(rootEl && rootEl.offsetParent !== null && document.body.contains(rootEl));
             if (!visible) return;
             var raw2 = await fetchData();
@@ -457,18 +439,13 @@
     bindUI();
     renderDashboard();
 
-    // Expose cleanup timer
-    return function teardown(){
-      if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
-    };
+    return function teardown(){ if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; } };
   }
 
   var viewDef = {
     controller: function(){ return { state:{}, methods:{} }; },
     onMounted: function(ctx){
-      // Inject i18n strings in static nodes for this view
-      if (AVRFW && AVRFW.translate) AVRFW.translate(ctx.root);
-      // Init dashboard features
+      AVRFW && AVRFW.translate && AVRFW.translate(ctx.root);
       ctx._teardown = initDashboard(ctx);
     },
     onBeforeUnmount: function(ctx){

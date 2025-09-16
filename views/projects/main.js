@@ -3,10 +3,10 @@
    - Groupes par rating (boutons) + listes paresseuses
    - Actions par projet: restart, stats, delete, accès permissions (si erreur d'accès)
    - Modales "stats" auto-injectées dans #modals
-   Dépendances backend:
-   window.AVRFW_OPTIONS_BACKEND = {
-     initializeConfig, attachGlobalErrorHandlers, DB, DB_LOGS, SETTINGS, allProjects,
-     utils: { getDomainWithoutSubdomain }
+   Dépendances via DI:
+   ctx.app.inject('backend') → {
+     DB, DB_LOGS, SETTINGS, allProjects,
+     attachGlobalErrorHandlers, utils: { getDomainWithoutSubdomain }
    }
 */
 (function (root, factory) {
@@ -21,12 +21,12 @@
       var g = (typeof self !== 'undefined' ? self : this);
       var hub = g.__AVRFW_PROVIDERS__ = g.__AVRFW_PROVIDERS__ || { defs:{}, waiters:{} };
       hub.defs[name] = def;
-      var w = hub.waiters[name] || []; w.forEach(function(fn){ try{fn(def);}catch{} }); hub.waiters[name] = [];
+      (hub.waiters[name]||[]).forEach(function(fn){ try{fn(def);}catch{} });
+      hub.waiters[name] = [];
     }
   }
 
   function t(k,a){ try{ return (root.chrome && root.chrome.i18n) ? root.chrome.i18n.getMessage(k,a) : ''; } catch(e){ return ''; } }
-  function fmt(n){ return isFinite(n) ? n.toLocaleString() : '—'; }
   function highlight(el){ if (!el) return; el.classList.add('highlight'); setTimeout(function(){ el.classList.remove('highlight'); }, 1200); }
   function toArr(x){ return Array.prototype.slice.call(x||[]); }
 
@@ -36,7 +36,7 @@
     if (!modals.querySelector('#stats')) {
       var stats = document.createElement('div');
       stats.className = 'modal'; stats.id = 'stats';
-      stats.innerHTML = '' +
+      stats.innerHTML =
       '<div class="head">' +
         '<div class="title"><h3 data-i18n-mode="replace" data-resource="stats2">Stats</h3><div class="statsSubtitle"></div></div>' +
         '<div class="close"></div>' +
@@ -52,8 +52,8 @@
         '<tr><td data-i18n-mode="replace" data-resource="statsAdded">Installed</td><th></th></tr>' +
       '</tbody></table></div></div>';
       modals.appendChild(stats);
-      if (AVRFW && AVRFW.translate) AVRFW.translate(stats);
-      OptionsCore.getModals(); // rebind close buttons if needed
+      AVRFW && AVRFW.translate && AVRFW.translate(stats);
+      OptionsCore.getModals();
     }
   }
 
@@ -61,7 +61,6 @@
     try { return new URL(url).hostname; } catch(e){ return url; }
   }
 
-  // Plain text -> clickable links
   function textToLinks(text, element) {
     var urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)/igm;
     if (text && text.match && text.match(urlRegex)) {
@@ -80,13 +79,11 @@
     }
   }
 
-  // Check/ask permissions for one or several projects
   async function checkPermissions(projects, element, be) {
     var allProjects = (be && be.allProjects) || {};
     var getDomainWithoutSubdomain = (be && be.utils && be.utils.getDomainWithoutSubdomain) || (function(u){
-      try {
-        var h = new URL(u).hostname; var p = h.split('.'); return p.slice(-2).join('.');
-      } catch(e){ return domainOf(u); }
+      try { var h = new URL(u).hostname; var p = h.split('.'); return p.slice(-2).join('.'); }
+      catch(e){ return domainOf(u); }
     });
 
     var origins = [], permissions = [];
@@ -101,17 +98,12 @@
         var hp = (root.chrome && root.chrome.runtime && root.chrome.runtime.getManifest && root.chrome.runtime.getManifest().host_permissions) || [];
         hp.forEach(function(o){ if (!origins.includes(o)) origins.push(o); });
       }
-      if (fn.needAdditionalOrigins) {
-        (fn.needAdditionalOrigins(project) || []).forEach(function(o){ if (!origins.includes(o)) origins.push(o); });
-      }
-      if (fn.needAdditionalPermissions) {
-        (fn.needAdditionalPermissions(project) || []).forEach(function(p){ if (!permissions.includes(p)) permissions.push(p); });
-      }
+      if (fn.needAdditionalOrigins) (fn.needAdditionalOrigins(project) || []).forEach(function(o){ if (!origins.includes(o)) origins.push(o); });
+      if (fn.needAdditionalPermissions) (fn.needAdditionalPermissions(project) || []).forEach(function(p){ if (!permissions.includes(p)) permissions.push(p); });
     });
 
     var granted = await chrome.permissions.contains({ origins: origins, permissions: permissions });
     if (!granted) {
-      // inline button flow in notif
       var button = document.createElement('button');
       button.textContent = t('grant') || 'Grant';
       button.classList.add('submitBtn');
@@ -143,15 +135,23 @@
   var viewDef = {
     controller: function(){ return { state:{}, methods:{} }; },
     onMounted: function(ctx){
-      if (AVRFW && AVRFW.translate) AVRFW.translate(ctx.root);
+      // i18n + services
+      AVRFW && AVRFW.translate && AVRFW.translate(ctx.root);
       OptionsCore.ensureContainers();
       ensureStatsModals();
-
       var notif = OptionsCore.getNotif();
-      var modals = OptionsCore.getModals();
+      OptionsCore.getModals();
 
-      var be = root.AVRFW_OPTIONS_BACKEND || {};
-      var db = be.DB, dbLogs = be.DB_LOGS, settings = be.SETTINGS || {}, allProjects = be.allProjects || {};
+      // Use injected backend (installed once in boot)
+      var be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||
+               (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) || null;
+      if (!be) { notif.create('Backend not available', 'error'); return; }
+
+      // Live bindings
+      var db = be.DB;
+      var dbLogs = be.DB_LOGS;
+      var settings = be.SETTINGS || {};
+      var allProjects = be.allProjects || {};
       var generateLock = false;
 
       function $(sel){ return ctx.root.querySelector(sel); }
@@ -173,7 +173,6 @@
           if (list.length>0) generateBtnListRating(r, list.length);
         });
 
-        // toggle empty state
         var notAdded = $('#notAddedAll');
         var loading = $('#addedLoading');
         if (loading) loading.style.display = 'none';
@@ -196,7 +195,6 @@
         ul.className = 'listcontent';
         ul.style.display = 'none';
 
-        // captcha tip
         try {
           var fn = allProjects[rating];
           if (!(fn && fn.notRequiredCaptcha && fn.notRequiredCaptcha())) {
@@ -239,7 +237,6 @@
       }
 
       async function listSelect(event, rating) {
-        // Hide all lists, deactivate all buttons
         toArr(ctx.root.getElementsByClassName('listcontent')).forEach(function(el){ el.style.display='none'; });
         toArr(ctx.root.getElementsByClassName('selectsite')).forEach(function(el){ el.classList.remove('activeList'); });
 
@@ -254,7 +251,6 @@
           div.setAttribute('data-resource','load'); div.textContent = t('load') || 'Loading…';
           list.append(div);
 
-          // read all projects for that rating
           var all = await db.getAll('projects');
           var projects = all.filter(function(p){ return p.rating===rating; });
 
@@ -280,7 +276,6 @@
           return;
         }
 
-        // create row
         var li = document.createElement('li'); li.id='projects'+project.key;
 
         var msg = document.createElement('div'); msg.className='message';
@@ -292,31 +287,26 @@
 
         var controls = document.createElement('div'); controls.className='controlItems';
 
-        // restart
         var restart = document.createElement('div'); restart.className='projectStats';
         var restartImg = document.createElement('img'); restartImg.src='images/icons/restart.svg';
         var restartTip = document.createElement('span'); restartTip.className='tooltiptext'; restartTip.textContent = t('restart') || 'Restart';
         restart.append(restartImg, restartTip); controls.append(restart);
 
-        // stats
         var stats = document.createElement('div'); stats.className='projectStats';
         var statsImg = document.createElement('img'); statsImg.src='images/icons/stats.svg';
         var statsTip = document.createElement('span'); statsTip.className='tooltiptext'; statsTip.textContent = t('stats2') || 'Stats';
         stats.append(statsImg, statsTip); controls.append(stats);
 
-        // delete
         var del = document.createElement('div'); del.className='projectStats';
         var delImg = document.createElement('img'); delImg.src='images/icons/delete.svg';
         var delTip = document.createElement('span'); delTip.className='tooltiptext'; delTip.textContent = t('deleteButton') || 'Delete';
         del.append(delImg, delTip); controls.append(del);
 
-        // edit button only in expertMode (visuel; l’édition réelle sera dans la vue Add)
         if (settings && settings.expertMode) {
           var edit = document.createElement('div'); edit.className='projectStats';
           var eImg = document.createElement('img'); eImg.src='images/icons/edit.svg';
           var eTip = document.createElement('span'); eTip.className='tooltiptext'; eTip.textContent = t('edit') || 'Edit';
           edit.append(eImg, eTip); controls.append(edit);
-          // à brancher plus tard vers la vue Add (app.navigate('add', {key:project.key}))
           edit.addEventListener('click', async function(){
             try { root.chrome && chrome.runtime && chrome.runtime.sendMessage && chrome.runtime.sendMessage({ openProject: project.key }); } catch(e){}
           });
@@ -326,7 +316,6 @@
         if (preBend) listProject.prepend(li); else listProject.append(li);
         await updateProjectText(project);
 
-        // actions
         del.addEventListener('click', async function(ev){
           if (ev.target.disabled) return; ev.target.disabled = true;
           var ok = await removeProjectList(project, false);
@@ -405,7 +394,6 @@
         var el = document.getElementById('projects'+project.key);
         if (!el) return;
 
-        // Next vote label
         var whenText = t('soon') || 'Soon';
         if (!(project.time == null || project.time === '') && Date.now() < project.time) {
           whenText = new Date(project.time).toLocaleString().replace(',', '');
@@ -418,8 +406,8 @@
           for (var it of iterate) {
             var value = it;
             if (project.rating === value.rating) {
-              whenText = t('inQueue') || 'In queue';
-              if (project.key === value.key) { whenText = t('now') || 'Now'; break; }
+              whenText = (t('inQueue') || 'In queue');
+              if (project.key === value.key) { whenText = (t('now') || 'Now'); break; }
             }
           }
         }
@@ -498,14 +486,12 @@
         document.querySelector('td[data-resource="statsAdded"]').nextElementSibling.textContent = orNone(project.stats.added);
       }
 
-      // Message updates from SW
       if (root.chrome && chrome.runtime && chrome.runtime.onMessage) {
         chrome.runtime.onMessage.addListener(async function(request){
           try {
             if (request.updateValue === 'projects' && request.value) {
               await updateProjectText(request.value);
             } else if (request.openProject) {
-              // open rating tab, scroll project into view
               var p = await db.get('projects', request.openProject);
               var btn = ctx.root.querySelector('[data-rating-button="'+p.rating+'"]');
               if (btn) btn.click();
@@ -520,12 +506,8 @@
         });
       }
 
-      // Init
       (async function init(){
         try { be.attachGlobalErrorHandlers && be.attachGlobalErrorHandlers(function(err){ OptionsCore.getNotif().create(err, 'error'); }); } catch(e){}
-        if (be.initializeConfig) await be.initializeConfig({ background:false });
-        // refresh local settings (expertMode)
-        try { settings = be.SETTINGS || settings; } catch(e){}
         await reloadProjectList();
         OptionsCore.usageSpace();
       })();
