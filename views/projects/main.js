@@ -6,7 +6,7 @@
    Dépendances via DI:
    ctx.app.inject('backend') → {
      DB, DB_LOGS, SETTINGS, allProjects,
-     attachGlobalErrorHandlers, utils: { getDomainWithoutSubdomain }
+     initializeConfig, attachGlobalErrorHandlers, utils: { getDomainWithoutSubdomain }
    }
 */
 (function (root, factory) {
@@ -21,12 +21,12 @@
       var g = (typeof self !== 'undefined' ? self : this);
       var hub = g.__AVRFW_PROVIDERS__ = g.__AVRFW_PROVIDERS__ || { defs:{}, waiters:{} };
       hub.defs[name] = def;
-      (hub.waiters[name]||[]).forEach(function(fn){ try{fn(def);}catch{} });
-      hub.waiters[name] = [];
+      var w = hub.waiters[name] || []; w.forEach(function(fn){ try{fn(def);}catch{} }); hub.waiters[name] = [];
     }
   }
 
   function t(k,a){ try{ return (root.chrome && root.chrome.i18n) ? root.chrome.i18n.getMessage(k,a) : ''; } catch(e){ return ''; } }
+  function fmt(n){ return isFinite(n) ? n.toLocaleString() : '—'; }
   function highlight(el){ if (!el) return; el.classList.add('highlight'); setTimeout(function(){ el.classList.remove('highlight'); }, 1200); }
   function toArr(x){ return Array.prototype.slice.call(x||[]); }
 
@@ -53,7 +53,7 @@
       '</tbody></table></div></div>';
       modals.appendChild(stats);
       AVRFW && AVRFW.translate && AVRFW.translate(stats);
-      OptionsCore.getModals();
+      OptionsCore.getModals(); // rebind close buttons if needed
     }
   }
 
@@ -61,6 +61,7 @@
     try { return new URL(url).hostname; } catch(e){ return url; }
   }
 
+  // Plain text -> clickable links
   function textToLinks(text, element) {
     var urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)/igm;
     if (text && text.match && text.match(urlRegex)) {
@@ -79,11 +80,13 @@
     }
   }
 
+  // Check/ask permissions for one or several projects
   async function checkPermissions(projects, element, be) {
     var allProjects = (be && be.allProjects) || {};
     var getDomainWithoutSubdomain = (be && be.utils && be.utils.getDomainWithoutSubdomain) || (function(u){
-      try { var h = new URL(u).hostname; var p = h.split('.'); return p.slice(-2).join('.'); }
-      catch(e){ return domainOf(u); }
+      try {
+        var h = new URL(u).hostname; var p = h.split('.'); return p.slice(-2).join('.');
+      } catch(e){ return domainOf(u); }
     });
 
     var origins = [], permissions = [];
@@ -142,16 +145,14 @@
       var notif = OptionsCore.getNotif();
       OptionsCore.getModals();
 
-      // Use injected backend (installed once in boot)
+      // Injected backend (via app DI or global fallback from backend.service)
       var be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||
-               (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) || null;
+               (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) ||
+               null;
       if (!be) { notif.create('Backend not available', 'error'); return; }
 
-      // Live bindings
-      var db = be.DB;
-      var dbLogs = be.DB_LOGS;
-      var settings = be.SETTINGS || {};
-      var allProjects = be.allProjects || {};
+      // Live bindings (post-init from backend.service)
+      var db = be.DB, dbLogs = be.DB_LOGS, settings = be.SETTINGS || {}, allProjects = be.allProjects || {};
       var generateLock = false;
 
       function $(sel){ return ctx.root.querySelector(sel); }
@@ -195,6 +196,7 @@
         ul.className = 'listcontent';
         ul.style.display = 'none';
 
+        // captcha tip
         try {
           var fn = allProjects[rating];
           if (!(fn && fn.notRequiredCaptcha && fn.notRequiredCaptcha())) {
@@ -406,8 +408,8 @@
           for (var it of iterate) {
             var value = it;
             if (project.rating === value.rating) {
-              whenText = (t('inQueue') || 'In queue');
-              if (project.key === value.key) { whenText = (t('now') || 'Now'); break; }
+              whenText = t('inQueue') || 'In queue';
+              if (project.key === value.key) { whenText = t('now') || 'Now'; break; }
             }
           }
         }
@@ -486,6 +488,7 @@
         document.querySelector('td[data-resource="statsAdded"]').nextElementSibling.textContent = orNone(project.stats.added);
       }
 
+      // SW notifications → update UI
       if (root.chrome && chrome.runtime && chrome.runtime.onMessage) {
         chrome.runtime.onMessage.addListener(async function(request){
           try {
@@ -506,6 +509,7 @@
         });
       }
 
+      // Init (no per-view initializeConfig; backend already installed)
       (async function init(){
         try { be.attachGlobalErrorHandlers && be.attachGlobalErrorHandlers(function(err){ OptionsCore.getNotif().create(err, 'error'); }); } catch(e){}
         await reloadProjectList();
