@@ -135,8 +135,7 @@ async function vote(first) {
                         console.log("[VOTE] Turnstile solved by direct check!");
                         captchaSolved = true;
                     }
-                    clearInterval(checkInterval);
-                    clearTimeout(timeoutId);
+                    clearInterval(checkInterval);;
                     resolve();
                 }
             }, 500);
