@@ -89,28 +89,26 @@
             var id = check.id;
 
             // map id -> settings fields (explicit where needed)
-            if (id === 'disabledNotifStart') settings.disabledNotifStart = check.checked;
-            else if (id === 'disabledNotifInfo') settings.disabledNotifInfo = check.checked;
-            else if (id === 'disabledNotifWarn') settings.disabledNotifWarn = check.checked;
-            else if (id === 'disabledNotifError') {
-              if (check.checked && !confirm(t('confirmDisableErrors') || 'Disable error notifications?')) { check.checked=false; check.disabled=false; return; }
-              settings.disabledNotifError = check.checked;
-            } else if (id === 'disabledCheckInternet') settings.disabledCheckInternet = check.checked;
-            else if (id === 'disabledOneVote') settings.disabledOneVote = check.checked;
-            else if (id === 'disabledRestartOnTimeout') settings.disabledRestartOnTimeout = check.checked;
-            else if (id === 'disabledFocusedTab') settings.disabledFocusedTab = check.checked;
-
-            else if (id === 'disabledWarnCaptcha') settings.disabledWarnCaptcha = check.checked;
-            else if (id === 'disabledClickCaptcha') settings.disabledClickCaptcha = check.checked;
-
-            else if (id === 'disabledDebug') settings.debug = check.checked;
-            else if (id === 'disableCloseTabsOnSuccess') settings.disableCloseTabsOnSuccess = check.checked;
-            else if (id === 'disableCloseTabsOnError') settings.disableCloseTabsOnError = check.checked;
-
-            else if (id === 'expertMode') {
-              settings.expertMode = check.checked;
-              toggleExpert(check.checked);
-            }
+            const map = {
+              disabledNotifStart: 'disabledNotifStart',
+              disabledNotifInfo: 'disabledNotifInfo',
+              disabledNotifWarn: 'disabledNotifWarn',
+              disabledNotifError: 'disabledNotifError',
+              disabledCheckInternet: 'disabledCheckInternet',
+              disabledOneVote: 'disabledOneVote',
+              disabledRestartOnTimeout: 'disabledRestartOnTimeout',
+              disabledFocusedTab: 'disabledFocusedTab',
+              disabledWarnCaptcha: 'disabledWarnCaptcha',
+              disabledClickCaptcha: 'disabledClickCaptcha',
+              disabledDebug: 'debug',
+              disableCloseTabsOnSuccess: 'disableCloseTabsOnSuccess',
+              disableCloseTabsOnError: 'disableCloseTabsOnError',
+              expertMode: 'expertMode',
+            };
+            const key = map[id];
+            if (key) settings[key] = check.checked;
+            if (key === 'disabledNotifError' && check.checked && !confirm(t('confirmDisableErrors') || 'Disable error notifications?')) { check.checked=false; check.disabled=false; return; }
+            if (key === 'expertMode') toggleExpert(check.checked);
 
             persistSettings().finally(function(){ check.disabled=false; });
           });
