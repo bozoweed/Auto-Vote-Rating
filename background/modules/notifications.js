@@ -66,10 +66,15 @@ export function sendNotification(title, message, type, notificationId='', meta =
   if (!message) message = '';
   const rawType = (typeof type === 'string' && type.trim()) ? type.trim() : 'info';
   const typeLower = rawType.toLowerCase();
-  if (state.settings?.disabledNotifStart && typeLower === 'start') return;
+  const isStartCategory = typeLower === 'start' || typeLower === 'started' || typeLower === 'begin';
+  if (state.settings?.disabledNotifStart && isStartCategory) return;
 
   const normalizedType = normalizeNotificationType(typeLower);
-  if (state.settings?.disabledNotifInfo && (normalizedType === 'info' || normalizedType === 'success')) return;
+  if (state.settings?.disabledNotifInfo) {
+    const treatedAsInfo = normalizedType === 'info' && !isStartCategory;
+    const treatedAsSuccess = normalizedType === 'success';
+    if (treatedAsInfo || treatedAsSuccess) return;
+  }
   if (state.settings?.disabledNotifWarn && normalizedType === 'warn') return;
   if (state.settings?.disabledNotifError && normalizedType === 'error') return;
 
@@ -122,4 +127,3 @@ export async function onNotificationClicked(notificationId) {
     if (!msg.includes('No tab with id')) log('warn', '[notify click]', msg);
   }
 }
-
