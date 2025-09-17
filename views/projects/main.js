@@ -22,29 +22,8 @@
     return null;
   })();
 
-  var DEBUG_PROJECTS = false;
-  function projectLog() {
-    if (!DEBUG_PROJECTS) return;
-    try {
-      if (typeof console !== 'undefined' && console) {
-        if (console.debug) console.debug.apply(console, arguments);
-        else if (console.log) console.log.apply(console, arguments);
-      }
-    } catch (_) {}
-  }
-
-  projectLog('[projects] module evaluated', { hasAVRFW: !!AVRFW, hasOptionsCore: !!OptionsCore });
 
 
-  function provide(name, def) {
-    if (AVRFW && AVRFW.provide) AVRFW.provide(name, def);
-    else {
-      var g = (typeof self !== 'undefined' ? self : this);
-      var hub = g.__AVRFW_PROVIDERS__ = g.__AVRFW_PROVIDERS__ || { defs: {}, waiters: {} };
-      hub.defs[name] = def;
-      var w = hub.waiters[name] || []; w.forEach(function (fn) { try { fn(def); } catch { } }); hub.waiters[name] = [];
-    }
-  }
 
   function t(k, a) { try { return (chrome && chrome.i18n) ? chrome.i18n.getMessage(k, a) : ''; } catch (e) { return ''; } }
   function fmt(n) { return isFinite(n) ? n.toLocaleString() : '—'; }
@@ -163,10 +142,9 @@
     return granted;
   }
 
-  var viewDef = {
+  AVRFW.createViewProvider('projects', {
     controller: function () { return { state: {}, methods: {} }; },
     onMounted: function (ctx) {
-      projectLog('[projects] onMounted', { root: !!ctx.root });
       // i18n + services
       AVRFW && AVRFW.translate && AVRFW.translate(ctx.root);
       OptionsCore.ensureContainers();
@@ -193,7 +171,6 @@
         if (root.AVRFW_installBackend && ctx.app) {
           try {
             backend = await root.AVRFW_installBackend(ctx.app, { background: false });
-            projectLog('[projects] ensureBackend:installed', { success: !!backend });
           } catch (error) {
             console.warn('[projects] ensureBackend:installFailed', error);
           }
@@ -206,7 +183,6 @@
               (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) ||
               null;
             if (candidate || attempts++ > 20) {
-              projectLog('[projects] ensureBackend:waitResult', { attempts, success: !!candidate });
               resolve(candidate);
             } else {
               setTimeout(wait, 100);
@@ -238,12 +214,9 @@
         var notAdded = $('#notAddedAll');
         var loading = $('#addedLoading');
 
-        projectLog('[projects] reload:start', { hasDB: !!db, lock: generateLock });
         try {
-          projectLog('[projects] reload:beforeInit', { hasDB: !!db });
           if (!be) {
             be = await ensureBackend();
-            projectLog('[projects] reload:ensureBackend', { hasBackend: !!be });
             if (be) {
               db = be.DB;
               dbLogs = be.DB_LOGS;
@@ -254,7 +227,6 @@
           if (!db && be && typeof be.initializeConfig === 'function') {
             try { await be.initializeConfig({ background: false }); } catch (_) { }
             db = be.DB;
-            projectLog('[projects] reload:afterInit', { hasDB: !!db });
           }
           if (!db) {
             ratingCache = new Map();
@@ -279,7 +251,6 @@
           }
 
           ratingCache = byRating;
-          projectLog('[projects] reload:grouped', { ratings: Array.from(byRating.keys()) });
 
           if (customFound && settings && !settings.enableCustom) {
             settings.enableCustom = true;
@@ -306,7 +277,6 @@
             generateBtnListRating(rating, list.length, extraOrder++);
           }
 
-          projectLog('[projects] reload:buttons', { buttons: buttonBlock ? buttonBlock.childElementCount : 0 });
           if (buttonBlock && buttonBlock.childElementCount > 0) {
             if (notAdded) notAdded.style.display = 'none';
             var alreadySelected = buttonBlock.querySelector('.selectsite.activeList');
@@ -324,7 +294,6 @@
         } finally {
           if (loading) loading.style.display = 'none';
           generateLock = false;
-          projectLog('[projects] reload:end', { cacheRatings: Array.from(ratingCache.keys()) });
         }
       }
 
@@ -401,14 +370,12 @@
         var list = ctx.root.querySelector(`[data-rating-list='${rating}']`);
         if (!list) return;
         if (list.childElementCount === 0) {
-          projectLog('[projects] listSelect:populate', { rating });
           var placeholder = document.createElement('div');
           placeholder.setAttribute('data-resource', 'load');
           placeholder.textContent = t('load') || 'Loading...';
           list.append(placeholder);
 
           var ratingProjects = ratingCache.get(rating) || [];
-          projectLog('[projects] listSelect:cache', { rating, cached: ratingProjects.length });
           if (ratingProjects.length === 0) {
             placeholder.remove();
             return;
@@ -472,11 +439,9 @@
           if (existing.parentElement !== listProject) listProject.appendChild(existing);
           await updateProjectText(project);
           if (preBend) listProject.prepend(existing);
-          projectLog('[projects] addProjectList:updateExisting', { rating, key: project.key });
           return;
         }
 
-        projectLog('[projects] addProjectList:create', { rating, key: project.key });
         var li = document.createElement('li'); li.id = 'projects' + project.key;
 
         var msg = document.createElement('div'); msg.className = 'message';
@@ -745,17 +710,13 @@
 
       // Init (no per-view initializeConfig; backend already installed)
       async function init() {
-        projectLog('[projects] init:start');
-        setTimeout(function () { projectLog('[projects] init:tick'); }, 0);
         be = await ensureBackend();
-        projectLog('[projects] init:backend', { hasBackend: !!be });
         if (!be) { notif.create('Backend not available', 'error'); return; }
 
         db = be.DB;
         dbLogs = be.DB_LOGS;
         settings = be.SETTINGS || {};
         allProjects = be.allProjects || {};
-        projectLog('[projects] init:dbSnapshot', { hasDB: !!db, ratings: Object.keys(allProjects || {}).length });
 
         try { be.attachGlobalErrorHandlers && be.attachGlobalErrorHandlers(function (err) { OptionsCore.getNotif().create(err, 'error', { error: err }); }); } catch (e) { }
         await reloadProjectList();
@@ -766,7 +727,6 @@
       };
       init();
 
-      projectLog('[projects] onMounted:end');
     },
     onBeforeUnmount: function (ctx) {
       if (ctx._messageListener && chrome && chrome.runtime && chrome.runtime.onMessage) {
@@ -774,7 +734,5 @@
       }
       ctx._messageListener = null;
     }
-  };
-
-  provide('projects', viewDef);
+  });
 }));

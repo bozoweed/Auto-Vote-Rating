@@ -9,22 +9,11 @@
   else if (typeof module === 'object' && module.exports) module.exports = factory(require('AVRFW'));
   else factory(root.AVRFW);
 }(typeof self !== 'undefined' ? self : this, function(AVRFW){
-
-  function provide(name, def){
-    if (AVRFW && AVRFW.provide) { AVRFW.provide(name, def); return; }
-    var g = (typeof self !== 'undefined' ? self : this);
-    var hub = g.__AVRFW_PROVIDERS__ = g.__AVRFW_PROVIDERS__ || { defs:{}, waiters:{} };
-    hub.defs[name] = def;
-    var w = hub.waiters[name] || []; w.forEach(function(fn){ try{fn(def);}catch{} }); hub.waiters[name] = [];
-  }
-
   function t(k,a){ try{ return (chrome && chrome.i18n) ? chrome.i18n.getMessage(k,a) : ''; } catch(e){ return ''; } }
 
-  var viewDef = {
+  AVRFW.createViewProvider('nav', {
     controller: function(){ return { state:{}, methods:{} }; },
     onMounted: function(ctx){
-      AVRFW && AVRFW.translate && AVRFW.translate(ctx.root);
-
       // Register inner host for content
       var contentHost = ctx.root.querySelector('#app-content');
       if (contentHost && ctx.app && ctx.app.registerHost) ctx.app.registerHost('content', contentHost);
@@ -132,7 +121,5 @@
         }
       })();
     }
-  };
-
-  provide('nav', viewDef);
+  });
 }));

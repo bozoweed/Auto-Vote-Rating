@@ -5,18 +5,11 @@
   else factory(root.AVRFW, root.OptionsCore);
 }(typeof self !== 'undefined' ? self : this, function(AVRFW, OptionsCore){
 
-  function provide(name, def){
-    if (AVRFW && AVRFW.provide) AVRFW.provide(name, def);
-    else {
-      var g = (typeof self !== 'undefined' ? self : this);
-      var hub = g.__AVRFW_PROVIDERS__ = g.__AVRFW_PROVIDERS__ || { defs:{}, waiters:{} };
-      hub.defs[name] = def; (hub.waiters[name]||[]).forEach(function(fn){ try{fn(def);}catch{} }); hub.waiters[name] = [];
-    }
-  }
+  
 
   function t(k,a){ try{ return (root.chrome && root.chrome.i18n) ? root.chrome.i18n.getMessage(k,a) : ''; } catch(e){ return ''; } }
 
-  var viewDef = {
+  AVRFW.createViewProvider('settings', {
     controller: function(){ return { state:{}, methods:{} }; },
     onMounted: function(ctx){
 
@@ -237,8 +230,6 @@
         } catch(e){ notif.create(e, 'error'); }
       })();
     }
-  };
-
-  provide('settings', viewDef);
+  });
 }));
 

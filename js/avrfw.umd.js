@@ -97,6 +97,41 @@
     const isFn = (v) => typeof v === 'function';
     const noop = () => { };
     const toArray = (list) => Array.prototype.slice.call(list);
+    function createViewProvider(name, hooks = {}) {
+        if (!name) throw new Error('View name is required');
+        const autoTranslate = hooks.autoTranslate !== false;
+        const baseController = typeof hooks.controller === 'function' ? hooks.controller : null;
+        const controller = function () {
+            const res = baseController ? (baseController.apply(this, arguments) || {}) : {};
+            if (hooks.state && res.state == null) res.state = { ...hooks.state };
+            else if (!res.state) res.state = {};
+            else if (hooks.state && res.state === hooks.state) res.state = { ...res.state };
+            if (hooks.methods) {
+                if (!res.methods) res.methods = { ...hooks.methods };
+                else if (res.methods === hooks.methods) res.methods = { ...res.methods };
+                else res.methods = Object.assign({}, hooks.methods, res.methods);
+            } else if (!res.methods) {
+                res.methods = {};
+            }
+            return res;
+        };
+        const userOnMounted = typeof hooks.onMounted === 'function' ? hooks.onMounted : null;
+        const viewDef = {
+            controller,
+            onBeforeMount: hooks.onBeforeMount || noop,
+            onMounted(ctx) {
+                if (autoTranslate && ctx && ctx.root) {
+                    try { translate(ctx.root); } catch { }
+                }
+                if (userOnMounted) userOnMounted(ctx);
+            },
+            onBeforeUnmount: hooks.onBeforeUnmount || noop,
+            onUnmounted: hooks.onUnmounted || noop
+        };
+        Providers.provide(name, viewDef);
+        return viewDef;
+    }
+
 
     function parsePath(path) {
         const segs = [];
@@ -591,6 +626,7 @@
         deepSet,
         // i18n
         setI18n, t, translate,
+        createViewProvider,
         // providers for dynamic views
         provide: Providers.provide
     };

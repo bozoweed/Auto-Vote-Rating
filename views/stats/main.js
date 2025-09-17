@@ -8,15 +8,7 @@
   else factory(root.AVRFW, root.OptionsCore);
 }(typeof self !== 'undefined' ? self : this, function (AVRFW, OptionsCore) {
 
-  function provide(name, def) {
-    if (AVRFW && AVRFW.provide) AVRFW.provide(name, def);
-    else {
-      var g = (typeof self !== 'undefined' ? self : this);
-      var hub = g.__AVRFW_PROVIDERS__ = g.__AVRFW_PROVIDERS__ || { defs: {}, waiters: {} };
-      hub.defs[name] = def;
-      var w = hub.waiters[name] || []; w.forEach(function (fn) { try { fn(def); } catch { } }); hub.waiters[name] = [];
-    }
-  }
+  
   function t(k, a) { try { return (root.chrome && root.chrome.i18n) ? root.chrome.i18n.getMessage(k, a) : ''; } catch (e) { return ''; } }
   function fmtDate(v) { return v ? new Date(v).toLocaleString().replace(',', '') : (t('none') || 'None'); }
 
@@ -68,7 +60,7 @@
     OptionsCore.getModals(); // rebinder les boutons de fermeture au besoin
   }
 
-  var viewDef = {
+  AVRFW.createViewProvider('stats', {
     controller: function () { return { state: {}, methods: {} }; },
     onMounted: function (ctx) {
       AVRFW && AVRFW.translate && AVRFW.translate(ctx.root);
@@ -150,7 +142,5 @@
       btnGeneral && btnGeneral.addEventListener('click', openGeneral);
       btnToday && btnToday.addEventListener('click', openToday);
     }
-  };
-
-  provide('stats', viewDef);
+  });
 }));

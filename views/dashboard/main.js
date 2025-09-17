@@ -8,16 +8,6 @@
   else if (typeof module === 'object' && module.exports) module.exports = factory(require('AVRFW'));
   else factory(root.AVRFW);
 }(typeof self !== 'undefined' ? self : this, function(AVRFW){
-
-  function provide(name, def){
-    if (AVRFW && AVRFW.provide) { AVRFW.provide(name, def); return; }
-    var g = (typeof self !== 'undefined' ? self : this);
-    var hub = g.__AVRFW_PROVIDERS__ = g.__AVRFW_PROVIDERS__ || { defs:{}, waiters:{} };
-    hub.defs[name] = def;
-    var w = hub.waiters[name] || []; w.forEach(function(fn){ try{ fn(def); }catch(e){} });
-    hub.waiters[name] = [];
-  }
-
   function makeI18n(){
     return function i18n(k, a){
       try {
@@ -442,16 +432,13 @@
     return function teardown(){ if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; } };
   }
 
-  var viewDef = {
+  AVRFW.createViewProvider('dashboard', {
     controller: function(){ return { state:{}, methods:{} }; },
     onMounted: function(ctx){
-      AVRFW && AVRFW.translate && AVRFW.translate(ctx.root);
       ctx._teardown = initDashboard(ctx);
     },
     onBeforeUnmount: function(ctx){
       if (ctx && ctx._teardown) { try{ ctx._teardown(); }catch(e){} }
     }
-  };
-
-  provide('dashboard', viewDef);
+  });
 }));
