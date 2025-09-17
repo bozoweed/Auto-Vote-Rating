@@ -56,7 +56,11 @@
       const notif = core.getNotif?.();
       if (!notif) return;
       const notifId = notification.notificationId || '';
-      const notifType = (['warn', 'error'].includes(notification.type)) ? notification.type : 'hint';
+      const rawType = notification.type || 'info';
+      let notifType;
+      if (rawType === 'start') notifType = 'info';
+      else if (['info', 'warn', 'error', 'success'].includes(rawType)) notifType = rawType;
+      else notifType = 'hint';
       let onClick = null;
       if (notifId.startsWith('openTab_')) {
         onClick = async () => {
