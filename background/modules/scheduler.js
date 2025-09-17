@@ -541,7 +541,8 @@ async function handleResultAndSchedule(project, request, sender) {
       } else {
         sendMessage = t('successAutoVote') || 'successAutoVote';
       }
-      sendNotification(getProjectPrefix(project, false), sendMessage, 'info', 'openProject_' + project.key);
+      const notifType = project.warn ? 'warn' : 'success';
+      sendNotification(getProjectPrefix(project, false), sendMessage, notifType, 'openProject_' + project.key);
 
       project.stats.successVotes = (project.stats.successVotes || 0) + 1;
       project.stats.monthSuccessVotes = (project.stats.monthSuccessVotes || 0) + 1;
@@ -662,3 +663,4 @@ async function updateValue(storeName, value) {
     log('warn', 'Store', storeName, 'key not found', value.key);
   }
 }
+

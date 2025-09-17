@@ -56,10 +56,12 @@
       const notif = core.getNotif?.();
       if (!notif) return;
       const notifId = notification.notificationId || '';
-      const rawType = notification.type || 'info';
+      const normalizedType = (notification.type || '').toLowerCase() || 'info';
+      const originalType = (notification.originalType || '').toLowerCase();
       let notifType;
-      if (rawType === 'start') notifType = 'info';
-      else if (['info', 'warn', 'error', 'success'].includes(rawType)) notifType = rawType;
+      if (['info', 'warn', 'error', 'success'].includes(normalizedType)) notifType = normalizedType;
+      else if (normalizedType === 'hint') notifType = 'hint';
+      else if (originalType === 'start') notifType = 'info';
       else notifType = 'hint';
       let onClick = null;
       if (notifId.startsWith('openTab_')) {
@@ -131,3 +133,4 @@
     location.hash = '#view=dashboard';
   });
 })();
+

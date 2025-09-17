@@ -26,15 +26,56 @@ function sanitizeMetaValue(value) {
   try { return String(value); } catch (_) { return null; }
 }
 
+function normalizeNotificationType(value) {
+  const type = (typeof value === 'string' ? value : '').toLowerCase().trim();
+  switch (type) {
+    case 'start':
+    case 'started':
+    case 'begin':
+    case 'info':
+    case 'information':
+    case 'notice':
+      return 'info';
+    case 'success':
+    case 'successful':
+    case 'successfully':
+    case 'ok':
+    case 'done':
+    case 'complete':
+    case 'completed':
+      return 'success';
+    case 'warn':
+    case 'warning':
+    case 'alert':
+    case 'caution':
+      return 'warn';
+    case 'error':
+    case 'errors':
+    case 'danger':
+    case 'fail':
+    case 'failed':
+    case 'failure':
+      return 'error';
+    case 'hint':
+      return 'hint';
+    default:
+      return 'hint';
+  }
+}
 export function sendNotification(title, message, type, notificationId='', meta = null) {
   if (!message) message = '';
-  if (state.settings?.disabledNotifStart && type === 'start') return;
-  if (state.settings?.disabledNotifInfo && type === 'info') return;
-  if (state.settings?.disabledNotifWarn && type === 'warn') return;
-  if (state.settings?.disabledNotifError && type === 'error') return;
+  const rawType = (typeof type === 'string' && type.trim()) ? type.trim() : 'info';
+  const typeLower = rawType.toLowerCase();
+  if (state.settings?.disabledNotifStart && typeLower === 'start') return;
+
+  const normalizedType = normalizeNotificationType(typeLower);
+  if (state.settings?.disabledNotifInfo && (normalizedType === 'info' || normalizedType === 'success')) return;
+  if (state.settings?.disabledNotifWarn && normalizedType === 'warn') return;
+  if (state.settings?.disabledNotifError && normalizedType === 'error') return;
 
   // Also mirror to options UI via runtime message for consistency
-  const payload = { title, message, type, notificationId };
+  const payload = { title, message, type: normalizedType, notificationId };
+  if (normalizedType !== typeLower) payload.originalType = rawType;
   if (meta && typeof meta === 'object') {
     const safe = {};
     for (const [key, value] of Object.entries(meta)) {
@@ -59,7 +100,6 @@ export function sendNotification(title, message, type, notificationId='', meta =
     message
   }, () => {});
 }
-
 export async function onNotificationClicked(notificationId) {
   await state.init;
   try {
@@ -82,3 +122,4 @@ export async function onNotificationClicked(notificationId) {
     if (!msg.includes('No tab with id')) log('warn', '[notify click]', msg);
   }
 }
+

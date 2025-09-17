@@ -189,7 +189,7 @@
         });
 
         if (btnClear) btnClear.addEventListener('click', async function(){
-          notif.create(t('clearingLogs') || 'Clearing logs…', 'hint');
+          notif.create(t('clearingLogs') || 'Clearing logs...', 'info', { delay: 1500 });
           if (dbLogs) await dbLogs.clear('logs');
           OptionsCore.usageSpace();
           notif.create(t('clearedLogs') || 'Logs cleared', 'success');
@@ -241,3 +241,4 @@
 
   provide('settings', viewDef);
 }));
+
