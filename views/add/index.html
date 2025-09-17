@@ -6,7 +6,7 @@
   <form id="addProject" class="addProject addProjectExpertManual">
     <!-- Mode -->
     <div class="check-inline">
-      <input type="checkbox" name="switchAddMode" id="switchAddMode" class="switchAddMode">
+      <input type="checkbox" name="switchAddMode" id="switchAddMode" class="checkbox">
       <label for="switchAddMode" data-i18n-mode="replace" data-resource="switchAddMode">Switch to manual mode</label>
     </div>
 
@@ -19,7 +19,8 @@
     <!-- Manual mode -->
     <div class="input-block" id="blk-rating" style="display:none">
       <label data-i18n-mode="replace" data-resource="siteTop" for="rating">Site</label>
-      <input class="input" name="project" type="text" id="rating" placeholder="selectTop" list="ratingList" spellcheck="false">
+      <input class="input" name="project" type="text" id="rating" placeholder="selectTop" list="ratingList"
+        spellcheck="false">
       <datalist id="ratingList"></datalist>
     </div>
 
@@ -35,7 +36,8 @@
             <span style="color:#d32f2f;">ID</span>
             <span data-i18n-mode="replace" data-resource="projectIDTooltip"></span>
             <br>
-            <span id="projectIDTooltip1"></span><span id="projectIDTooltip2" style="color:#d32f2f;"></span><span id="projectIDTooltip3"></span>
+            <span id="projectIDTooltip1"></span><span id="projectIDTooltip2" style="color:#d32f2f;"></span><span
+              id="projectIDTooltip3"></span>
           </span>
         </span>
       </label>
@@ -46,11 +48,13 @@
       <label data-i18n-mode="replace" data-resource="additionURL" for="additionURL">
         <span class="tooltip1" tabindex="0">
           <span class="tooltip1text" role="tooltip">
-            <span id="additionURLTooltip1"></span><span id="additionURLTooltip2" style="color:#d32f2f;"></span><span id="additionURLTooltip3"></span>
+            <span id="additionURLTooltip1"></span><span id="additionURLTooltip2" style="color:#d32f2f;"></span><span
+              id="additionURLTooltip3"></span>
           </span>
         </span>
       </label>
-      <input id="additionURL" name="additionURL" placeholder="additionURL" type="text" class="input" spellcheck="false"/>
+      <input id="additionURL" name="additionURL" placeholder="additionURL" type="text" class="input"
+        spellcheck="false" />
     </div>
 
     <div class="input-block" id="blk-game" style="display:none">
@@ -60,11 +64,13 @@
             <span style="color:red;">URL</span>
             <span data-i18n-mode="replace" data-resource="gameIDTooltip"></span>
             <br>
-            <span id="urlGameTooltip1"></span><span id="urlGameTooltip2" style="color:#d32f2f;"></span><span id="urlGameTooltip3"></span>
+            <span id="urlGameTooltip1"></span><span id="urlGameTooltip2" style="color:#d32f2f;"></span><span
+              id="urlGameTooltip3"></span>
           </span>
         </span>
       </label>
-      <input class="input" name="chooseGame" type="text" id="chooseGame" placeholder="chooseGameURL" list="gameList" spellcheck="false">
+      <input class="input" name="chooseGame" type="text" id="chooseGame" placeholder="chooseGameURL" list="gameList"
+        spellcheck="false">
       <datalist id="gameList"></datalist>
     </div>
 
@@ -75,23 +81,27 @@
             <span style="color:red;">URL</span>
             <span data-i18n-mode="replace" data-resource="listingIDTooltip"></span>
             <br>
-            <span id="urlListingTooltip1"></span><span id="urlListingTooltip2" style="color:#d32f2f;"></span><span id="urlListingTooltip3"></span>
+            <span id="urlListingTooltip1"></span><span id="urlListingTooltip2" style="color:#d32f2f;"></span><span
+              id="urlListingTooltip3"></span>
           </span>
         </span>
       </label>
-      <input class="input" name="chooseListing" type="text" id="chooseListing" placeholder="chooseListingURL" list="listingList" spellcheck="false">
+      <input class="input" name="chooseListing" type="text" id="chooseListing" placeholder="chooseListingURL"
+        list="listingList" spellcheck="false">
       <datalist id="listingList"></datalist>
     </div>
 
     <div class="input-block" id="blk-lang" style="display:none">
       <label data-i18n-mode="replace" data-resource="chooseLang" for="chooseLang">Language</label>
-      <input class="input" name="chooseLang" type="text" id="chooseLang" placeholder="chooseLang" list="langList" spellcheck="false">
+      <input class="input" name="chooseLang" type="text" id="chooseLang" placeholder="chooseLang" list="langList"
+        spellcheck="false">
       <datalist id="langList"></datalist>
     </div>
 
     <div class="input-block" id="blk-countVote" style="display:none">
       <label for="countVote" data-i18n-mode="replace" data-resource="countVote">Count vote</label>
-      <input id="countVote" name="countVote" type="number" min="1" max="16" placeholder="countVote" class="input" value="5">
+      <input id="countVote" name="countVote" type="number" min="1" max="16" placeholder="countVote" class="input"
+        value="5">
     </div>
 
     <div class="input-block" id="blk-ordinalWorld" style="display:none">
@@ -102,17 +112,18 @@
           </span>
         </span>
       </label>
-      <input id="ordinalWorld" name="ordinalWorld" type="number" min="1" max="16" placeholder="ordinalWorld" class="input">
+      <input id="ordinalWorld" name="ordinalWorld" type="number" min="1" max="16" placeholder="ordinalWorld"
+        class="input">
     </div>
 
     <!-- Advanced settings -->
-    <div class="label-block"><label data-i18n-mode="replace" data-resource="advSettings">Advanced</label></div>
+    <div class="label-block" data-advanced="general"><label data-i18n-mode="replace" data-resource="advSettings">Advanced</label></div>
 
-    <div class="check-block">
-      <input class="checkbox" id="customTimeOut" type="checkbox" name="customTimeOut"/>
+    <div class="check-block" data-advanced="general">
+      <input class="checkbox" id="customTimeOut" type="checkbox" name="customTimeOut" />
       <label data-i18n-mode="replace" data-resource="customTimeOut" for="customTimeOut">Custom timeout</label>
     </div>
-    <div class="input-block" id="blk-selectTime" style="display:none">
+    <div class="input-block" data-advanced="general" id="blk-selectTime" style="display:none">
       <label for="selectTime" data-i18n-mode="replace" data-resource="selectTime">Select time</label>
       <select id="selectTime" class="select">
         <option value="ms" data-i18n-mode="replace" data-resource="timeoutMS">Milliseconds</option>
@@ -121,15 +132,15 @@
         <option value="month" data-i18n-mode="replace" data-resource="timeoutMonth">Month</option>
       </select>
     </div>
-    <div class="input-block" id="blk-time" style="display:none">
+    <div class="input-block" data-advanced="general" id="blk-time" style="display:none">
       <label for="time" data-i18n-mode="replace" data-resource="delayFetch">Delay</label>
-      <input id="time" name="customTime" placeholder="delayFetch" type="number" min="1000" class="input"/>
+      <input id="time" name="customTime" placeholder="delayFetch" type="number" min="1000" class="input" />
     </div>
-    <div class="input-block" id="blk-hour" style="display:none">
+    <div class="input-block" data-advanced="general" id="blk-hour" style="display:none">
       <label for="hour" data-i18n-mode="replace" data-resource="chooseHour">Choose hour</label>
-      <input id="hour" name="chooseHour" placeholder="chooseHour" type="time" step="0.001" class="input"/>
+      <input id="hour" name="chooseHour" placeholder="chooseHour" type="time" step="0.001" class="input" />
     </div>
-    <div class="input-block" id="blk-week" style="display:none">
+    <div class="input-block" data-advanced="general" id="blk-week" style="display:none">
       <label for="week" data-i18n-mode="replace" data-resource="chooseWeek">Choose week day</label>
       <select id="week" class="select">
         <option value="1" data-i18n-mode="replace" data-resource="monday">Monday</option>
@@ -141,31 +152,32 @@
         <option value="0" data-i18n-mode="replace" data-resource="sunday">Sunday</option>
       </select>
     </div>
-    <div class="input-block" id="blk-month" style="display:none">
+    <div class="input-block" data-advanced="general" id="blk-month" style="display:none">
       <label for="month" data-i18n-mode="replace" data-resource="chooseMonth">Choose month day</label>
-      <input id="month" name="chooseMonth" placeholder="chooseMonth" type="number" min="1" max="31" class="input"/>
+      <input id="month" name="chooseMonth" placeholder="chooseMonth" type="number" min="1" max="31" class="input" />
     </div>
-    <div class="check-block">
-      <input class="checkbox" id="lastDayMonth" type="checkbox" name="lastDayMonth" disabled/>
+    <div class="check-block" data-advanced="general">
+      <input class="checkbox" id="lastDayMonth" type="checkbox" name="lastDayMonth" disabled />
       <label data-i18n-mode="replace" data-resource="lastDayMonth" for="lastDayMonth">Use last day of month</label>
     </div>
 
-    <div class="check-block">
-      <input class="checkbox" id="scheduleTimeCheckbox" type="checkbox" name="scheduleTimeCheckbox"/>
+    <div class="check-block" data-advanced="general">
+      <input class="checkbox" id="scheduleTimeCheckbox" type="checkbox" name="scheduleTimeCheckbox" />
       <label data-i18n-mode="replace" data-resource="scheduleTime" for="scheduleTimeCheckbox">Schedule time</label>
     </div>
-    <div class="input-block" id="blk-schedule" style="display:none">
+    <div class="input-block" data-advanced="general" id="blk-schedule" style="display:none">
       <label data-i18n-mode="replace" data-resource="scheduleTime" for="scheduleTime">Schedule</label>
       <input id="scheduleTime" type="datetime-local" class="input" step="0.001">
     </div>
 
-    <div class="check-block">
-      <input class="checkbox" id="disableCheckProjects" type="checkbox" name="disableCheckProjects"/>
-      <label data-i18n-mode="replace" data-resource="disableCheckProjects" for="disableCheckProjects">Skip project presence check</label>
+    <div class="check-block" data-advanced="general">
+      <input class="checkbox" id="disableCheckProjects" type="checkbox" name="disableCheckProjects" />
+      <label data-i18n-mode="replace" data-resource="disableCheckProjects" for="disableCheckProjects">Skip project
+        presence check</label>
     </div>
 
-    <div class="check-block">
-      <input class="checkbox" id="priority" type="checkbox" name="priority"/>
+    <div class="check-block" data-advanced="general">
+      <input class="checkbox" id="priority" type="checkbox" name="priority" />
       <label data-i18n-mode="replace" data-resource="priority" for="priority">
         <span class="tooltip1" tabindex="0">
           <span data-i18n-mode="replace" data-resource="priorityTooltip" class="tooltip1text" role="tooltip"></span>
@@ -173,15 +185,15 @@
       </label>
     </div>
 
-    <div class="check-block">
-      <input class="checkbox" id="randomize" type="checkbox" name="randomize"/>
+    <div class="check-block" data-advanced="general">
+      <input class="checkbox" id="randomize" type="checkbox" name="randomize" />
       <label data-i18n-mode="replace" data-resource="randomize" for="randomize">
         <span class="tooltip1" tabindex="0">
           <span data-i18n-mode="replace" data-resource="randomizeTooltip" class="tooltip1text" role="tooltip"></span>
         </span>
       </label>
     </div>
-    <div class="input-block" id="blk-random" style="display:none">
+    <div class="input-block" data-advanced="general" id="blk-random" style="display:none">
       <label data-i18n-mode="replace" data-resource="randomizeInput" for="randomizeMin">Randomize</label>
       <div class="grid2">
         <input id="randomizeMin" type="number" class="input" placeholder="min">
@@ -189,14 +201,15 @@
       </div>
     </div>
 
-    <div class="check-block">
-      <input class="checkbox" id="voteMode" type="checkbox" name="voteMode"/>
+    <div class="check-block" data-advanced="general">
+      <input class="checkbox" id="voteMode" type="checkbox" name="voteMode" />
       <label data-i18n-mode="replace" data-resource="voteMode" for="voteMode">Vote mode</label>
     </div>
-    <div class="input-block" id="blk-voteMode" style="display:none">
+    <div class="input-block" data-advanced="general" id="blk-voteMode" style="display:none">
       <label data-i18n-mode="replace" data-resource="enabledSilentVote" for="voteModeSelect">
         <span class="tooltip2" tabindex="0">
-          <span data-i18n-mode="replace" data-resource="enabledSilentVoteTooltip" class="tooltip2text" role="tooltip"></span>
+          <span data-i18n-mode="replace" data-resource="enabledSilentVoteTooltip" class="tooltip2text"
+            role="tooltip"></span>
         </span>
       </label>
       <select id="voteModeSelect" class="select">
@@ -208,20 +221,24 @@
     <!-- Custom rating payload -->
     <div class="input-block" id="blk-responseURL" style="display:none">
       <label data-i18n-mode="replace" data-resource="urlFetch" for="responseURL">Response URL</label>
-      <input id="responseURL" name="customURL" placeholder="urlFetch" type="text" class="input" spellcheck="false"/>
+      <input id="responseURL" name="customURL" placeholder="urlFetch" type="text" class="input" spellcheck="false" />
     </div>
     <div class="input-block" id="blk-customBody" style="display:none">
       <label data-i18n-mode="replace" data-resource="bodyFetch" for="customBody">Request body</label>
-      <textarea id="customBody" name="customBody" placeholder="bodyFetch" class="textarea" spellcheck="false"></textarea>
+      <textarea id="customBody" name="customBody" placeholder="bodyFetch" class="textarea"
+        spellcheck="false"></textarea>
     </div>
 
     <!-- Submit -->
     <div class="actions">
-      <button class="submitBtn" data-i18n-mode="replace" data-resource="addButton" id="submitAddProject" type="submit">Add</button>
+      <button class="submitBtn" data-i18n-mode="replace" data-resource="addButton" id="submitAddProject"
+        type="submit">Add</button>
 
       <div class="editProjectButtons" style="display:none">
-        <button class="submitBtn" data-i18n-mode="replace" data-resource="save" id="submitEditProject" type="submit">Save</button>
-        <button class="submitBtn redBtn" data-i18n-mode="replace" data-resource="cancel" id="submitCancelProject" type="button">Cancel</button>
+        <button class="submitBtn" data-i18n-mode="replace" data-resource="save" id="submitEditProject"
+          type="submit">Save</button>
+        <button class="submitBtn redBtn" data-i18n-mode="replace" data-resource="cancel" id="submitCancelProject"
+          type="button">Cancel</button>
       </div>
     </div>
 
@@ -230,7 +247,8 @@
     <div data-i18n-mode="replace" data-resource="rewardAttention" id="rewardAttention" style="display:none"></div>
     <div data-i18n-mode="replace" data-resource="operaAttention" id="operaAttention" style="display:none">
       <br><br>
-      <a class="link" target="_blank" href="https://github.com/Serega007RU/Auto-Vote-Rating/wiki/Problems-with-Opera">Problems with Opera</a>
+      <a class="link" target="_blank"
+        href="https://github.com/Serega007RU/Auto-Vote-Rating/wiki/Problems-with-Opera">Problems with Opera</a>
     </div>
   </form>
 </section>

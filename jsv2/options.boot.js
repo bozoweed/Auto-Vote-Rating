@@ -3,13 +3,112 @@
 
   const app = AVRFW.createApp({ defaultHost: '#app' });
 
-  // Install the backend service once (live getters for DB/SETTINGS/…)
+  const pendingOpenProjects = [];
+  let navReady = false;
+  let drainingOpenProjects = false;
+
+  async function openProjectByKey(projectKey) {
+    try {
+      await app.loadView('projects', 'views/projects/');
+      await app.mountHost('content', 'projects', { focusProject: projectKey });
+      location.hash = '#view=projects';
+      const navBtns = document.querySelectorAll('.nav-btn');
+      navBtns.forEach((btn) => {
+        const isTarget = btn.getAttribute('data-view') === 'projects';
+        btn.classList.toggle('active', isTarget);
+        btn.setAttribute('aria-selected', String(isTarget));
+      });
+      const nav = document.getElementById('primaryNav');
+      const burger = document.querySelector('.burger');
+      nav?.classList.remove('active');
+      if (burger) {
+        burger.classList.remove('active');
+        burger.setAttribute('aria-expanded', 'false');
+      }
+    } catch (e) {
+      console.warn('[options] failed to open project', e);
+    }
+  }
+
+  function queueProjectFocus(projectKey) {
+    pendingOpenProjects.push(projectKey);
+    drainOpenProjects();
+  }
+
+  async function drainOpenProjects() {
+    if (!navReady || drainingOpenProjects) return;
+    drainingOpenProjects = true;
+    try {
+      while (pendingOpenProjects.length) {
+        const key = pendingOpenProjects.shift();
+        await openProjectByKey(key);
+      }
+    } finally {
+      drainingOpenProjects = false;
+    }
+  }
+
+  function relayNotification(notification) {
+    try {
+      const core = window.OptionsCore;
+      if (!core) return;
+      core.ensureContainers?.();
+      const notif = core.getNotif?.();
+      if (!notif) return;
+      const notifId = notification.notificationId || '';
+      const notifType = (['warn', 'error'].includes(notification.type)) ? notification.type : 'hint';
+      let onClick = null;
+      if (notifId.startsWith('openTab_')) {
+        onClick = async () => {
+          try {
+            const tabId = Number(notifId.replace('openTab_', ''));
+            if (!tabId) return;
+            const tab = await chrome.tabs.update(tabId, { active: true });
+            if (tab && tab.windowId != null) await chrome.windows.update(tab.windowId, { focused: true });
+          } catch (_) {}
+        };
+      } else if (notifId.startsWith('openProject_')) {
+        const projectKey = Number(notifId.replace('openProject_', ''));
+        if (!Number.isNaN(projectKey)) {
+          onClick = () => { queueProjectFocus(projectKey); };
+        }
+      } else if (notifId.startsWith('openSettings')) {
+        onClick = () => { try { chrome.runtime.openOptionsPage(); } catch (_) {}; };
+      }
+      notif.create([notification.title, document.createElement('br'), notification.message], notifType, { onClick });
+    } catch (err) {
+      try { console.warn('[options] notification relay failed', err); } catch (_) {}
+    }
+  }
+
+  if (chrome?.runtime?.onMessage) {
+    chrome.runtime.onMessage.addListener((req) => {
+      if (req && req.installed) {
+        try {
+          const msg = chrome?.i18n?.getMessage ? chrome.i18n.getMessage('firstInstall') : null;
+          alert(msg || 'Auto Vote Rating installed successfully.');
+        } catch (_) {
+          alert('Auto Vote Rating installed successfully.');
+        }
+      } else if (req && req.openProject != null) {
+        queueProjectFocus(req.openProject);
+      } else if (req && req.updateValue === 'projects') {
+        try { window.OptionsCore?.usageSpace?.(); } catch (_) {}
+      } else if (req && req.notification) {
+        relayNotification(req.notification);
+      }
+    });
+  }
+
+  // Install the backend service once (live getters for DB/SETTINGS/...)
   if (window.AVRFW_installBackend) {
     await window.AVRFW_installBackend(app, { background: false });
   }
 
   await app.loadView('nav', 'views/nav/');
   app.mountHost('default', 'nav');
+  navReady = true;
+  await drainOpenProjects();
 
   document.getElementById('btnDashboard')?.addEventListener('click', () => {
     location.hash = '#view=dashboard';

@@ -263,6 +263,22 @@
         }
       }
 
+      async function focusProjectByKey(projectKey) {
+        if (projectKey == null) return;
+        var key = Number(projectKey);
+        if (Number.isNaN(key)) return;
+        var project = await db.get('projects', key);
+        if (!project) return;
+        var ratingBtn = ctx.root.querySelector('[data-rating-button="' + project.rating + '"]');
+        if (ratingBtn) ratingBtn.click();
+        var row = document.getElementById('projects'+project.key);
+        if (!row) {
+          await addProjectList(project);
+          row = document.getElementById('projects'+project.key);
+        }
+        if (row) { row.scrollIntoView({ block:'center' }); highlight(row); }
+      }
+
       async function addProjectList(project, preBend) {
         if (!ctx.root.querySelector('[data-rating-button="'+project.rating+'"]')) generateBtnListRating(project.rating, 0);
         if (!ctx.root.querySelector('[data-rating-tab="'+project.rating+'"]')) generateBtnListRating(project.rating, 0);
@@ -308,10 +324,32 @@
           var edit = document.createElement('div'); edit.className='projectStats';
           var eImg = document.createElement('img'); eImg.src='images/icons/edit.svg';
           var eTip = document.createElement('span'); eTip.className='tooltiptext'; eTip.textContent = t('edit') || 'Edit';
-          edit.append(eImg, eTip); controls.append(edit);
-          edit.addEventListener('click', async function(){
-            try { root.chrome && chrome.runtime && chrome.runtime.sendMessage && chrome.runtime.sendMessage({ openProject: project.key }); } catch(e){}
-          });
+          edit.append(eImg, eTip); controls.append(edit);        edit.addEventListener('click', async function(){
+          try {
+            if (ctx.app && ctx.app.loadView) {
+              await ctx.app.loadView('add', 'views/add/');
+              ctx.app.mountHost && ctx.app.mountHost('content', 'add', { key: project.key });
+              location.hash = '#view=add';
+              var navBtns = document.querySelectorAll('.nav-btn');
+              navBtns.forEach(function(btn){
+                var isTarget = btn.getAttribute('data-view') === 'add';
+                btn.classList.toggle('active', isTarget);
+                btn.setAttribute('aria-selected', String(isTarget));
+              });
+              var nav = document.getElementById('primaryNav');
+              var burger = document.querySelector('.burger');
+              if (nav) nav.classList.remove('active');
+              if (burger) {
+                burger.classList.remove('active');
+                burger.setAttribute('aria-expanded', 'false');
+              }
+            } else if (root.chrome && chrome.runtime && chrome.runtime.sendMessage) {
+              await chrome.runtime.sendMessage({ openProject: project.key });
+            }
+          } catch(e) {
+            try { root.chrome && chrome.runtime && chrome.runtime.sendMessage && chrome.runtime.sendMessage({ openProject: project.key }); } catch(_){}
+          }
+        });
         }
 
         li.append(controls);
@@ -331,7 +369,7 @@
             var b = document.createElement('button'); b.className='btn'; b.id='restartBtn';
             b.textContent = t('restartExtension') || 'Restart extension';
             b.addEventListener('click', function(){ if (confirm(t('confirmRestartExtension') || 'Restart extension now?')) chrome.runtime.reload(); });
-            OptionsCore.getNotif().create([t('lagServiceWorker') || 'Worker seems stuck', b], 'warn', 60000);
+            OptionsCore.getNotif().create([t('lagServiceWorker') || 'Worker seems stuck', b], 'warn', { delay: 60000 });
             ev.target.disabled=false;
           }, 5000);
           try{
@@ -344,7 +382,7 @@
                   var b = document.createElement('button'); b.className='btn'; b.id='restartBtn';
                   b.textContent = t('restartExtension') || 'Restart extension';
                   b.addEventListener('click', function(){ if (confirm(t('confirmRestartExtension') || 'Restart extension now?')) chrome.runtime.reload(); });
-                  OptionsCore.getNotif().create([t('lagServiceWorker') || 'Worker seems stuck', b], 'warn', 60000);
+                  OptionsCore.getNotif().create([t('lagServiceWorker') || 'Worker seems stuck', b], 'warn', { delay: 60000 });
                 }, 5000);
                 await chrome.runtime.sendMessage({ projectRestart: fresh, confirmed: true });
               } else { ev.target.disabled=false; return; }
@@ -364,7 +402,7 @@
             var b = document.createElement('button'); b.className='btn'; b.id='restartBtn';
             b.textContent = t('restartExtension') || 'Restart extension';
             b.addEventListener('click', function(){ if (confirm(t('confirmRestartExtension') || 'Restart extension now?')) chrome.runtime.reload(); });
-            OptionsCore.getNotif().create([t('lagServiceWorker') || 'Worker seems stuck', b], 'warn', 60000);
+            OptionsCore.getNotif().create([t('lagServiceWorker') || 'Worker seems stuck', b], 'warn', { delay: 60000 });
           }, 5000);
           try {
             var message = await chrome.runtime.sendMessage({ projectDeleted: project });
@@ -488,25 +526,19 @@
         document.querySelector('td[data-resource="statsAdded"]').nextElementSibling.textContent = orNone(project.stats.added);
       }
 
-      // SW notifications → update UI
+      // SW notifications -> update UI
       if (root.chrome && chrome.runtime && chrome.runtime.onMessage) {
-        chrome.runtime.onMessage.addListener(async function(request){
+        ctx._messageListener = async function(request){
           try {
             if (request.updateValue === 'projects' && request.value) {
+              OptionsCore.usageSpace();
               await updateProjectText(request.value);
             } else if (request.openProject) {
-              var p = await db.get('projects', request.openProject);
-              var btn = ctx.root.querySelector('[data-rating-button="'+p.rating+'"]');
-              if (btn) btn.click();
-              var row = document.getElementById('projects'+p.key);
-              if (!row) { await addProjectList(p); row = document.getElementById('projects'+p.key); }
-              row && row.scrollIntoView({ block:'center' }); highlight(row);
-            } else if (request.notification) {
-              var typ = (['warn','error'].includes(request.notification.type)) ? request.notification.type : 'hint';
-              OptionsCore.getNotif().create([request.notification.title, document.createElement('br'), request.notification.message], typ);
+              await focusProjectByKey(request.openProject);
             }
           } catch(e){}
-        });
+        };
+        chrome.runtime.onMessage.addListener(ctx._messageListener);
       }
 
       // Init (no per-view initializeConfig; backend already installed)
@@ -514,7 +546,16 @@
         try { be.attachGlobalErrorHandlers && be.attachGlobalErrorHandlers(function(err){ OptionsCore.getNotif().create(err, 'error'); }); } catch(e){}
         await reloadProjectList();
         OptionsCore.usageSpace();
+        if (ctx.params && ctx.params.focusProject != null) {
+          await focusProjectByKey(Number(ctx.params.focusProject));
+        }
       })();
+    },
+    onBeforeUnmount: function(ctx){
+      if (ctx._messageListener && root.chrome && chrome.runtime && chrome.runtime.onMessage) {
+        try { chrome.runtime.onMessage.removeListener(ctx._messageListener); } catch(e){}
+      }
+      ctx._messageListener = null;
     }
   };
 

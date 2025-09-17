@@ -2,10 +2,9 @@
 // background/index.js (MV3 module service worker)
 
 import { ensureState, state } from './modules/state.js';
-import { registerAll, unregisterAll, onCommitted, onCompleted, onNavError } from './modules/injection.js';
 import { onRuntimeMessage } from './modules/messages.js';
 import { sendNotification, onNotificationClicked } from './modules/notifications.js';
-import { checkVote, reloadAllAlarms } from './modules/scheduler.js';
+import { checkVote, reloadAllAlarms, updateListeners } from './modules/scheduler.js';
 import { log } from './modules/logs.js';
 
 // Optional ESM preloads during install
@@ -35,12 +34,6 @@ chrome.alarms.onAlarm.addListener(() => {
 });
 chrome.idle.onStateChanged.addListener((st) => { if (st === 'active') checkVote(); });
 
-// WebNavigation/WebRequest/tabs listeners
-registerAll();
-chrome.webNavigation.onCommitted.addListener(onCommitted);
-chrome.webNavigation.onCompleted.addListener(onCompleted);
-chrome.webNavigation.onErrorOccurred.addListener(onNavError);
-
 // Runtime messages (async responses covered inside)
 chrome.runtime.onMessage.addListener((req, snd, sendRsp) => {
   onRuntimeMessage(req, snd, sendRsp);
@@ -65,6 +58,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   }
 });
 
+  updateListeners(true);
   reloadAllAlarms();
   if (state.settings?.debug) log('info', 'ensureState done');
   

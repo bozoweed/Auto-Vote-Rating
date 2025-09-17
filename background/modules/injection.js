@@ -11,18 +11,33 @@ let registered = false;
 
 export function registerAll() {
   if (registered) return;
+  if (!chrome.webNavigation.onCommitted.hasListener(onCommitted)) {
+    chrome.webNavigation.onCommitted.addListener(onCommitted);
+  }
+  if (!chrome.webNavigation.onCompleted.hasListener(onCompleted)) {
+    chrome.webNavigation.onCompleted.addListener(onCompleted);
+  }
+  if (!chrome.webNavigation.onErrorOccurred.hasListener(onNavError)) {
+    chrome.webNavigation.onErrorOccurred.addListener(onNavError);
+  }
   registered = true;
-  // these addListeners happen in background/index.js so they’re idempotent there
 }
 export function unregisterAll() {
   if (!registered) return;
   registered = false;
   try {
-    chrome.webNavigation.onErrorOccurred.removeListener(onNavError);
-    chrome.webNavigation.onCommitted.removeListener(onCommitted);
-    chrome.webNavigation.onCompleted.removeListener(onCompleted);
-  } catch {}
+    if (chrome.webNavigation.onErrorOccurred.hasListener(onNavError)) {
+      chrome.webNavigation.onErrorOccurred.removeListener(onNavError);
+    }
+    if (chrome.webNavigation.onCommitted.hasListener(onCommitted)) {
+      chrome.webNavigation.onCommitted.removeListener(onCommitted);
+    }
+    if (chrome.webNavigation.onCompleted.hasListener(onCompleted)) {
+      chrome.webNavigation.onCompleted.removeListener(onCompleted);
+    }
+  } catch { }
 }
+
 
 // onCommitted -> pre-injection staging and “not ready inject” guard
 export const onCommitted = (details) => {
@@ -170,11 +185,11 @@ export const onNavError = async (details) => {
 function isOAuth(url) {
   return /facebook\.com\/|accounts\.google\.com\/|google\.com\/|reddit\.com\/|twitter\.com\//.test(url);
 }
-function isCaptchaFrame(url) {
+export function isCaptchaFrame(url) {
   return /hcaptcha\.com\/captcha\/|google\.com\/recaptcha\/|recaptcha\.net\/recaptcha\/|challenges\.cloudflare\.com\//.test(url) ||
-         url.includes('smartcaptcha.yandexcloud.net') || url.includes('service.mtcaptcha.com');
+    url.includes('smartcaptcha.yandexcloud.net') || url.includes('service.mtcaptcha.com');
 }
-const IGNORABLE_NAV_ERRORS = [
+export const IGNORABLE_NAV_ERRORS = [
   'net::ERR_ABORTED', 'net::ERR_CONNECTION_RESET', 'net::ERR_NETWORK_CHANGED', 'net::ERR_CACHE_MISS', 'net::ERR_BLOCKED_BY_CLIENT', 'net::ERR_QUIC_PROTOCOL_ERROR',
   'NS_BINDING_ABORTED', 'NS_ERROR_NET_ON_RESOLVED', 'NS_ERROR_NET_ON_RESOLVING', 'NS_ERROR_NET_ON_WAITING_FOR', 'NS_ERROR_NET_ON_CONNECTING_TO', 'NS_ERROR_FAILURE', 'NS_ERROR_DOCSHELL_DYING', 'NS_ERROR_NET_ON_TRANSACTION_CLOSE'
 ];
@@ -187,8 +202,8 @@ async function catchTabError(error, tabId) {
   if (!msg || [
     'The frame was removed.', 'The tab was closed.'
   ].some(x => msg.includes(x)) || msg.includes('No frame with id') || msg.includes('PrecompiledScript.executeInGlobal') ||
-      msg.includes('Receiving end does not exist') || msg.includes('The message port closed before a response was received') ||
-      /Frame with ID .* was removed/.test(msg)) {
+    msg.includes('Receiving end does not exist') || msg.includes('The message port closed before a response was received') ||
+    /Frame with ID .* was removed/.test(msg)) {
     return;
   }
   if (msg.includes('ExtensionsSettings policy')) {
@@ -206,6 +221,6 @@ async function updateValue(storeName, value) {
   const found = await store.count(value.key);
   if (found) {
     await store.put(value, value.key);
-    chrome.runtime.sendMessage({ updateValue: storeName, value }).catch(()=>{});
+    chrome.runtime.sendMessage({ updateValue: storeName, value }).catch(() => { });
   }
 }

@@ -74,6 +74,7 @@
       AVRFW && AVRFW.translate && AVRFW.translate(ctx.root);
       injectModals();
       var modals = OptionsCore.getModals();
+      var notif = OptionsCore.getNotif();
 
     // Injected backend (via app DI or global fallback from backend.service)
       var be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||

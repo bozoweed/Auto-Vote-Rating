@@ -156,6 +156,7 @@
     var key = await store.put(project); project.key = key;
     await store.put(project, project.key);
     try { chrome.runtime.sendMessage('reloadAllSettings'); chrome.runtime.sendMessage('checkVote'); } catch(e){}
+    try { window.OptionsCore?.usageSpace?.(); } catch (_) {}
     return project;
   }
 

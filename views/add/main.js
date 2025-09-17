@@ -92,6 +92,28 @@
       function showBlock(id,on){ var el=E(id); if (!el) return; if (on) el.removeAttribute('style'); else el.style.display='none'; }
       function setReq(id,on){ var el=E(id); if (el) el.required = !!on; }
 
+      let advancedForCustom = false;
+
+      function updateAdvancedVisibility() {
+        var show = (settings && settings.expertMode) || advancedForCustom;
+        if (show) ctx.root.classList.remove('hide-advanced');
+        else ctx.root.classList.add('hide-advanced');
+      }
+
+      function resetAdvancedInputs() {
+        var customTimeout = E('#customTimeOut');
+        if (customTimeout) { customTimeout.disabled = false; customTimeout.checked = false; }
+        toggleCustomTimeout(false);
+        var selectTime = E('#selectTime'); if (selectTime) selectTime.value = 'ms';
+        var lastDay = E('#lastDayMonth'); if (lastDay) { lastDay.checked = false; lastDay.disabled = true; }
+        var randomize = E('#randomize'); if (randomize) randomize.checked = false;
+        onRandomizeChange();
+        var scheduleToggle = E('#scheduleTimeCheckbox'); if (scheduleToggle) scheduleToggle.checked = false;
+        onScheduleToggle();
+        var voteToggle = E('#voteMode'); if (voteToggle) voteToggle.checked = false;
+        onVoteModeToggle();
+      }
+
       function generateDataList(){
         var datalist = E('#ratingList'); if (!datalist) return; datalist.replaceChildren();
         Object.keys(allProjects).forEach(function(rating){
@@ -137,11 +159,12 @@
 
         var voteMode = E('#voteMode'); if (voteMode){ voteMode.disabled = true; voteMode.checked = false; }
         E('#voteModeSelect') && (E('#voteModeSelect').value='silentMode');
+        advancedForCustom = false;
+        updateAdvancedVisibility();
       }
 
       function onSwitchMode() {
         var manual = E('#switchAddMode').checked;
-        console.log('onSwitchMode', manual);
         if (manual) {
           resetVisibility();
           showBlock('#blk-rating', true);
@@ -227,6 +250,8 @@
         var func = allProjects[rating];
         if (!func) return;
         laterChooseManual=true;
+        advancedForCustom = (rating === 'Custom');
+        updateAdvancedVisibility();
 
         if (rating === 'Custom') {
           E('#customTimeOut').checked = false; E('#customTimeOut').disabled = true; toggleCustomTimeout(false);
@@ -242,6 +267,7 @@
           showBlock('#blk-customBody', true);
           return;
         }
+        E('#customTimeOut').disabled = false;
 
         // ID requis
         if (!(func.notRequiredId && func.notRequiredId())) {
@@ -420,44 +446,51 @@
           }
 
           // Advanced
-          // schedule
-          if (E('#scheduleTimeCheckbox').checked && E('#scheduleTime').value) {
-            project.time = new Date(E('#scheduleTime').value).getTime();
-          } else project.time = null;
+          if (settings.expertMode || project.rating === 'Custom') {
+            if (E('#scheduleTimeCheckbox').checked && E('#scheduleTime').value) {
+              project.time = new Date(E('#scheduleTime').value).getTime();
+            } else project.time = null;
 
-          // timeout
-          if (E('#customTimeOut').checked || project.rating === 'Custom') {
-            if (E('#selectTime').value === 'ms') {
-              delete project.timeoutHour; delete project.timeoutMinute; delete project.timeoutSecond; delete project.timeoutMS;
-              delete project.timeoutWeek; delete project.timeoutMonth;
-              project.timeout = E('#time').valueAsNumber || 0;
+            if (E('#customTimeOut').checked || project.rating === 'Custom') {
+              if (E('#selectTime').value === 'ms') {
+                delete project.timeoutHour; delete project.timeoutMinute; delete project.timeoutSecond; delete project.timeoutMS;
+                delete project.timeoutWeek; delete project.timeoutMonth;
+                project.timeout = E('#time').valueAsNumber || 0;
+              } else {
+                delete project.timeout;
+                var hhmmss = String(E('#hour').value || '0:0:0.0').split(':');
+                var hh = Number(hhmmss[0])||0, mm = Number(hhmmss[1])||0;
+                var ssms = String(hhmmss[2]||'0.0').split('.');
+                var ss = Number(ssms[0])||0, ms = Number(ssms[1])||0;
+                project.timeoutHour = hh; project.timeoutMinute = mm; project.timeoutSecond = ss; project.timeoutMS = ms;
+                if (E('#selectTime').value === 'week') project.timeoutWeek = Number(E('#week').value);
+                else delete project.timeoutWeek;
+                if (E('#selectTime').value === 'month') project.timeoutMonth = E('#month').valueAsNumber;
+                else delete project.timeoutMonth;
+              }
             } else {
-              delete project.timeout;
-              var hhmmss = String(E('#hour').value || '0:0:0.0').split(':');
-              var hh = Number(hhmmss[0])||0, mm = Number(hhmmss[1])||0;
-              var ssms = String(hhmmss[2]||'0.0').split('.');
-              var ss = Number(ssms[0])||0, ms = Number(ssms[1])||0;
-              project.timeoutHour = hh; project.timeoutMinute = mm; project.timeoutSecond = ss; project.timeoutMS = ms;
-              if (E('#selectTime').value === 'week') project.timeoutWeek = Number(E('#week').value);
-              else delete project.timeoutWeek;
-              if (E('#selectTime').value === 'month') project.timeoutMonth = E('#month').valueAsNumber;
-              else delete project.timeoutMonth;
+              delete project.timeout; delete project.timeoutHour; delete project.timeoutMinute; delete project.timeoutSecond; delete project.timeoutMS;
+              delete project.timeoutWeek; delete project.timeoutMonth;
+            }
+            if (E('#lastDayMonth').checked) project.lastDayMonth = true; else delete project.lastDayMonth;
+
+            delete project.silentMode; delete project.emulateMode;
+            if (project.rating !== 'Custom' && E('#voteMode').checked) {
+              if (E('#voteModeSelect').value === 'silentMode') project.silentMode = true;
+              else if (E('#voteModeSelect').value === 'emulateMode') project.emulateMode = true;
+            }
+
+            delete project.randomize;
+            if (E('#randomize').checked) {
+              project.randomize = { min: E('#randomizeMin').valueAsNumber || 0, max: E('#randomizeMax').valueAsNumber || 0 };
             }
           } else {
+            project.time = null;
             delete project.timeout; delete project.timeoutHour; delete project.timeoutMinute; delete project.timeoutSecond; delete project.timeoutMS;
             delete project.timeoutWeek; delete project.timeoutMonth;
-          }
-          if (E('#lastDayMonth').checked) project.lastDayMonth = true; else delete project.lastDayMonth;
-
-          delete project.silentMode; delete project.emulateMode;
-          if (project.rating !== 'Custom' && E('#voteMode').checked) {
-            if (E('#voteModeSelect').value === 'silentMode') project.silentMode = true;
-            else if (E('#voteModeSelect').value === 'emulateMode') project.emulateMode = true;
-          }
-
-          delete project.randomize;
-          if (E('#randomize').checked) {
-            project.randomize = { min: E('#randomizeMin').valueAsNumber || 0, max: E('#randomizeMax').valueAsNumber || 0 };
+            delete project.lastDayMonth;
+            delete project.silentMode; delete project.emulateMode;
+            delete project.randomize;
           }
 
           if (project.rating === 'Custom') {
@@ -531,8 +564,9 @@
           // reset fields
           E('#addProject').reset();
           resetVisibility();
-          // keep defaults
-          E('#selectTime').value = 'ms'; onSelectTime();
+          resetAdvancedInputs();
+          advancedForCustom = false;
+          updateAdvancedVisibility();
         } else {
           // switch to edit
           E('#switchAddMode').checked = true; onSwitchMode();
