@@ -62,7 +62,7 @@
             var ok = await chrome.permissions.request({ origins: origins, permissions: permissions });
             if (!ok) { OptionsCore.getNotif().create(t('notGrantUrl') || 'Permission denied', 'error', { element: element }); resolve(false); }
             else { if (element) OptionsCore.getNotif().create(t('granted') || 'Permission granted', 'success', { element: element }); resolve(true); }
-          } catch(e){ OptionsCore.getNotif().create(e, 'error', { element: element }); resolve(false); }
+          } catch(e){ OptionsCore.getNotif().create(e, 'error', { element: element, error: e }); resolve(false); }
         });
       });
     } else if (element) OptionsCore.getNotif().create(t('granted') || 'Permission granted', 'success', { element: element });
@@ -159,6 +159,7 @@
 
         var voteMode = E('#voteMode'); if (voteMode){ voteMode.disabled = true; voteMode.checked = false; }
         E('#voteModeSelect') && (E('#voteModeSelect').value='silentMode');
+        resetAdvancedInputs();
         advancedForCustom = false;
         updateAdvancedVisibility();
       }
@@ -367,7 +368,7 @@
               if (funcRating.exampleURLGame && project.game == null) { OptionsCore.getNotif().create(t('errorLinkParam','game') || 'Missing game', 'error'); return; }
               if (funcRating.exampleURLListing && project.listing == null) { OptionsCore.getNotif().create(t('errorLinkParam','listing') || 'Missing listing', 'error'); return; }
               if (funcRating.langList && project.lang == null) { OptionsCore.getNotif().create(t('errorLinkParam','lang') || 'Missing lang', 'error'); return; }
-            } catch(e){ OptionsCore.getNotif().create(e, 'error'); return; }
+            } catch(e){ OptionsCore.getNotif().create(e, 'error', { error: e }); return; }
           } else {
             // Manual
             domain = E('#rating').value; funcRating = allProjects[domain];
@@ -417,7 +418,7 @@
               response = await fetch(url, { credentials: (project.rating === 'minecraftiplist.com' ? 'omit' : 'include') });
             } catch(error){
               if (String(error).includes('Failed to fetch')) OptionsCore.getNotif().create(t('notConnectInternet') || 'No internet', 'error');
-              else OptionsCore.getNotif().create(error, 'error');
+              else OptionsCore.getNotif().create(error, 'error', { error: error });
               return;
             }
             var ignoreErrors = funcRating.ignoreErrors && funcRating.ignoreErrors();
@@ -495,7 +496,7 @@
 
           if (project.rating === 'Custom') {
             var body;
-            try { body = JSON.parse(String(E('#customBody').value || '{}')); } catch(e){ OptionsCore.getNotif().create(e, 'error'); return; }
+            try { body = JSON.parse(String(E('#customBody').value || '{}')); } catch(e){ OptionsCore.getNotif().create(e, 'error', { error: e }); return; }
             project.body = body;
             project.responseURL = E('#responseURL').value || '';
             if (!settings.enableCustom) {
@@ -543,7 +544,7 @@
             OptionsCore.getNotif().create((t('addSuccess') || 'Added') + ' ' + (project.name||''), 'success');
           }
 
-        } catch(e){ OptionsCore.getNotif().create(e, 'error'); }
+        } catch(e){ OptionsCore.getNotif().create(e, 'error', { error: e }); }
         finally { if (btn) btn.disabled=false; }
       });
 
@@ -564,9 +565,6 @@
           // reset fields
           E('#addProject').reset();
           resetVisibility();
-          resetAdvancedInputs();
-          advancedForCustom = false;
-          updateAdvancedVisibility();
         } else {
           // switch to edit
           E('#switchAddMode').checked = true; onSwitchMode();
@@ -669,6 +667,17 @@
       E('#link').addEventListener('input', onLinkInput);
       E('#rating').addEventListener('input', function(){ onRatingInput(false); });
 
+      if (root.chrome && chrome.runtime && chrome.runtime.onMessage) {
+        ctx._settingsListener = function(request){
+          try {
+            if (request === 'reloadSettings' || request === 'reloadAllSettings' || (request && request.updateValue === 'settings')) {
+              updateAdvancedVisibility();
+            }
+          } catch(e){}
+        };
+        chrome.runtime.onMessage.addListener(ctx._settingsListener);
+      }
+
       // Defaults
       onSwitchMode();
       toggleCustomTimeout(false);
@@ -680,12 +689,18 @@
 
       // Edit mode if params.key (backend already initialized globally)
       (async function boot(){
-        try { be.attachGlobalErrorHandlers && be.attachGlobalErrorHandlers(function(err){ OptionsCore.getNotif().create(err, 'error'); }); } catch(e){}
+        try { be.attachGlobalErrorHandlers && be.attachGlobalErrorHandlers(function(err){ OptionsCore.getNotif().create(err, 'error', { error: err }); }); } catch(e){}
         if (ctx.params && ctx.params.key != null) {
           var proj = await db.get('projects', Number(ctx.params.key));
           if (proj) setEditMode(proj);
         } else setEditMode(null);
       })();
+    },
+    onBeforeUnmount: function(ctx){
+      if (ctx._settingsListener && root.chrome && chrome.runtime && chrome.runtime.onMessage) {
+        try { chrome.runtime.onMessage.removeListener(ctx._settingsListener); } catch(e){}
+      }
+      ctx._settingsListener = null;
     }
   };
 

@@ -354,7 +354,7 @@ async function tryCloseTab(tabId, project, attempt) {
       await wait(500); await tryCloseTab(tabId, project, ++attempt); return;
     }
     if (!e.message.includes('No tab with id')) {
-      sendNotification(getProjectPrefix(project, false), e.message, 'error', 'openProject_' + project.key);
+      sendNotification(getProjectPrefix(project, false), e.message, 'error', 'openProject_' + project.key, { errorMessage: e?.message, errorStack: e?.stack });
     }
   }
 }
@@ -595,7 +595,7 @@ async function handleResultAndSchedule(project, request, sender) {
 
     log('error', getProjectPrefix(project, true), sendMessage + ', ' + (t('timeStamp') || 'timeStamp') + ' ' + project.time);
     if (!(request.errorVote && request.errorVote[0]?.charAt(0) === '5')) {
-      sendNotification(getProjectPrefix(project, false), sendMessage, 'error', 'openProject_' + project.key);
+      sendNotification(getProjectPrefix(project, false), sendMessage, 'error', 'openProject_' + project.key, { request });
     }
 
     project.stats.errorVotes = (project.stats.errorVotes || 0) + 1;

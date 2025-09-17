@@ -10,12 +10,20 @@ const fakeIdToId = Object.create(null);
 export async function onRuntimeMessage(request, sender, sendResponse) {
   await state.init;
 
+  const tab = (sender && sender.tab) || null;
+  const tabId = (tab && typeof tab.id === "number") ? tab.id : null;
+
+  if (request && request.notification) {
+    return;
+  }
+
   // Captcha reload
   if (request.reloadCaptcha) {
-    const frames = await chrome.webNavigation.getAllFrames({ tabId: sender.tab.id });
+    if (!Number.isInteger(tabId)) return;
+    const frames = await chrome.webNavigation.getAllFrames({ tabId });
     for (const f of frames) {
       if (/google\.com\/recaptcha\/api.+\/anchor|recaptcha\.net\/recaptcha\/api.+\/anchor|recaptcha\.enterprise\/anchor/.test(f.url)) {
-        await chrome.scripting.executeScript({ target: { tabId: sender.tab.id, frameIds: [f.frameId] }, func: () => document.location.reload() });
+        await chrome.scripting.executeScript({ target: { tabId, frameIds: [f.frameId] }, func: () => document.location.reload() });
       }
     }
     return;
@@ -23,18 +31,20 @@ export async function onRuntimeMessage(request, sender, sendResponse) {
 
   // Captcha passed messages (double)
   if (request.captchaPassed) {
-    try { await chrome.tabs.sendMessage(sender.tab.id, request); } catch (e) {}
+    if (!Number.isInteger(tabId)) return;
+    try { await chrome.tabs.sendMessage(tabId, request); } catch (e) {}
     if (request.captchaPassed !== 'double') return;
   }
 
   // HackTimer
   if (request.HackTimer) {
+    if (!Number.isInteger(tabId)) return;
     if (request.name === 'setInterval') {
-      fakeIdToId[request.fakeId] = setInterval(() => triggerTimer(request.name, sender, request.fakeId), request.time);
+      fakeIdToId[request.fakeId] = setInterval(() => triggerTimer(request.name, tabId, sender, request.fakeId), request.time);
     } else if (request.name === 'clearInterval') {
       clearInterval(fakeIdToId[request.fakeId]); delete fakeIdToId[request.fakeId];
     } else if (request.name === 'setTimeout') {
-      fakeIdToId[request.fakeId] = setTimeout(() => { triggerTimer(request.name, sender, request.fakeId); delete fakeIdToId[request.fakeId]; }, request.time);
+      fakeIdToId[request.fakeId] = setTimeout(() => { triggerTimer(request.name, tabId, sender, request.fakeId); delete fakeIdToId[request.fakeId]; }, request.time);
     } else if (request.name === 'clearTimeout') {
       clearTimeout(fakeIdToId[request.fakeId]); delete fakeIdToId[request.fakeId];
     }
@@ -124,11 +134,15 @@ export async function onRuntimeMessage(request, sender, sendResponse) {
   }
 
   // Vote completion (from content scripts)
-  if (!state.openedProjects.has(sender.tab.id)) {
+  if (!Number.isInteger(tabId)) {
+    if (state.settings?.debug) log('warn', '[runtime] message without tab context', request);
+    return;
+  }
+  if (!state.openedProjects.has(tabId)) {
     log('warn', 'Double attempt to complete vote?', request, sender);
     return;
   }
-  const opened = state.openedProjects.get(sender.tab.id);
+  const opened = state.openedProjects.get(tabId);
 
   if (request.captcha || request.authSteam || request.discordLogIn || request.auth || request.requiredConfirmTOS || (request.errorCaptcha && !request.restartVote) || request.restartVote === false || request.captchaPassed === 'double') {
     const project = await state.db.get('projects', opened.key);
@@ -139,7 +153,7 @@ export async function onRuntimeMessage(request, sender, sendResponse) {
     }
     if (!(request.captcha && state.settings.disabledWarnCaptcha)) {
       log('warn', getProjectPrefix(project, true), message);
-      sendNotification(getProjectPrefix(project, false), message, 'warn', 'openTab_' + sender.tab.id);
+      sendNotification(getProjectPrefix(project, false), message, 'warn', 'openTab_' + tabId);
       project.error = message;
     }
     await updateValue('projects', project);
@@ -149,9 +163,10 @@ export async function onRuntimeMessage(request, sender, sendResponse) {
   await endVote(request, sender, opened);
 }
 
-async function triggerTimer(name, sender, fakeId) {
+async function triggerTimer(name, tabId, sender, fakeId) {
   try {
-    await chrome.tabs.sendMessage(sender.tab.id, { HackTimer: true, fakeId }, { documentId: sender.documentId, frameId: sender.frameId });
+    if (!Number.isInteger(tabId)) return;
+    await chrome.tabs.sendMessage(tabId, { HackTimer: true, fakeId }, { documentId: sender.documentId, frameId: sender.frameId });
   } catch (_) {
     if (name === 'setInterval') clearInterval(fakeIdToId[fakeId]);
     delete fakeIdToId[fakeId];

@@ -106,6 +106,13 @@ export const onCompleted = async (details) => {
   if (details.frameId === 0) {
     if (isOAuth(details.url)) return;
     const project = await state.db.get('projects', opened.key);
+    if (!project) {
+      log('warn', '[inject] project not found for opened entry', opened);
+      sendNotification('[inject]', 'Project data missing, aborting injection', 'error', 'openProject_' + opened.key, { context: { tabId: details.tabId, opened } });
+      state.openedProjects.delete(details.tabId);
+      await state.db.put('other', state.openedProjects, 'openedProjects');
+      return;
+    }
 
     if (opened.countInject >= 10) {
       const { endVote } = await import('./scheduler.js'); // lazy import to avoid cycles
@@ -152,6 +159,13 @@ export const onCompleted = async (details) => {
     }
   } else if (isCaptchaFrame(details.url)) {
     const project = await state.db.get('projects', opened.key);
+    if (!project) {
+      log('warn', '[inject] project not found for captcha frame', opened);
+      sendNotification('[inject]', 'Project data missing during captcha injection', 'error', 'openProject_' + opened.key, { context: { tabId: details.tabId, opened } });
+      state.openedProjects.delete(details.tabId);
+      await state.db.put('other', state.openedProjects, 'openedProjects');
+      return;
+    }
     try {
       await chrome.scripting.executeScript({
         target: { tabId: details.tabId, frameIds: [details.frameId] },
@@ -207,9 +221,9 @@ async function catchTabError(error, tabId) {
     return;
   }
   if (msg.includes('ExtensionsSettings policy')) {
-    sendNotification(getProjectPrefix(project, false), msg + ' https://github.com/Serega007RU/Auto-Vote-Rating/wiki/Problems-with-Opera', 'error', 'openProject_' + project.key);
+    sendNotification(getProjectPrefix(project, false), msg + ' https://github.com/Serega007RU/Auto-Vote-Rating/wiki/Problems-with-Opera', 'error', 'openProject_' + project.key, { errorMessage: msg, errorStack: error?.stack });
   } else {
-    sendNotification(getProjectPrefix(project, false), msg, 'error', 'openProject_' + project.key);
+    sendNotification(getProjectPrefix(project, false), msg, 'error', 'openProject_' + project.key, { errorMessage: msg, errorStack: error?.stack });
   }
   project.error = msg;
   await updateValue('projects', project);

@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="fr">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -7,26 +8,57 @@
   <title data-i18n-mode="replace" data-resource="dashboard">Dashboard</title>
   <meta name="color-scheme" content="dark light">
   <style>
-    :root { --bg:#0e1116; --surface:#141821; --text:#e9eef6; --muted:#a7b1c2; --brand:#4f8cff; --border:rgba(255,255,255,.08) }
-    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
-    #app{padding:14px}
-    .nav{display:flex;gap:8px}
-    .btn{background:var(--brand);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer}
+    :root {
+      --bg: #0e1116;
+      --surface: #141821;
+      --text: #e9eef6;
+      --muted: #a7b1c2;
+      --brand: #4f8cff;
+      --border: rgba(255, 255, 255, .08)
+    }
+
+    html,
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif
+    }
+
+    #app {
+      padding: 14px
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px
+    }
+
+    .btn {
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer
+    }
   </style>
 </head>
+
 <body>
-  
+
 
   <div id="app"></div>
 
   <!-- UMD framework + core services -->
-<script src="jsv2/avrfw.umd.js" defer></script>
-<script src="modules/options-core.umd.js" defer></script>
+  <script src="jsv2/avrfw.umd.js" defer></script>
+  <script src="modules/options-core.umd.js" defer></script>
 
-<!-- ESM bridge (loads js/main.js and friends) -->>
-<script type="module" src="jsv2/backend.service.js"></script>
+  <!-- ESM bridge (loads js/main.js and friends) -->
+  <script type="module" src="jsv2/backend.service.js"></script>
 
-<!-- Boot (UMD) -->
-<script src="jsv2/options.boot.js" defer></script>
+  <!-- Boot (UMD) -->
+  <script src="jsv2/options.boot.js" defer></script>
 </body>
+
 </html>

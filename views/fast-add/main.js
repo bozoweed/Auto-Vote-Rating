@@ -56,7 +56,7 @@
             var ok = await chrome.permissions.request({ origins, permissions });
             if (!ok) { OptionsCore.getNotif().create(t('notGrantUrl') || 'Permission denied', 'error', { element }); resolve(false); }
             else { if (element) OptionsCore.getNotif().create(t('granted') || 'Permission granted', 'success', { element }); resolve(true); }
-          } catch(e){ OptionsCore.getNotif().create(e, 'error', { element }); resolve(false); }
+          } catch(e){ OptionsCore.getNotif().create(e, 'error', { element, error: e }); resolve(false); }
         });
       });
     } else if (element) {
@@ -297,10 +297,10 @@
             closeBtn.addEventListener('click', function(){ window.close(); });
           }
 
-          run().catch(function(e){ OptionsCore.getNotif().create(e, 'error'); });
+          run().catch(function(e){ OptionsCore.getNotif().create(e, 'error', { error: e }); });
 
         } catch (e) {
-          OptionsCore.getNotif().create(e, 'error');
+          OptionsCore.getNotif().create(e, 'error', { error: e });
         }
       })();
     }

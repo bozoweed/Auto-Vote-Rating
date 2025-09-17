@@ -1,8 +1,32 @@
 // background/modules/notifications.js
-import { state, t } from './state.js';
+import { state } from './state.js';
 import { log } from './logs.js';
 
-export function sendNotification(title, message, type, notificationId='') {
+function sanitizeMetaValue(value) {
+  if (value instanceof Error) {
+    return { message: value.message, stack: value.stack };
+  }
+  if (value == null) return value;
+  const type = typeof value;
+  if (type === 'string' || type === 'number' || type === 'boolean') return value;
+  if (Array.isArray(value)) return value.map(sanitizeMetaValue);
+  if (type === 'object') {
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch (_) {
+      try {
+        const plain = {};
+        for (const [k, v] of Object.entries(value)) { plain[k] = sanitizeMetaValue(v); }
+        return plain;
+      } catch (_) {
+        return String(value);
+      }
+    }
+  }
+  try { return String(value); } catch (_) { return null; }
+}
+
+export function sendNotification(title, message, type, notificationId='', meta = null) {
   if (!message) message = '';
   if (state.settings?.disabledNotifStart && type === 'start') return;
   if (state.settings?.disabledNotifInfo && type === 'info') return;
@@ -10,8 +34,18 @@ export function sendNotification(title, message, type, notificationId='') {
   if (state.settings?.disabledNotifError && type === 'error') return;
 
   // Also mirror to options UI via runtime message for consistency
+  const payload = { title, message, type, notificationId };
+  if (meta && typeof meta === 'object') {
+    const safe = {};
+    for (const [key, value] of Object.entries(meta)) {
+      const targetKey = (key === 'title' || key === 'message' || key === 'type' || key === 'notificationId') ? `meta${key.charAt(0).toUpperCase()}${key.slice(1)}` : key;
+      safe[targetKey] = sanitizeMetaValue(value);
+    }
+    Object.assign(payload, safe);
+  }
+
   (async () => {
-    try { await chrome.runtime.sendMessage({ notification: { title, message, type, notificationId } }); }
+    try { await chrome.runtime.sendMessage({ notification: payload }); }
     catch (e) {
       const msg = e?.message || '';
       if (!msg.includes('Receiving end does not exist') && !msg.includes('The message port closed')) log('warn', '[notify relay]', msg);

@@ -40,6 +40,44 @@
     if (!message) message = 'Empty error, see console for details';
     var delay = opts.delay || (type === 'error' ? 30000 : 5000);
 
+    function pickErrorCandidate(msg, options) {
+      if (options) {
+        if (options.error instanceof Error) return options.error;
+        if (options.originalError instanceof Error) return options.originalError;
+        if (options.cause instanceof Error) return options.cause;
+      }
+      if (msg instanceof Error) return msg;
+      if (Array.isArray(msg)) {
+        for (var i = 0; i < msg.length; i++) {
+          if (msg[i] instanceof Error) return msg[i];
+        }
+      }
+      return null;
+    }
+
+    function emitErrorLog(msg, options) {
+      if (type !== 'error' || (options && options.dontLog)) return;
+      try {
+        if (typeof console === 'undefined' || !console || !console.error) return;
+        var err = pickErrorCandidate(msg, options);
+        if (err) {
+          console.error('[error]', err);
+          if (options && options.request != null) try { console.error('[error][request]', options.request); } catch (_) {}
+          if (options && options.meta != null) try { console.error('[error][meta]', options.meta); } catch (_) {}
+          if (options && options.context != null) try { console.error('[error][context]', options.context); } catch (_) {}
+          return;
+        }
+        if (Array.isArray(msg)) console.error.apply(console, ['[error]'].concat(msg));
+        else console.error('[error]', msg);
+        var trace = options && (options.trace || options.stack || options.errorStack);
+        if (trace) console.error(trace);
+        else if (console.trace) console.trace();
+        if (options && options.request != null) try { console.error('[error][request]', options.request); } catch (_) {}
+        if (options && options.meta != null) try { console.error('[error][meta]', options.meta); } catch (_) {}
+        if (options && options.context != null) try { console.error('[error][context]', options.context); } catch (_) {}
+      } catch (_) {}
+    }
+
     if (opts.element) {
       var el = opts.element;
       el.textContent = '';
@@ -47,7 +85,7 @@
         for (var it of message) el.append(it);
       } else { el.textContent = String(message); }
       el.className = type;
-      if (!opts.dontLog && type === 'error') console.error('[error]', message);
+      emitErrorLog(message, opts);
       return;
     }
 
@@ -85,7 +123,7 @@
         timer.resume(); var barEl = notif.querySelector('.progress div'); if (barEl) barEl.style.animationPlayState='running';
       });
     }
-    if (!opts.dontLog && type === 'error') console.error('[error]', message);
+    emitErrorLog(message, opts);
   };
   NotificationService.prototype.remove = function(elem){
     if (!elem) return; elem.classList.remove('show'); elem.classList.add('hide'); setTimeout(function(){ elem.remove(); }, 600);

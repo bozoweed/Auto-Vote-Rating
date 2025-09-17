@@ -75,7 +75,20 @@
       } else if (notifId.startsWith('openSettings')) {
         onClick = () => { try { chrome.runtime.openOptionsPage(); } catch (_) {}; };
       }
-      notif.create([notification.title, document.createElement('br'), notification.message], notifType, { onClick });
+      const createOpts = { onClick };
+      const errorMeta = notification.error && typeof notification.error === 'object' ? notification.error : null;
+      const errorMessage = notification.errorMessage || (typeof notification.error === 'string' ? notification.error : null) || (errorMeta && errorMeta.message) || null;
+      const errorStack = notification.errorStack || notification.stack || (errorMeta && errorMeta.stack) || null;
+      if (errorMessage || errorStack) {
+        const err = new Error(errorMessage || notification.message || notification.title || 'Notification error');
+        if (errorStack) err.stack = errorStack;
+        createOpts.error = err;
+        createOpts.errorStack = err.stack;
+      }
+      if (notification.request != null) createOpts.request = notification.request;
+      if (notification.meta != null) createOpts.meta = notification.meta;
+      if (notification.context != null) createOpts.context = notification.context;
+      notif.create([notification.title, document.createElement('br'), notification.message], notifType, createOpts);
     } catch (err) {
       try { console.warn('[options] notification relay failed', err); } catch (_) {}
     }
