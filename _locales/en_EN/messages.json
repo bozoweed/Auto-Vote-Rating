@@ -1,6 +1,7 @@
 {
   "appName": { "message": "A.V.R." },
-
+  "appDesc": { "message": "Automate certain vote/notation actions.", "description": "Anti-captcha, evolving, and easy to use." },
+  
   "dashboard": { "message": "Dashboard" },
   "addButton": { "message": "Add" },
   "addedButton": { "message": "Added" },
