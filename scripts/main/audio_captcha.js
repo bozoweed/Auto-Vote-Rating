@@ -188,6 +188,7 @@
           .result {
             margin-top: 8px; padding: 10px; border-radius: 12px; background: rgba(0,0,0,.04);
             font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+            text-align: center;
           }
           @media (prefers-color-scheme: dark) { .result { background: rgba(255,255,255,.08); } }
           .close {
