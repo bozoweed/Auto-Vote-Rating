@@ -173,7 +173,7 @@ export const onCompleted = async (details) => {
       });
       const tab = await chrome.tabs.get(details.tabId);
       if (tab.status == null || tab.status === 'complete') {
-        await chrome.tabs.sendMessage(details.tab.id, { sendProject: true, project, settings: state.settings });
+        await chrome.tabs.sendMessage(details.tabId, { sendProject: true, project, settings: state.settings });
       }
     } catch (error) {
       catchTabError(error, details.tabId);
