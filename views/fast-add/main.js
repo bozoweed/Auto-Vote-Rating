@@ -12,7 +12,7 @@
 
   
 
-  function t(k,a){ try{ return (root.chrome && root.chrome.i18n) ? root.chrome.i18n.getMessage(k,a) : ''; } catch(e){ return ''; } }
+  function t(k,a){ try{ return (chrome && chrome.i18n) ? chrome.i18n.getMessage(k,a) : ''; } catch(e){ return ''; } }
   function el(sel, scope){ return (scope || document).querySelector(sel); }
 
   // Permissions checker (uses be.allProjects + be.utils.getDomainWithoutSubdomain)
@@ -30,7 +30,7 @@
       if (!origins.includes(originPattern)) origins.push(originPattern);
 
       if (!(fn.notRequiredCaptcha && fn.notRequiredCaptcha(project))) {
-        var hp = (root.chrome && root.chrome.runtime && root.chrome.runtime.getManifest && root.chrome.runtime.getManifest().host_permissions) || [];
+        var hp = (chrome && chrome.runtime && chrome.runtime.getManifest && chrome.runtime.getManifest().host_permissions) || [];
         hp.forEach(function(o){ if (!origins.includes(o)) origins.push(o); });
       }
       if (fn.needAdditionalOrigins) (fn.needAdditionalOrigins(project)||[]).forEach(function(o){ if (!origins.includes(o)) origins.push(o); });

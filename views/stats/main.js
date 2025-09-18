@@ -9,7 +9,7 @@
 }(typeof self !== 'undefined' ? self : this, function (AVRFW, OptionsCore) {
 
   
-  function t(k, a) { try { return (root.chrome && root.chrome.i18n) ? root.chrome.i18n.getMessage(k, a) : ''; } catch (e) { return ''; } }
+  function t(k, a) { try { return (chrome && chrome.i18n) ? chrome.i18n.getMessage(k, a) : ''; } catch (e) { return ''; } }
   function fmtDate(v) { return v ? new Date(v).toLocaleString().replace(',', '') : (t('none') || 'None'); }
 
   function injectModals() {

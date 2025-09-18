@@ -89,10 +89,32 @@
             });
           }
 
+          function parseHash(){
+            try {
+              var hash = String(location.hash || '');
+              if (hash.charAt(0) === '#') hash = hash.slice(1);
+              var result = { view: null, params: {} };
+              if (!hash) return result;
+              hash.split('&').forEach(function(part){
+                if (!part) return;
+                var idx = part.indexOf('=');
+                var key = idx >= 0 ? part.slice(0, idx) : part;
+                var value = idx >= 0 ? part.slice(idx + 1) : '';
+                try { key = decodeURIComponent(key); } catch (_) {}
+                try { value = decodeURIComponent(value); } catch (_) {}
+                if (!key) return;
+                if (key === 'view') result.view = value;
+                else result.params[key] = value;
+              });
+              return result;
+            } catch (_) { return { view: null, params: {} }; }
+          }
+
           // Bind sidebar buttons
           ctx.root.querySelectorAll('.nav-btn').forEach(function(btn){
             btn.addEventListener('click', function(){
               var vn = btn.getAttribute('data-view');
+              try { location.hash = '#view=' + encodeURIComponent(vn); } catch (_) {}
               go(vn);
             });
           });
@@ -104,8 +126,8 @@
               if (href.includes('addFastProject')) { await go('fast-add'); return; }
             } catch(e){}
             try {
-              var m = String(location.hash || '').match(/view=([a-z\-]+)/i);
-              if (m && routes[m[1]]) { await go(m[1]); return; }
+              var parsed = parseHash();
+              if (parsed.view && routes[parsed.view]) { await go(parsed.view, parsed.params); return; }
             } catch(e){}
             await go('dashboard');
           })();

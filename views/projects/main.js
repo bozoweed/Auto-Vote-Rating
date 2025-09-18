@@ -17,7 +17,7 @@
 
   var chrome = (function () {
     try { if (typeof globalThis !== 'undefined' && globalThis.chrome) return globalThis.chrome; } catch (_) {}
-    try { if (root && root.chrome) return root.chrome; } catch (_) {}
+    try { if ( chrome) return chrome; } catch (_) {}
     try { if (typeof window !== 'undefined' && window.chrome) return window.chrome; } catch (_) {}
     return null;
   })();
@@ -474,10 +474,18 @@
           var eTip = document.createElement('span'); eTip.className = 'tooltiptext'; eTip.textContent = t('edit') || 'Edit';
           edit.append(eImg, eTip); controls.append(edit); edit.addEventListener('click', async function () {
             try {
+              
               if (ctx.app && ctx.app.loadView) {
+                try {
+                  var hashParams = new URLSearchParams();
+                  hashParams.set('view', 'add');
+                  hashParams.set('key', String(project.key));
+                  location.hash = '#' + hashParams.toString();
+                } catch (_) {
+                  location.hash = '#view=add&key=' + encodeURIComponent(String(project.key));
+                }
                 await ctx.app.loadView('add', 'views/add/');
-                ctx.app.mountHost && ctx.app.mountHost('content', 'add', { key: project.key });
-                location.hash = '#view=add';
+                if (ctx.app.mountHost) await ctx.app.mountHost('content', 'add', { key: project.key });
                 var navBtns = document.querySelectorAll('.nav-btn');
                 navBtns.forEach(function (btn) {
                   var isTarget = btn.getAttribute('data-view') === 'add';

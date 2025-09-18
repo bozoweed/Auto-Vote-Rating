@@ -1,10 +1,10 @@
-/* view/add/main.js — UMD provider "add"
+/* view/add/main.js â€” UMD provider "add"
    - Mode lien / manuel avec champs conditionnels par rating (allProjects)
-   - Vérification permissions + présence (fetch), notFound, projectName
+   - VÃ©rification permissions + prÃ©sence (fetch), notFound, projectName
    - Sauvegarde DB (add / edit), scheduling, timeout, randomize, vote modes, Custom body
 
-   Dépendances via DI:
-   ctx.app.inject('backend') → {
+   DÃ©pendances via DI:
+   ctx.app.inject('backend') â†’ {
      DB, SETTINGS, allProjects,
      attachGlobalErrorHandlers, utils: { getDomainWithoutSubdomain }
    }
@@ -14,16 +14,6 @@
   else if (typeof module === 'object' && module.exports) module.exports = factory(require('AVRFW'), require('OptionsCore'));
   else factory(root.AVRFW, root.OptionsCore);
 }(typeof self !== 'undefined' ? self : this, function(AVRFW, OptionsCore){
-
-  function provide(name, def){
-    if (AVRFW && AVRFW.provide) AVRFW.provide(name, def);
-    else {
-      var g = (typeof self !== 'undefined' ? self : this);
-      var hub = g.__AVRFW_PROVIDERS__ = g.__AVRFW_PROVIDERS__ || { defs:{}, waiters:{} };
-      hub.defs[name] = def;
-      var w = hub.waiters[name] || []; w.forEach(function(fn){ try{fn(def);}catch{} }); hub.waiters[name] = [];
-    }
-  }
 
   function t(k,a){ try{ return (chrome && chrome.i18n) ? chrome.i18n.getMessage(k,a) : ''; } catch(e){ return ''; } }
   function $(rootEl, sel){ return rootEl.querySelector(sel); }
@@ -70,24 +60,69 @@
     return granted;
   }
 
-  var viewDef = {
+  AVRFW.createViewProvider('add', {
     controller: function(){ return { state:{}, methods:{} }; },
     onMounted: function(ctx){
       if (AVRFW && AVRFW.translate) AVRFW.translate(ctx.root);
       OptionsCore.ensureContainers();
       var notif = OptionsCore.getNotif();
 
+     
+
+     
+
       // Injected backend (DI); no per-view initializeConfig
       var be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) || null;
+      
       if (!be) { notif.create('Backend not available', 'error'); return; }
 
       var db = be.DB, settings = be.SETTINGS || {}, allProjects = be.allProjects || {};
       var getDomainWithoutSubdomain = be.utils && be.utils.getDomainWithoutSubdomain;
-
+      
       var editingProject = null;
 
-      function E(sel){ return $(ctx.root, sel); }
+      function toProjectKey(value){
+        if (value == null || value === '') return null;
+        if (typeof value === 'object' && value){
+          if (value.key != null) value = value.key;
+        }
+        var num = Number(value);
+        return isFinite(num) ? num : null;
+      }
 
+      function getHashEditKey(){
+        try {
+          var hash = String(location.hash || '');
+          if (hash.charAt(0) === '#') hash = hash.slice(1);
+          if (!hash) return null;
+          var params = new URLSearchParams(hash);
+          var raw = params.get('key') || params.get('projectKey') || params.get('editKey');
+          if (raw == null || raw === '') return null;
+          var num = Number(raw);
+          return isFinite(num) ? num : null;
+        } catch (e) { return null; }
+      }
+
+      function dropHashEditKey(){
+        try {
+          var hash = String(location.hash || '');
+          if (!hash.includes('key=')) return;
+          if (hash.charAt(0) === '#') hash = hash.slice(1);
+          var params = new URLSearchParams(hash);
+          if (!params.has('key')) return;
+          params.delete('key');
+          var nextView = params.get('view') || 'add';
+          params.delete('view');
+          var nextHash = '#view=' + nextView;
+          var rest = params.toString();
+          if (rest) nextHash += '&' + rest;
+          
+          if (location.hash !== nextHash) location.hash = nextHash;
+        } catch (err) { console.error(err); }
+      }
+
+      function E(sel){ return $(ctx.root, sel); }
+      function setText(sel, value){ var el = E(sel); if (el) el.textContent = value == null ? '' : value; }
       function show(elId,on){ var el=E(elId); if (!el) return; el.style.display = on ? '' : 'none'; }
       function showBlock(id,on){ var el=E(id); if (!el) return; if (on) el.removeAttribute('style'); else el.style.display='none'; }
       function setReq(id,on){ var el=E(id); if (el) el.required = !!on; }
@@ -274,7 +309,7 @@
         if (!(func.notRequiredId && func.notRequiredId())) {
           showBlock('#blk-id', true); setReq('#id', true);
           var ex = func.exampleURL && func.exampleURL();
-          if (ex){ E('#projectIDTooltip1').textContent = ex[0]||''; E('#projectIDTooltip2').textContent = ex[1]||''; E('#projectIDTooltip3').textContent = ex[2]||''; }
+          if (ex){ setText('#projectIDTooltip1', ex ? ex[0] : ''); setText('#projectIDTooltip2', ex ? ex[1] : ''); setText('#projectIDTooltip3', ex ? ex[2] : ''); }
           E('#id').name = 'id_' + rating;
         }
 
@@ -291,7 +326,7 @@
         // Game
         if (func.exampleURLGame) {
           showBlock('#blk-game', true); E('#chooseGame').name = 'chooseGame_' + rating;
-          var exg = func.exampleURLGame(); if (exg){ E('#urlGameTooltip1').textContent=exg[0]||''; E('#urlGameTooltip2').textContent=exg[1]||''; E('#urlGameTooltip3').textContent=exg[2]||''; }
+          var exg = func.exampleURLGame(); if (exg){ setText('#urlGameTooltip1', exg ? exg[0] : ''); setText('#urlGameTooltip2', exg ? exg[1] : ''); setText('#urlGameTooltip3', exg ? exg[2] : ''); }
           if (func.gameList) {
             var gl=E('#gameList'); gl.replaceChildren();
             for (var it of func.gameList()) { var o = document.createElement('option'); o.value=it[0]; o.textContent=it[1]; gl.append(o); }
@@ -300,7 +335,7 @@
         // Listing
         if (func.exampleURLListing) {
           showBlock('#blk-listing', true); E('#chooseListing').name = 'chooseListing_' + rating;
-          var exl = func.exampleURLListing(); if (exl){ E('#urlListingTooltip1').textContent=exl[0]||''; E('#urlListingTooltip2').textContent=exl[1]||''; E('#urlListingTooltip3').textContent=exl[2]||''; }
+          var exl = func.exampleURLListing(); if (exl){ setText('#urlListingTooltip1', exl ? exl[0] : ''); setText('#urlListingTooltip2', exl ? exl[1] : ''); setText('#urlListingTooltip3', exl ? exl[2] : ''); }
           if (func.listingList) {
             var ll=E('#listingList'); ll.replaceChildren();
             for (var it2 of func.listingList()) { var o2=document.createElement('option'); o2.value=it2[0]; o2.textContent=it2[1]; ll.append(o2); }
@@ -325,7 +360,7 @@
         }
         if (func.additionExampleURL) {
           showBlock('#blk-addition', true); E('#additionURL').name = 'additionURL_' + rating;
-          var exa = func.additionExampleURL(); if (exa){ E('#additionURLTooltip1').textContent=exa[0]||''; E('#additionURLTooltip2').textContent=exa[1]||''; E('#additionURLTooltip3').textContent=exa[2]||''; }
+          var exa = func.additionExampleURL(); if (exa){ setText('#additionURLTooltip1', exa ? exa[0] : ''); setText('#additionURLTooltip2', exa ? exa[1] : ''); setText('#additionURLTooltip3', exa ? exa[2] : ''); }
         }
       }
 
@@ -406,13 +441,13 @@
           }
 
           // Permissions
-          OptionsCore.getNotif().create(t('adding') || 'Adding…', 'hint');
+          OptionsCore.getNotif().create(t('adding') || 'Addingâ€¦', 'hint');
           var statusEl = null;
           if (!(await checkPermissions([project], statusEl, be))) return;
 
           // Presence check
           if (!E('#disableCheckProjects').checked && project.rating !== 'Custom') {
-            OptionsCore.getNotif().create(t('checkHasProject') || 'Checking project…', 'hint');
+            OptionsCore.getNotif().create(t('checkHasProject') || 'Checking projectâ€¦', 'hint');
             var response, url = funcRating.pageURL(project);
             try {
               response = await fetch(url, { credentials: (project.rating === 'minecraftiplist.com' ? 'omit' : 'include') });
@@ -550,6 +585,7 @@
 
       function setEditMode(project) {
         editingProject = project || null;
+       
         var title = E('.editSubtitle');
         var btnAdd = E('#submitAddProject');
         var btnBlock = E('.editProjectButtons');
@@ -565,6 +601,7 @@
           // reset fields
           E('#addProject').reset();
           resetVisibility();
+          dropHashEditKey();
         } else {
           // switch to edit
           E('#switchAddMode').checked = true; onSwitchMode();
@@ -640,9 +677,9 @@
 
           // subtitle
           var text = project.rating;
-          if (project.nick) text += ' – ' + project.nick;
-          if (project.game) text += ' – ' + project.game;
-          if (project.name) text += ' – ' + project.name; else if (project.id) text += ' – ' + project.id;
+          if (project.nick) text += ' â€“ ' + project.nick;
+          if (project.game) text += ' â€“ ' + project.game;
+          if (project.name) text += ' â€“ ' + project.name; else if (project.id) text += ' â€“ ' + project.id;
           var sub = E('.editSubtitle'); sub.textContent = text; sub.id = 'edit'+project.key; sub.style.display='';
           E('h4').textContent = t('editTitle') || 'Edit project';
         }
@@ -667,7 +704,7 @@
       E('#link').addEventListener('input', onLinkInput);
       E('#rating').addEventListener('input', function(){ onRatingInput(false); });
 
-      if (root.chrome && chrome.runtime && chrome.runtime.onMessage) {
+      if (chrome && chrome.runtime && chrome.runtime.onMessage) {
         ctx._settingsListener = function(request){
           try {
             if (request === 'reloadSettings' || request === 'reloadAllSettings' || (request && request.updateValue === 'settings')) {
@@ -690,19 +727,36 @@
       // Edit mode if params.key (backend already initialized globally)
       (async function boot(){
         try { be.attachGlobalErrorHandlers && be.attachGlobalErrorHandlers(function(err){ OptionsCore.getNotif().create(err, 'error', { error: err }); }); } catch(e){}
-        if (ctx.params && ctx.params.key != null) {
-          var proj = await db.get('projects', Number(ctx.params.key));
-          if (proj) setEditMode(proj);
-        } else setEditMode(null);
+        
+        if (!db || typeof db.get !== 'function') {
+         
+          try { await be.initializeConfig({ background: false }); }
+          catch (err) { console.error(err); }
+          db = be.DB;
+        }
+        var hashKey = getHashEditKey();
+        var editKey = (ctx.params && ctx.params.key != null) ? toProjectKey(ctx.params.key) : null;
+        if (editKey == null) editKey = hashKey;
+        
+       
+        if (editKey != null) {
+          try {
+            var proj = db && typeof db.get === 'function' ? await db.get('projects', editKey) : null;
+            if (proj) { setEditMode(proj); return; }
+          } catch (err) {
+            try { console.warn('[add] failed to load project for edit', err); } catch (_) {}
+          }
+        }
+        setEditMode(null);
       })();
     },
     onBeforeUnmount: function(ctx){
-      if (ctx._settingsListener && root.chrome && chrome.runtime && chrome.runtime.onMessage) {
+      if (ctx._settingsListener && chrome && chrome.runtime && chrome.runtime.onMessage) {
         try { chrome.runtime.onMessage.removeListener(ctx._settingsListener); } catch(e){}
       }
       ctx._settingsListener = null;
     }
-  };
-
-  provide('add', viewDef);
+  });
 }));
+
+

@@ -7,7 +7,7 @@
 
   
 
-  function t(k,a){ try{ return (root.chrome && root.chrome.i18n) ? root.chrome.i18n.getMessage(k,a) : ''; } catch(e){ return ''; } }
+  function t(k,a){ try{ return (chrome && chrome.i18n) ? chrome.i18n.getMessage(k,a) : ''; } catch(e){ return ''; } }
 
   AVRFW.createViewProvider('settings', {
     controller: function(){ return { state:{}, methods:{} }; },
