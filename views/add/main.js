@@ -1,10 +1,10 @@
-/* view/add/main.js â€” UMD provider "add"
+/* view/add/main.js — UMD provider "add"
    - Mode lien / manuel avec champs conditionnels par rating (allProjects)
-   - VÃ©rification permissions + prÃ©sence (fetch), notFound, projectName
+   - Vérification permissions + présence (fetch), notFound, projectName
    - Sauvegarde DB (add / edit), scheduling, timeout, randomize, vote modes, Custom body
 
-   DÃ©pendances via DI:
-   ctx.app.inject('backend') â†’ {
+   Dépendances via DI:
+   ctx.app.inject('backend') → {
      DB, SETTINGS, allProjects,
      attachGlobalErrorHandlers, utils: { getDomainWithoutSubdomain }
    }
@@ -441,13 +441,13 @@
           }
 
           // Permissions
-          OptionsCore.getNotif().create(t('adding') || 'Addingâ€¦', 'hint');
+          OptionsCore.getNotif().create(t('adding') || 'Adding…', 'hint');
           var statusEl = null;
           if (!(await checkPermissions([project], statusEl, be))) return;
 
           // Presence check
           if (!E('#disableCheckProjects').checked && project.rating !== 'Custom') {
-            OptionsCore.getNotif().create(t('checkHasProject') || 'Checking projectâ€¦', 'hint');
+            OptionsCore.getNotif().create(t('checkHasProject') || 'Checking project…', 'hint');
             var response, url = funcRating.pageURL(project);
             try {
               response = await fetch(url, { credentials: (project.rating === 'minecraftiplist.com' ? 'omit' : 'include') });
@@ -677,9 +677,9 @@
 
           // subtitle
           var text = project.rating;
-          if (project.nick) text += ' â€“ ' + project.nick;
-          if (project.game) text += ' â€“ ' + project.game;
-          if (project.name) text += ' â€“ ' + project.name; else if (project.id) text += ' â€“ ' + project.id;
+          if (project.nick) text += ' – ' + project.nick;
+          if (project.game) text += ' – ' + project.game;
+          if (project.name) text += ' – ' + project.name; else if (project.id) text += ' – ' + project.id;
           var sub = E('.editSubtitle'); sub.textContent = text; sub.id = 'edit'+project.key; sub.style.display='';
           E('h4').textContent = t('editTitle') || 'Edit project';
         }
