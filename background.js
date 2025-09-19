@@ -448,7 +448,7 @@ async function checkResponseError(project, response, url, bypassCodes, vk) {
         } else {
             text = 'null'
         }
-        endVote({errorAuthVK: text}, null, project)
+        endVote({errorAuthVK: "mimimimim"}, null, project)
         return false
     }
     if (!host.includes(url)) {

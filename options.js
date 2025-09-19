@@ -15,7 +15,7 @@ const authVKUrls = new Map([
     ['minecraftrating.ru', 'https://oauth.vk.com/authorize?client_id=5216838&display=page&redirect_uri=close.html&response_type=token&v=5.45'],
     ['monitoringminecraft.ru', 'https://oauth.vk.com/authorize?client_id=3697128&scope=0&response_type=token&redirect_uri=close.html'],
     ['misterlauncher.org', 'https://oauth.vk.com/authorize?client_id=7636705&display=page&redirect_uri=close.html&response_type=token'],
-    ['minecraft-servers.ru', 'https://id.vk.com/auth?app_id=53128143&device_id=&response_type=code&redirect_uri=https%3A%2F%2Fminecraft-servers.ru%2Fauth%2Fvk%2Fcallback&scope=email&lang_id=16&scheme=&oauth_version=2&redirect_state=caf306f7e0bf7607&code_challenge=B0kUyEERfUMFcAfvFi3wb4ZhMP9hMQ3_7vq7NxFKuik&code_challenge_method=sha256']
+    ['minecraft-servers.ru', 'https://oauth.vk.com/authorize?response_type=token&client_id=53128143&redirect_uri=close.html&scope=email']
 ])
 
 const svgFail = document.createElement('img')

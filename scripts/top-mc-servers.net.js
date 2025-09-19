@@ -15,6 +15,7 @@ const timer = setInterval(() => {
 }, 1000)
 
 function checkAnswer() {
+    // Alerts.Вы уже голосовали сегодня
     const toast = document.querySelector('div.toast-message')
     if (toast) {
         const request = {}

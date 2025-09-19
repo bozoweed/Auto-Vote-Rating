@@ -124,6 +124,12 @@ async function checkAll(first) {
             }, 1000)
             return
         }
+        if(document.querySelector(".vkc__Authorize__container")){
+            if (document.querySelector("button.vkuiButton") != null){
+                document.querySelector("button.vkuiButton").click()
+                return
+            }
+        }
         let text
         let notAuth = false
         if (document.querySelector('div.oauth_form_access')) {
