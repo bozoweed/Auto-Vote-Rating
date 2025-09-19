@@ -11,7 +11,7 @@ export class TopServeursNet extends TopGamesNet {
       '/vote/<server-slug>/'
     ];
   }
-
+  static limitedCountVote() { return false; }
   // We can rely on parent parseURL (now returns { lang, game, listing, id })
   // and parent voteURL/pageURL implementations.
 }
