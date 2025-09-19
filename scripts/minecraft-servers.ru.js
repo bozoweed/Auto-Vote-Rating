@@ -42,6 +42,5 @@ function checkAnswer() {
             return true
         }
     }
-    chrome.runtime.sendMessage({successfully: true})
-    return true
+    return false
 }
