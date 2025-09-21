@@ -37,9 +37,8 @@ function checkAnswer() {
         } else*/ if (request.message.includes('Alerts.Вы уже голосовали сегодня')) {
             chrome.runtime.sendMessage({later: true})
             return true
-        } else {
-            chrome.runtime.sendMessage({successfully: true})
-            // chrome.runtime.sendMessage(request)
+        } else {            
+            chrome.runtime.sendMessage(request)
             return true
         }
     }
