@@ -27,6 +27,7 @@ async function vote(first) {
 function checkAnswer() {
     // Alerts.Вы уже голосовали сегодня
     const toast = document.querySelector("div.text-red-800 > div.flex.items-center > div").innerText
+    const wintoast = document.querySelector("div.text-green-800 > div.flex.items-center > div").innerText
     if (toast) {
         const request = {}
         request.message = toast.trim()
@@ -41,6 +42,10 @@ function checkAnswer() {
             // chrome.runtime.sendMessage(request)
             return true
         }
+    }
+    if (wintoast) {       
+        chrome.runtime.sendMessage({successfully: true})
+        return true
     }
     return false
 }
