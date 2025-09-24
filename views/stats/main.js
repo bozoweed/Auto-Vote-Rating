@@ -1,6 +1,6 @@
-/* view/stats/main.js — UMD provider "stats"
-   - Deux modales (#stats et #statsToday) + 2 boutons pour les ouvrir
-   - Règles: reset jour, rollover mois (lastMonthSuccessVotes <- monthSuccessVotes si mois changé)
+﻿/* view/stats/main.js - UMD provider "stats"
+   - Two modals (#stats and #statsToday) + two buttons to open them
+   - Rules: reset day, rollover month (lastMonthSuccessVotes <- monthSuccessVotes when month changes)
 */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) define([], function () { return factory(root.AVRFW, root.OptionsCore); });
@@ -9,7 +9,16 @@
 }(typeof self !== 'undefined' ? self : this, function (AVRFW, OptionsCore) {
 
   
-  function t(k, a) { try { return (chrome && chrome.i18n) ? chrome.i18n.getMessage(k, a) : ''; } catch (e) { return ''; } }
+  const t = (AVRFW && typeof AVRFW.createTranslator === 'function')
+    ? AVRFW.createTranslator()
+    : function(key, args){
+        try{
+          if (chrome && chrome.i18n){
+            return chrome.i18n.getMessage(key, args) || '';
+          }
+        } catch(e){}
+        return '';
+      };
   function fmtDate(v) { return v ? new Date(v).toLocaleString().replace(',', '') : (t('none') || 'None'); }
 
   function injectModals() {
@@ -67,80 +76,82 @@
       injectModals();
       var modals = OptionsCore.getModals();
       var notif = OptionsCore.getNotif();
+      (async function initStats(){
+        try {
 
-      // Injected backend (via app DI or global fallback from backend.service)
-      var be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||
-        (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) ||
-        null;
-      if (!be) { notif.create('Backend not available', 'error'); return; }
+        // Injected backend (via app DI or global fallback from backend.service)
+        const backend = await AVRFW.ensureBackend(ctx, { install: true, waitFor: true, retries: 15, delay: 120 });
+        if (!backend) { notif.create('Backend not available', 'error'); return; }
 
-      // Live bindings (post-init from backend.service)
-      var db = be.DB, dbLogs = be.DB_LOGS, settings = be.SETTINGS || {}, allProjects = be.allProjects || {};
+        // Live bindings (post-init from backend.service)
+        var db = backend.DB, dbLogs = backend.DB_LOGS, settings = backend.SETTINGS || {}, allProjects = backend.allProjects || {};
 
-      function getMonthRoll(general) {
-        if (!general || !general.lastAttemptVote) return general;
-        var last = new Date(general.lastAttemptVote);
-        var now = new Date();
-        if (last.getFullYear() < now.getFullYear() || last.getMonth() < now.getMonth()) {
-          // nouvelle période: décalage des compteurs
-          general.lastMonthSuccessVotes = Number(general.monthSuccessVotes || 0);
-          general.monthSuccessVotes = 0;
+        function getMonthRoll(general) {
+          if (!general || !general.lastAttemptVote) return general;
+          var last = new Date(general.lastAttemptVote);
+          var now = new Date();
+          if (last.getFullYear() < now.getFullYear() || last.getMonth() < now.getMonth()) {
+            // nouvelle periode: decalage des compteurs
+            general.lastMonthSuccessVotes = Number(general.monthSuccessVotes || 0);
+            general.monthSuccessVotes = 0;
+          }
+          return general;
         }
-        return general;
-      }
 
-      async function openGeneral() {
+        async function openGeneral() {
 
-        var general = await db.get('other', 'generalStats') || {};
-        general = getMonthRoll(general);
-        await db.put('other', general, 'generalStats');
+          var general = await db.get('other', 'generalStats') || {};
+          general = getMonthRoll(general);
+          await db.put('other', general, 'generalStats');
 
-        modals.toggle('stats');
+          modals.toggle('stats');
 
-        var sub = document.querySelector('#stats .statsSubtitle');
-        sub.textContent = t('generalStats') || 'General stats';
+          var sub = document.querySelector('#stats .statsSubtitle');
+          sub.textContent = t('generalStats') || 'General stats';
 
-        var q = function (key) { return document.querySelector('#stats td[data-resource="' + key + '"]').nextElementSibling; };
+          var q = function (key) { return document.querySelector('#stats td[data-resource="' + key + '"]').nextElementSibling; };
 
-        q('statsSuccessVotes').textContent = Number(general.successVotes || 0);
-        q('statsMonthSuccessVotes').textContent = Number(general.monthSuccessVotes || 0);
-        q('statsLastMonthSuccessVotes').textContent = Number(general.lastMonthSuccessVotes || 0);
-        q('statsErrorVotes').textContent = Number(general.errorVotes || 0);
-        q('statsLaterVotes').textContent = Number(general.laterVotes || 0);
-        q('statsLastSuccessVote').textContent = fmtDate(general.lastSuccessVote);
-        q('statsLastAttemptVote').textContent = fmtDate(general.lastAttemptVote);
+          q('statsSuccessVotes').textContent = Number(general.successVotes || 0);
+          q('statsMonthSuccessVotes').textContent = Number(general.monthSuccessVotes || 0);
+          q('statsLastMonthSuccessVotes').textContent = Number(general.lastMonthSuccessVotes || 0);
+          q('statsErrorVotes').textContent = Number(general.errorVotes || 0);
+          q('statsLaterVotes').textContent = Number(general.laterVotes || 0);
+          q('statsLastSuccessVote').textContent = fmtDate(general.lastSuccessVote);
+          q('statsLastAttemptVote').textContent = fmtDate(general.lastAttemptVote);
 
-        // label "Installed"
-        var tdAdded = document.querySelector('#stats td[data-resource="statsAdded"]');
-        if (tdAdded) tdAdded.textContent = t('statsInstalled') || 'Installed';
-        q('statsAdded').textContent = fmtDate(general.added);
-      }
-
-      async function openToday() {
-        if (be.initializeConfig) await be.initializeConfig({ background: false });
-
-        var today = await db.get('other', 'todayStats') || {};
-        var now = new Date(); var last = today.lastAttemptVote ? new Date(today.lastAttemptVote) : null;
-        if (last && last.getDate() !== now.getDate()) {
-          today = { successVotes: 0, errorVotes: 0, laterVotes: 0, lastSuccessVote: null, lastAttemptVote: null };
+          // label "Installed"
+          var tdAdded = document.querySelector('#stats td[data-resource="statsAdded"]');
+          if (tdAdded) tdAdded.textContent = t('statsInstalled') || 'Installed';
+          q('statsAdded').textContent = fmtDate(general.added);
         }
-        await db.put('other', today, 'todayStats');
 
-        modals.toggle('statsToday');
+        async function openToday() {
+          if (backend.initializeConfig) await backend.initializeConfig({ background: false });
 
-        var q = function (key) { return document.querySelector('#statsToday td[data-resource="' + key + '"]').nextElementSibling; };
-        q('statsSuccessVotes').textContent = Number(today.successVotes || 0);
-        q('statsErrorVotes').textContent = Number(today.errorVotes || 0);
-        q('statsLaterVotes').textContent = Number(today.laterVotes || 0);
-        q('statsLastSuccessVote').textContent = fmtDate(today.lastSuccessVote);
-        q('statsLastAttemptVote').textContent = fmtDate(today.lastAttemptVote);
+          var today = await db.get('other', 'todayStats') || {};
+          var now = new Date(); var last = today.lastAttemptVote ? new Date(today.lastAttemptVote) : null;
+          if (last && last.getDate() !== now.getDate()) {
+            today = { successVotes: 0, errorVotes: 0, laterVotes: 0, lastSuccessVote: null, lastAttemptVote: null };
+          }
+          await db.put('other', today, 'todayStats');
+
+          modals.toggle('statsToday');
+
+          var q = function (key) { return document.querySelector('#statsToday td[data-resource="' + key + '"]').nextElementSibling; };
+          q('statsSuccessVotes').textContent = Number(today.successVotes || 0);
+          q('statsErrorVotes').textContent = Number(today.errorVotes || 0);
+          q('statsLaterVotes').textContent = Number(today.laterVotes || 0);
+          q('statsLastSuccessVote').textContent = fmtDate(today.lastSuccessVote);
+          q('statsLastAttemptVote').textContent = fmtDate(today.lastAttemptVote);
+        }
+
+        // Bind buttons
+        var btnGeneral = ctx.root.querySelector('#btnGeneral');
+        var btnToday = ctx.root.querySelector('#btnToday');
+        btnGeneral && btnGeneral.addEventListener('click', openGeneral);
+        btnToday && btnToday.addEventListener('click', openToday);
       }
-
-      // Bind buttons
-      var btnGeneral = ctx.root.querySelector('#btnGeneral');
-      var btnToday = ctx.root.querySelector('#btnToday');
-      btnGeneral && btnGeneral.addEventListener('click', openGeneral);
-      btnToday && btnToday.addEventListener('click', openToday);
-    }
+        } catch (error) { notif.create(error, 'error'); }
+      })();
   });
 }));

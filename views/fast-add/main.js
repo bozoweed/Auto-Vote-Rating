@@ -1,7 +1,7 @@
-/* view/fast-add/main.js — UMD provider "fast-add"
-   - Crée la modale #addFastProject et exécute l’ajout rapide via URL
-   - Flags supportés: ?disableNotifInfo=true&disableNotifWarn=true&disableNotifStart=true
-   - Paramètres projet: top|rating, nick, id, game, listing, lang, maxCountVote, ordinalWorld, addition
+﻿/* view/fast-add/main.js - UMD provider "fast-add"
+   - Cree la modale #addFastProject et execute l'ajout rapide via URL
+   - Flags supportes: ?disableNotifInfo=true&disableNotifWarn=true&disableNotifStart=true
+   - Parametres projet: top|rating, nick, id, game, listing, lang, maxCountVote, ordinalWorld, addition
    - Backend via DI: ctx.app.inject('backend') (fallback __AVRFW_SERVICES__.backend)
 */
 (function (root, factory) {
@@ -12,11 +12,20 @@
 
   
 
-  function t(k,a){ try{ return (chrome && chrome.i18n) ? chrome.i18n.getMessage(k,a) : ''; } catch(e){ return ''; } }
+  const t = (AVRFW && typeof AVRFW.createTranslator === 'function')
+    ? AVRFW.createTranslator()
+    : function(key, args){
+        try{
+          if (chrome && chrome.i18n){
+            return chrome.i18n.getMessage(key, args) || '';
+          }
+        } catch(e){}
+        return '';
+      };
   function el(sel, scope){ return (scope || document).querySelector(sel); }
 
   // Permissions checker (uses be.allProjects + be.utils.getDomainWithoutSubdomain)
-  async function checkPermissions(projects, element, be) {
+  async function checkPermissions(projects, element, backend) {
     var allProjects = be.allProjects || {};
     var getDomainWithoutSubdomain = (be.utils && be.utils.getDomainWithoutSubdomain) ||
       (u => { try { var h=new URL(u).hostname; var p=h.split('.'); return p.slice(-2).join('.'); } catch(e){ return u; } });
@@ -108,7 +117,7 @@
     }
   }
 
-  async function addProjectToDB(project, be) {
+  async function addProjectToDB(project, backend) {
     var db = be.DB;
     var allProjects = be.allProjects || {};
     var fn = allProjects[project.rating]; if (!fn) throw new Error('Unknown rating: ' + project.rating);
@@ -182,14 +191,8 @@
       // Resolve backend via DI (auto-install if missing)
       (async function initFastAdd(){
         try {
-          var be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||
-                   (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) || null;
-          if (!be && root.AVRFW_installBackend) {
-            await root.AVRFW_installBackend(ctx.app, { background:false });
-            be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||
-                 (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) || null;
-          }
-          if (!be) {
+          const backend = await AVRFW.ensureBackend(ctx, { install: true });
+          if (!backend) {
             // Graceful error in modal
             var msgBox = el('#addFastProject > .content > .message');
             if (msgBox) {
@@ -201,9 +204,9 @@
             return;
           }
 
-          var db = be.DB;
-          var settings = be.SETTINGS || {};
-          var allProjects = be.allProjects || {};
+          var db = backend.DB;
+          var settings = backend.SETTINGS || {};
+          var allProjects = backend.allProjects || {};
           var listFastAdd = el('#addFastProject > .content > .message');
           var events = el('#addFastProject > .content > .events');
           var hadError = false;
@@ -249,7 +252,7 @@
             div2.append(p2); htmlPerm.append(div2); listFastAdd.append(htmlPerm); listFastAdd.scrollTop = listFastAdd.scrollHeight;
 
             var projects = parseProjectsFromURL(allProjects);
-            var granted = await checkPermissions(projects, status2, be);
+            var granted = await checkPermissions(projects, status2, backend);
             if (!granted) {
               var retryBtn = document.createElement('button'); retryBtn.className='btn'; retryBtn.textContent = t('retry') || 'Retry';
               events.append(retryBtn);
@@ -260,10 +263,10 @@
 
             for (var k=0;k<projects.length;k++){
               var p = projects[k];
-              var label = p.rating + (p.nick ? ' – ' + p.nick : '') + (p.id ? ' – ' + p.id : '');
+              var label = p.rating + (p.nick ? ' - ' + p.nick : '') + (p.id ? ' - ' + p.id : '');
               var status = appendRow('error', label, true);
               try {
-                await addProjectToDB(p, be);
+                await addProjectToDB(p, backend);
                 status.parentElement.parentElement.querySelector('img').src = 'images/icons/success.svg';
                 status.textContent = t('addSuccess') || 'Added!';
               } catch(e) {

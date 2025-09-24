@@ -1,5 +1,5 @@
-/* view/dashboard/main.js — UMD provider "dashboard"
-   - Sparklines interactives, légende cliquable, leaderboard, favicons
+/* view/dashboard/main.js - UMD provider "dashboard"
+   - Sparklines interactives, legende cliquable, leaderboard, favicons
    - i18n via AVRFW.t / chrome.i18n
    - Backend via DI: ctx.app.inject('backend') (fallback __AVRFW_SERVICES__.backend)
 */
@@ -8,24 +8,40 @@
   else if (typeof module === 'object' && module.exports) module.exports = factory(require('AVRFW'));
   else factory(root.AVRFW);
 }(typeof self !== 'undefined' ? self : this, function(AVRFW){
+  const DASHBOARD_I18N_FALLBACK = {
+    dashboard:'Dashboard', overview:'Overview', totalVotes:'Total votes', today:'Today',
+    thisMonth:'This month', allTime:'All time', live:'Live', reliability:'Reliability',
+    successRate:'Success rate', errors:'Errors', monthlyTrend:'Monthly trend',
+    topSites:'Top vote sites', votes:'Votes', success:'Success', last:'Last',
+    recentActivity:'Recent activity', streak:'Streak', site:'Site', ok:'Vote success', err:'Vote error',
+    kpiAvgPerDay:(args) => 'Avg per day: ' + (Array.isArray(args) ? args[0] : args || ''),
+    kpiLastMonthDelta:(args) => (Array.isArray(args) ? args[0] : args || '') + '% vs last'
+  };
+
+  function dashboardFallback(key, args) {
+    const val = DASHBOARD_I18N_FALLBACK[key];
+    if (typeof val === 'function') return val(args);
+    return val ?? key;
+  }
+
   function makeI18n(){
-    return function i18n(k, a){
+    if (AVRFW && typeof AVRFW.createTranslator === 'function') {
+      return AVRFW.createTranslator({ fallback: dashboardFallback });
+    }
+    return function i18n(key, a){
       try {
-        if (AVRFW && AVRFW.t) { var s = AVRFW.t(k, a); if (s) return s; }
+        if (AVRFW && typeof AVRFW.t === 'function') {
+          var s = AVRFW.t(key, a);
+          if (s) return s;
+        }
+      } catch(e){}
+      try {
         if (chrome?.i18n?.getMessage) {
-          var m = chrome.i18n.getMessage(k, a);
+          var m = chrome.i18n.getMessage(key, a);
           if (m) return m;
         }
       } catch(e){}
-      var fb = {
-        dashboard:'Dashboard', overview:'Overview', totalVotes:'Total votes', today:'Today',
-        thisMonth:'This month', allTime:'All time', live:'Live', reliability:'Reliability',
-        successRate:'Success rate', errors:'Errors', monthlyTrend:'Monthly trend',
-        topSites:'Top vote sites', votes:'Votes', success:'Success', last:'Last',
-        recentActivity:'Recent activity', streak:'Streak', site:'Site', ok:'Vote success', err:'Vote error',
-        kpiAvgPerDay:'Avg per day: ' + (Array.isArray(a)?a[0]:a||''), kpiLastMonthDelta:(Array.isArray(a)?a[0]:a||'') + '% vs last'
-      };
-      return fb[k] || k;
+      return dashboardFallback(key, a);
     };
   }
 
@@ -59,7 +75,7 @@
     return { d, points, max, stepX, scaleY, pad, w, h };
   }
   function dayStart(ts){ var d = new Date(ts); d.setHours(0,0,0,0); return +d; }
-  function fmt(n){ return isFinite(n) ? n.toLocaleString() : '—'; }
+  function fmt(n){ return isFinite(n) ? n.toLocaleString() : '-'; }
 
   function initDashboard(ctx){
     var rootEl = ctx.root;
@@ -101,20 +117,15 @@
     function getMonthLabel(d){ d = d||new Date(); return new Intl.DateTimeFormat(undefined, { month:'long' }).format(d); }
 
     // Resolve backend via DI (auto-install if missing)
-    var be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||
-             (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) || null;
-    var beReady = (async function ensureBackend(){
-      if (be) return;
-      if (root.AVRFW_installBackend) {
-        await root.AVRFW_installBackend(ctx.app, { background:false });
-        be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||
-             (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) || null;
-      }
+    let backend = AVRFW.getBackend(ctx);
+    const backendReady = (async function ensureBackend(){
+      backend = await AVRFW.ensureBackend(ctx, { install: true });
+      return backend;
     })();
 
     async function fetchData() {
-      await beReady;
-      if (!be || !be.DB) {
+      await backendReady;
+      if (!backend || !backend.DB) {
         // Demo fallback if backend not available yet
         return {
           general: { successVotes: 1200, errorVotes: 80, laterVotes: 20, monthSuccessVotes: 90, lastMonthSuccessVotes: 70, added: Date.now()-20*86400000 },
@@ -128,9 +139,9 @@
       }
       // No per-view initializeConfig; backend is already installed
       var res = await Promise.all([
-        be.DB.get('other','generalStats'),
-        be.DB.get('other','todayStats'),
-        be.DB.getAll('projects')
+        backend.DB.get('other','generalStats'),
+        backend.DB.get('other','todayStats'),
+        backend.DB.getAll('projects')
       ]);
       return { general: res[0]||{}, today: res[1]||{}, projects: res[2]||[] };
     }
@@ -203,7 +214,7 @@
       if (els.pillTotal) els.pillTotal.textContent   = fmt(t.attemptsAll);
       if (els.pillToday) els.pillToday.textContent   = fmt(t.todayTotal);
       if (els.pillSuccess) els.pillSuccess.textContent = (t.successRateAll||0) + '%';
-      if (els.pillStreak) els.pillStreak.textContent = t.streak ? (t.streak + 'd') : '—';
+      if (els.pillStreak) els.pillStreak.textContent = t.streak ? (t.streak + 'd') : '-';
     }
     function renderKPIs(t) {
       if (els.kpiMonthLabel) els.kpiMonthLabel.textContent = getMonthLabel();
@@ -248,7 +259,7 @@
 
       setupSparkInteractions(tr, ok, er);
       var lblStart = $('#sparkStartLabel'), lblEnd = $('#sparkEndLabel');
-      if (lblStart) lblStart.textContent = '−30d';
+      if (lblStart) lblStart.textContent = '30d';
       if (lblEnd)   lblEnd.textContent   = i18n('today') || 'Today';
     }
 
@@ -334,13 +345,13 @@
         var pill = document.createElement('span');
         pill.className = 'ellipse';
         var r = Math.max(0, Math.min(100, Number(row.rate||0)));
-        pill.textContent = isFinite(r) ? (r + '%') : '—';
+        pill.textContent = isFinite(r) ? (r + '%') : '-';
         pill.style.background = rateColor(r);
         pill.style.color = '#fff';
         rateCell.innerHTML = '';
         rateCell.appendChild(pill);
 
-        node.querySelector('.last time').textContent = row.last ? new Date(row.last).toLocaleString() : '—';
+        node.querySelector('.last time').textContent = row.last ? new Date(row.last).toLocaleString() : '-';
         els.leaderBody.appendChild(node);
       });
     }
@@ -351,7 +362,7 @@
         var when = new Date(item.ts).toLocaleString();
         return '<li>' +
           '<span class="dot '+(item.ok?'ok':'err')+'"></span>' +
-          '<span class="what">'+ what +' — '+ domainFrom(item.site) +'</span>' +
+          '<span class="what">'+ what +' - '+ domainFrom(item.site) +'</span>' +
           '<time class="when">'+ when +'</time>' +
         '</li>';
       }).join('')) || '';

@@ -1,4 +1,4 @@
-/* view/settings/main.js — uses injected backend service (ctx.app.inject('backend')) */
+/* view/settings/main.js - uses injected backend service (ctx.app.inject('backend')) */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) define([], function(){ return factory(root.AVRFW, root.OptionsCore); });
   else if (typeof module === 'object' && module.exports) module.exports = factory(require('AVRFW'), require('OptionsCore'));
@@ -7,7 +7,22 @@
 
   
 
-  function t(k,a){ try{ return (chrome && chrome.i18n) ? chrome.i18n.getMessage(k,a) : ''; } catch(e){ return ''; } }
+  const t = (AVRFW && typeof AVRFW.createTranslator === 'function')
+    ? AVRFW.createTranslator()
+    : function(key, args){
+        try{
+          if (AVRFW && typeof AVRFW.t === 'function'){
+            var res = AVRFW.t(key, args);
+            if (res) return res;
+          }
+        } catch(e){}
+        try{
+          if (chrome && chrome.i18n){
+            return chrome.i18n.getMessage(key, args) || '';
+          }
+        } catch(e){}
+        return '';
+      };
 
   AVRFW.createViewProvider('settings', {
     controller: function(){ return { state:{}, methods:{} }; },
@@ -16,101 +31,105 @@
       AVRFW && AVRFW.translate && AVRFW.translate(ctx.root);
       OptionsCore.ensureContainers();
       var notif = OptionsCore.getNotif();
+      (async function initSettings(){
+        try {
 
-      var be = ctx.app && ctx.app.inject && ctx.app.inject('backend');
-      if (!be) { notif.create('Backend not available', 'error'); return; }
+        const backend = await AVRFW.ensureBackend(ctx, { install: true, waitFor: true, retries: 20, delay: 120 });
+        if (!backend) { notif.create('Backend not available', 'error'); return; }
 
-      // live bindings (after backend install)
-      var db = be.DB, dbLogs = be.DB_LOGS, settings = be.SETTINGS;
+        // live bindings (after backend install)
+        var db = backend.DB, dbLogs = backend.DB_LOGS, settings = backend.SETTINGS;
 
-      // Helpers
-      function setChecked(id, v){ var el = ctx.root.querySelector('#'+id); if (el) el.checked = !!v; }
-      function setValue(id, v){ var el = ctx.root.querySelector('#'+id); if (el) el.value = (v ?? ''); }
-      function getValue(id){ var el = ctx.root.querySelector('#'+id); return el ? el.value : ''; }
+        // Helpers
+        function setChecked(id, v){ var el = ctx.root.querySelector('#'+id); if (el) el.checked = !!v; }
+        function setValue(id, v){ var el = ctx.root.querySelector('#'+id); if (el) el.value = (v ?? ''); }
+        function getValue(id){ var el = ctx.root.querySelector('#'+id); return el ? el.value : ''; }
 
-      function persistSettings() {
-        var liveDB = be.DB || db;
-        if (!liveDB) { notif.create('DB not initialized', 'error'); return Promise.resolve(); }
-        return liveDB.put('other', settings, 'settings')
-          .then(function(){ try { chrome.runtime.sendMessage('reloadSettings'); } catch(e){} })
-          .then(function(){ OptionsCore.usageSpace(); });
-      }
-
-      function toggleExpert(on) {
-        var row = function(sel) {
-          var el = ctx.root.querySelector(sel);
-          return el && el.closest('.input-block, .check-block');
-        };
-        var show = function(sel){ var r=row(sel); if (r) r.style.display=''; };
-        var hide = function(sel){ var r=row(sel); if (r) r.style.display='none'; };
-
-        if (on) {
-          show('#timeout'); show('#timeoutError'); show('#timeoutVote');
-          show('#disabledOneVote'); show('#disabledDebug');
-          show('#disableCloseTabsOnSuccess'); show('#disableCloseTabsOnError');
-        } else {
-          hide('#timeout'); hide('#timeoutError'); hide('#timeoutVote');
-          hide('#disabledOneVote'); hide('#disabledDebug');
-          hide('#disableCloseTabsOnSuccess'); hide('#disableCloseTabsOnError');
+        function persistSettings() {
+          var liveDB = be.DB || db;
+          if (!liveDB) { notif.create('DB not initialized', 'error'); return Promise.resolve(); }
+          return liveDB.put('other', settings, 'settings')
+            .then(function(){ try { chrome.runtime.sendMessage('reloadSettings'); } catch(e){} })
+            .then(function(){ OptionsCore.usageSpace(); });
         }
-      }
 
-      async function restoreOptions(first){
-        // fill switches/inputs
-        setChecked('disabledNotifStart', settings.disabledNotifStart);
-        setChecked('disabledNotifInfo', settings.disabledNotifInfo);
-        setChecked('disabledNotifWarn', settings.disabledNotifWarn);
-        setChecked('disabledNotifError', settings.disabledNotifError);
+        function toggleExpert(on) {
+          var row = function(sel) {
+            var el = ctx.root.querySelector(sel);
+            return el && el.closest('.input-block, .check-block');
+          };
+          var show = function(sel){ var r=row(sel); if (r) r.style.display=''; };
+          var hide = function(sel){ var r=row(sel); if (r) r.style.display='none'; };
 
-        setChecked('disabledCheckInternet', settings.disabledCheckInternet);
-        setChecked('disabledOneVote', settings.disabledOneVote);
-        setChecked('disabledRestartOnTimeout', settings.disabledRestartOnTimeout);
-        setChecked('disabledFocusedTab', settings.disabledFocusedTab);
+          if (on) {
+            show('#timeout'); show('#timeoutError'); show('#timeoutVote');
+            show('#disabledOneVote'); show('#disabledDebug');
+            show('#disableCloseTabsOnSuccess'); show('#disableCloseTabsOnError');
+          } else {
+            hide('#timeout'); hide('#timeoutError'); hide('#timeoutVote');
+            hide('#disabledOneVote'); hide('#disabledDebug');
+            hide('#disableCloseTabsOnSuccess'); hide('#disableCloseTabsOnError');
+          }
+        }
 
-        setChecked('disabledWarnCaptcha', settings.disabledWarnCaptcha);
-        setChecked('disabledClickCaptcha', settings.disabledClickCaptcha);
+        async function restoreOptions(first){
+          // fill switches/inputs
+          setChecked('disabledNotifStart', settings.disabledNotifStart);
+          setChecked('disabledNotifInfo', settings.disabledNotifInfo);
+          setChecked('disabledNotifWarn', settings.disabledNotifWarn);
+          setChecked('disabledNotifError', settings.disabledNotifError);
 
-        setChecked('disabledDebug', settings.debug || false);
-        setChecked('disableCloseTabsOnSuccess', settings.disableCloseTabsOnSuccess || false);
-        setChecked('disableCloseTabsOnError', settings.disableCloseTabsOnError || false);
+          setChecked('disabledCheckInternet', settings.disabledCheckInternet);
+          setChecked('disabledOneVote', settings.disabledOneVote);
+          setChecked('disabledRestartOnTimeout', settings.disabledRestartOnTimeout);
+          setChecked('disabledFocusedTab', settings.disabledFocusedTab);
 
-        setChecked('expertMode', settings.expertMode || false);
-        setValue('timeoutValue', settings.timeout || 0);
-        setValue('timeoutErrorValue', settings.timeoutError || 0);
-        setValue('timeoutVoteValue', settings.timeoutVote || 1000);
+          setChecked('disabledWarnCaptcha', settings.disabledWarnCaptcha);
+          setChecked('disabledClickCaptcha', settings.disabledClickCaptcha);
 
-        toggleExpert(!!settings.expertMode);
-      }
+          setChecked('disabledDebug', settings.debug || false);
+          setChecked('disableCloseTabsOnSuccess', settings.disableCloseTabsOnSuccess || false);
+          setChecked('disableCloseTabsOnError', settings.disableCloseTabsOnError || false);
 
-      function wireSettingsCheckboxes() {
-        ctx.root.querySelectorAll('input[name=checkbox]').forEach(function(check){
-          check.addEventListener('change', function(e){
-            check.disabled = true;
-            var id = check.id;
+          setChecked('expertMode', settings.expertMode || false);
+          setValue('timeoutValue', settings.timeout || 0);
+          setValue('timeoutErrorValue', settings.timeoutError || 0);
+          setValue('timeoutVoteValue', settings.timeoutVote || 1000);
 
-            // map id -> settings fields (explicit where needed)
-            const map = {
-              disabledNotifStart: 'disabledNotifStart',
-              disabledNotifInfo: 'disabledNotifInfo',
-              disabledNotifWarn: 'disabledNotifWarn',
-              disabledNotifError: 'disabledNotifError',
-              disabledCheckInternet: 'disabledCheckInternet',
-              disabledOneVote: 'disabledOneVote',
-              disabledRestartOnTimeout: 'disabledRestartOnTimeout',
-              disabledFocusedTab: 'disabledFocusedTab',
-              disabledWarnCaptcha: 'disabledWarnCaptcha',
-              disabledClickCaptcha: 'disabledClickCaptcha',
-              disabledDebug: 'debug',
-              disableCloseTabsOnSuccess: 'disableCloseTabsOnSuccess',
-              disableCloseTabsOnError: 'disableCloseTabsOnError',
-              expertMode: 'expertMode',
-            };
-            const key = map[id];
-            if (key) settings[key] = check.checked;
-            if (key === 'disabledNotifError' && check.checked && !confirm(t('confirmDisableErrors') || 'Disable error notifications?')) { check.checked=false; check.disabled=false; return; }
-            if (key === 'expertMode') toggleExpert(check.checked);
+          toggleExpert(!!settings.expertMode);
+        }
 
-            persistSettings().finally(function(){ check.disabled=false; });
+        function wireSettingsCheckboxes() {
+          ctx.root.querySelectorAll('input[name=checkbox]').forEach(function(check){
+            check.addEventListener('change', function(e){
+              check.disabled = true;
+              var id = check.id;
+
+              // map id -> settings fields (explicit where needed)
+              const map = {
+                disabledNotifStart: 'disabledNotifStart',
+                disabledNotifInfo: 'disabledNotifInfo',
+                disabledNotifWarn: 'disabledNotifWarn',
+                disabledNotifError: 'disabledNotifError',
+                disabledCheckInternet: 'disabledCheckInternet',
+                disabledOneVote: 'disabledOneVote',
+                disabledRestartOnTimeout: 'disabledRestartOnTimeout',
+                disabledFocusedTab: 'disabledFocusedTab',
+                disabledWarnCaptcha: 'disabledWarnCaptcha',
+                disabledClickCaptcha: 'disabledClickCaptcha',
+                disabledDebug: 'debug',
+                disableCloseTabsOnSuccess: 'disableCloseTabsOnSuccess',
+                disableCloseTabsOnError: 'disableCloseTabsOnError',
+                expertMode: 'expertMode',
+              };
+              const key = map[id];
+              if (key) settings[key] = check.checked;
+              if (key === 'disabledNotifError' && check.checked && !confirm(t('confirmDisableErrors') || 'Disable error notifications?')) { check.checked=false; check.disabled=false; return; }
+              if (key === 'expertMode') toggleExpert(check.checked);
+
+              persistSettings().finally(function(){ check.disabled=false; });
+        } catch (error) { notif.create(error, 'error'); }
+      })();
           });
         });
       }
@@ -148,7 +167,7 @@
 
         if (btnExport) btnExport.addEventListener('click', async function(){
           try {
-            notif.create(t('exporting') || 'Exporting…', 'hint');
+            notif.create(t('exporting') || 'Exporting...', 'hint');
             var generalStats = await db.get('other','generalStats') || {};
             var todayStats   = await db.get('other','todayStats') || {};
             var allSetting   = { settings, generalStats, todayStats, version: db.version };
@@ -166,7 +185,7 @@
 
         if (btnLogs) btnLogs.addEventListener('click', async function(){
           try {
-            notif.create(t('exporting') || 'Exporting…', 'hint');
+            notif.create(t('exporting') || 'Exporting...', 'hint');
             var logs = dbLogs ? await dbLogs.getAll('logs') : [];
             var text = logs.map(function(l){return l;}).join('\n');
             var blob = new Blob([text], { type:'text/plain;charset=UTF-8' });
@@ -187,7 +206,7 @@
         });
 
         if (fileInput) fileInput.addEventListener('change', async function(ev){
-          notif.create(t('importing') || 'Importing…', 'hint');
+          notif.create(t('importing') || 'Importing...', 'hint');
           try {
             if (!ev.target.files || ev.target.files.length === 0) return;
             var file = ev.target.files[0];
@@ -230,4 +249,10 @@
     }
   });
 }));
+
+
+
+
+
+
 

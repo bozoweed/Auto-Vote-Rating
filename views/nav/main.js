@@ -1,5 +1,5 @@
-/* view/nav/main.js — UMD provider "nav"
-   - Barre latérale + burger
+/* view/nav/main.js - UMD provider "nav"
+   - Barre laterale + burger
    - Host interne "content" (#app-content) pour monter les vues enfants
    - Chargement paresseux des vues: dashboard, projects, add, settings, stats (+ fast-add si URL)
    - DI backend: ctx.app.inject('backend'), auto-install fallback if missing
@@ -9,7 +9,30 @@
   else if (typeof module === 'object' && module.exports) module.exports = factory(require('AVRFW'));
   else factory(root.AVRFW);
 }(typeof self !== 'undefined' ? self : this, function(AVRFW){
-  function t(k,a){ try{ return (chrome && chrome.i18n) ? chrome.i18n.getMessage(k,a) : ''; } catch(e){ return ''; } }
+  const t = (AVRFW && typeof AVRFW.createTranslator === 'function')
+    ? AVRFW.createTranslator({
+        fallback: {
+          openMenu: 'Open menu',
+          closeMenu: 'Close menu',
+          backendNotAvailable: 'Backend not available. Reload the page.',
+          loadError: 'Navigation load error'
+        }
+      })
+    : function(key, args){
+        try{
+          if (chrome && chrome.i18n){
+            var msg = chrome.i18n.getMessage(key, args);
+            if (msg) return msg;
+          }
+        } catch(e){}
+        var fb = {
+          openMenu: 'Open menu',
+          closeMenu: 'Close menu',
+          backendNotAvailable: 'Backend not available. Reload the page.',
+          loadError: 'Navigation load error'
+        };
+        return fb[key] || '';
+      };
 
   AVRFW.createViewProvider('nav', {
     controller: function(){ return { state:{}, methods:{} }; },
@@ -26,8 +49,8 @@
           var active = nav.classList.toggle('active');
           burger.classList.toggle('active', active);
           burger.setAttribute('aria-expanded', String(active));
-          var openLbl  = AVRFW.t ? AVRFW.t('openMenu')  : (t('openMenu')  || 'Open menu');
-          var closeLbl = AVRFW.t ? AVRFW.t('closeMenu') : (t('closeMenu') || 'Close menu');
+          var openLbl  = t('openMenu') || 'Open menu';
+          var closeLbl = t('closeMenu') || 'Close menu';
           burger.setAttribute('aria-label', active ? closeLbl : openLbl);
         });
       }
@@ -47,17 +70,9 @@
       (async function initNav(){
         try {
           // Injected backend or fallback registry from backend.service.js
-          var be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||
-                   (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) || null;
+          const backend = await AVRFW.ensureBackend(ctx, { install: true });
 
-          if (!be && root.AVRFW_installBackend) {
-            // Auto-install backend if not present (no-op if already installed)
-            await root.AVRFW_installBackend(ctx.app, { background: false });
-            be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||
-                 (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) || null;
-          }
-
-          if (!be) {
+          if (!backend) {
             // If still not available, render a small error panel in content
             if (contentHost) {
               contentHost.innerHTML = '<div style="padding:12px;color:#ff6b6b;border:1px solid rgba(255,255,255,.15);border-radius:8px;background:rgba(255,107,107,.08)">' +

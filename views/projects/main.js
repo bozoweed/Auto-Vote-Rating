@@ -1,10 +1,10 @@
-/* view/projects/main.js — UMD provider "projects"
-   Fonctionnalités:
+/* view/projects/main.js - UMD provider "projects"
+   Fonctionnalites:
    - Groupes par rating (boutons) + listes paresseuses
-   - Actions par projet: restart, stats, delete, accès permissions (si erreur d'accès)
-   - Modales "stats" auto-injectées dans #modals
-   Dépendances via DI:
-   ctx.app.inject('backend') → {
+   - Actions par projet: restart, stats, delete, acces permissions (si erreur d'acces)
+   - Modales "stats" auto-injectees dans #modals
+   Dependances via DI:
+   ctx.app.inject('backend')  {
      DB, DB_LOGS, SETTINGS, allProjects,
      initializeConfig, attachGlobalErrorHandlers, utils: { getDomainWithoutSubdomain }
    }
@@ -25,10 +25,18 @@
 
 
 
-  function t(k, a) { try { return (chrome && chrome.i18n) ? chrome.i18n.getMessage(k, a) : ''; } catch (e) { return ''; } }
-  function fmt(n) { return isFinite(n) ? n.toLocaleString() : '—'; }
+  const t = (AVRFW && typeof AVRFW.createTranslator === 'function')
+    ? AVRFW.createTranslator()
+    : function(key, args){
+        try {
+          return (chrome && chrome.i18n) ? chrome.i18n.getMessage(key, args) : '';
+        } catch (e) { return ''; }
+      };
+  function fmt(n) { return isFinite(n) ? n.toLocaleString() : '-'; }
   function highlight(el) { if (!el) return; el.classList.add('highlight'); setTimeout(function () { el.classList.remove('highlight'); }, 1200); }
-  function toArr(x) { return Array.prototype.slice.call(x || []); }
+  const toArr = (AVRFW && typeof AVRFW.toArray === 'function')
+    ? AVRFW.toArray
+    : function(list){ return Array.prototype.slice.call(list || []); };
 
   function ensureStatsModals() {
     OptionsCore.ensureContainers();
@@ -78,7 +86,7 @@
         if (tkn.match(urlRegex)) {
           var a = document.createElement('a');
           a.classList.add('link'); a.target = 'blank_'; a.href = tkn;
-          a.textContent = (tkn.length > 64 ? tkn.substring(0, 64) + '…' : tkn);
+          a.textContent = (tkn.length > 64 ? tkn.substring(0, 64) + '...' : tkn);
           element.append(a);
         } else element.append(tkn);
       }
@@ -153,48 +161,24 @@
       OptionsCore.getModals();
 
       // Injected backend (via app DI or global fallback from backend.service)
-      // Injected backend (via app DI or global fallback from backend.service)
-      var be = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||
-        (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) ||
-        null;
-      if (!be) { notif.create('Backend not available', 'error'); return; }
-
-      // Live bindings (post-init from backend.service)
-      var db = be.DB, dbLogs = be.DB_LOGS, settings = be.SETTINGS || {}, allProjects = be.allProjects || {};
+      var be = AVRFW.getBackend(ctx);
+      if (!be) { notif.create('Backend not available', 'error'); }
 
       async function ensureBackend() {
-        let backend = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||
-          (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) ||
-          null;
-        if (backend) return backend;
-        console.warn('[projects] ensureBackend:missing', { hasInstaller: !!root.AVRFW_installBackend, hasApp: !!ctx.app });
-        if (root.AVRFW_installBackend && ctx.app) {
-          try {
-            backend = await root.AVRFW_installBackend(ctx.app, { background: false });
-          } catch (error) {
-            console.warn('[projects] ensureBackend:installFailed', error);
-          }
-        }
-        if (backend) return backend;
-        return await new Promise((resolve) => {
-          let attempts = 0;
-          (function wait() {
-            const candidate = (ctx.app && ctx.app.inject && ctx.app.inject('backend')) ||
-              (root.__AVRFW_SERVICES__ && root.__AVRFW_SERVICES__.backend) ||
-              null;
-            if (candidate || attempts++ > 20) {
-              resolve(candidate);
-            } else {
-              setTimeout(wait, 100);
-            }
-          })();
-        });
+        return AVRFW.ensureBackend(ctx, { install: true, waitFor: true, retries: 25, delay: 120 });
       }
 
       // Live bindings (post-init from backend.service)
       var db = null, dbLogs = null, settings = {}, allProjects = {};
       var generateLock = false;
       let ratingCache = new Map();
+
+      if (be) {
+        db = be.DB;
+        dbLogs = be.DB_LOGS;
+        settings = be.SETTINGS || settings;
+        allProjects = be.allProjects || allProjects;
+      }
 
       function $(sel) { return ctx.root.querySelector(sel); }
       function $all(sel) { return toArr(ctx.root.querySelectorAll(sel)); }
@@ -628,11 +612,11 @@
         }
 
         var textProject = '';
-        if (project.nick) textProject += ' – ' + project.nick;
-        if (project.game) textProject += ' – ' + project.game;
-        if (project.id) textProject += ' – ' + project.id;
-        if (project.name) textProject += ' – ' + project.name;
-        if (textProject === '') textProject = project.rating; else textProject = textProject.replace(' – ', '');
+        if (project.nick) textProject += ' - ' + project.nick;
+        if (project.game) textProject += ' - ' + project.game;
+        if (project.id) textProject += ' - ' + project.id;
+        if (project.name) textProject += ' - ' + project.name;
+        if (textProject === '') textProject = project.rating; else textProject = textProject.replace(' - ', '');
         if (project.priority) textProject += ' (' + (t('inPriority') || 'priority') + ')';
         if (project.randomize) textProject += ' (' + (t('inRandomize') || 'randomize') + ')';
         if (project.rating !== 'Custom' && (project.timeout != null || project.timeoutHour != null)) textProject += ' (' + (t('customTimeOut2') || 'custom timeout') + ')';
@@ -682,9 +666,9 @@
           if (!(open && same)) return;
         }
         var text = project.rating;
-        if (project.nick) text += ' – ' + project.nick;
-        if (project.game) text += ' – ' + project.game;
-        if (project.name) text += ' – ' + project.name; else if (project.id) text += ' – ' + project.id;
+        if (project.nick) text += ' - ' + project.nick;
+        if (project.game) text += ' - ' + project.game;
+        if (project.name) text += ' - ' + project.name; else if (project.id) text += ' - ' + project.id;
 
         var sub = document.querySelector('.statsSubtitle');
         sub.textContent = text; sub.id = 'stats' + project.key;
