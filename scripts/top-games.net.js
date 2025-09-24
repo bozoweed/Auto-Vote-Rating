@@ -27,7 +27,12 @@ async function vote(first) {
         chrome.runtime.sendMessage({ successfully: true });
         return;
     }
-
+    if (document.querySelector(".failed-description") != null){
+        const numbers = document.querySelector(".failed-description").textContent.match(/\d+/g).map(Number);
+        const milliseconds = numbers[0] * 60 * 1000
+        chrome.runtime.sendMessage({ later: Date.now() + milliseconds });
+        return;
+    }
     // Если есть предупреждение
     if (document.getElementById('digitalCountdown') != null) {
         const numbers = document.getElementById('digitalCountdown').textContent.match(/\d+/g).map(Number);
