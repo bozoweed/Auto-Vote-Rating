@@ -186,9 +186,8 @@ function dbError(event, logs) {
 // -------------------- Upgrade (Migrations) --------------------
 export async function upgrade(dbase, oldVersion, newVersion, transaction) {
   const tx = transaction || dbase.transaction(['projects', 'other'], 'readwrite');
-  const other = tx.objectStore('other');
+  let other;
 
-  // v1 — initial schema
   if (oldVersion < 1) {
     const projects = dbase.createObjectStore('projects', { autoIncrement: true });
     projects.createIndex('rating, id, nick', ['rating', 'id', 'nick']);
@@ -196,7 +195,11 @@ export async function upgrade(dbase, oldVersion, newVersion, transaction) {
     projects.createIndex('rating', 'rating');
 
     dbase.createObjectStore('other');
+  }
 
+  other = tx.objectStore('other');
+
+  if (oldVersion < 1) {
     await other.put(defaultSettings(), 'settings');
     await other.put(defaultGeneralStats(), 'generalStats');
     await other.put(defaultTodayStats(), 'todayStats');
@@ -204,7 +207,7 @@ export async function upgrade(dbase, oldVersion, newVersion, transaction) {
     await other.put(true, 'onLine');
   }
 
-  // v2 — ensure todayStats + timeout
+  // v2 ??" ensure todayStats + timeout
   if (oldVersion < 2) {
     let s = await other.get('settings');
     if (!s) s = defaultSettings();
@@ -381,3 +384,4 @@ async function migrateLegacyRatingsToDomains(tx) {
     cursor = await cursor.continue();
   }
 }
+
