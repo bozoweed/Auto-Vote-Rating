@@ -17,6 +17,7 @@
 
 <a href="http://topcraft.club/">topcraft.club</a>  
 <a href="https://mctop.su/">mctop.su</a>  
+<a href="http://minecraft-servers.ru/">minecraft-servers.ru</a>  
 <a href="http://mcrate.su/">mcrate.su</a>  
 <a href="http://minecraftrating.ru/">minecraftrating.ru</a>  
 <a href="http://monitoringminecraft.ru/">monitoringminecraft.ru</a>  

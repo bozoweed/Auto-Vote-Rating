@@ -14,7 +14,8 @@ const authVKUrls = new Map([
     ['mcrate.su', 'https://oauth.vk.com/authorize?client_id=3059117&redirect_uri=close.html&response_type=token&scope=0&v=&state=&display=page&__q_hash=a11ee68ba006307dbef29f34297bee9a'],
     ['minecraftrating.ru', 'https://oauth.vk.com/authorize?client_id=5216838&display=page&redirect_uri=close.html&response_type=token&v=5.45'],
     ['monitoringminecraft.ru', 'https://oauth.vk.com/authorize?client_id=3697128&scope=0&response_type=token&redirect_uri=close.html'],
-    ['misterlauncher.org', 'https://oauth.vk.com/authorize?client_id=7636705&display=page&redirect_uri=close.html&response_type=token']
+    ['misterlauncher.org', 'https://oauth.vk.com/authorize?client_id=7636705&display=page&redirect_uri=close.html&response_type=token'],
+    ['minecraft-servers.ru', 'https://oauth.vk.com/authorize?response_type=token&client_id=53128143&redirect_uri=close.html&scope=email']
 ])
 
 const svgFail = document.createElement('img')
@@ -1921,8 +1922,8 @@ async function addCustom() {
 }
 
 async function openPopup(url, onClose) {
-    const width = 700
-    const height = 500
+    const width = 900
+    const height = 700
     const left = parseInt(Math.max(0, (screen.width - width) / 2) + (screen.availLeft | 0))
         , top = parseInt(Math.max(0, (screen.height - height) / 2) + (screen.availTop | 0))
     let close = 'setSelfAsOpener'

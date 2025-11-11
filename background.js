@@ -419,7 +419,7 @@ async function silentVote(project) {
 
 async function checkResponseError(project, response, url, bypassCodes, vk) {
     let host = extractHostname(response.url)
-    if (vk && host.includes('vk.com')) {
+    if (vk && (host.includes('vk.com') || host.includes('vk.ru'))) {
         if (response.headers.get('Content-Type') && response.headers.get('Content-Type').includes('windows-1251')) {
             //Почему не UTF-8?
             response = await new Response(new TextDecoder('windows-1251').decode(await response.arrayBuffer()))
@@ -430,7 +430,7 @@ async function checkResponseError(project, response, url, bypassCodes, vk) {
     silentResponseBody[project.rating] = {}
     silentResponseBody[project.rating].doc = response.doc
     silentResponseBody[project.rating].url = response.url
-    if (vk && host.includes('vk.com')) {
+    if (vk &&  (host.includes('vk.com') || host.includes('vk.ru'))) {
         //Узнаём причину почему мы зависли на авторизации ВК
         let text
         if (response.doc.querySelector('div.oauth_form_access') != null) {

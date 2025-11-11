@@ -14,6 +14,16 @@ var allProjects = {
         needIsTrusted: () => true
     },
     'topcraft.club': {},
+    'minecraft-servers.ru': {
+        pageURL: (project) => 'https://minecraft-servers.ru/server/' + project.id ,
+        voteURL: (project) => 'https://minecraft-servers.ru/server/' + project.id ,
+        projectName: (doc) => doc.querySelector('div.flex.justify-between > h1').textContent,
+        exampleURL: () => ['https://minecraft-servers.ru/server/', '5231', ''],
+        parseURL: (url) => ({id: url.pathname.split('/')[2]}),
+        timeout: () => ({hour: 21}),
+        needAdditionalOrigins: ()=> ['*://*.vk.com/*'],
+        needIsTrusted: () => true
+    },
     'mctop.su': {
         pageURL: (project) => 'https://mctop.su/servers/' + project.id + '/',
         voteURL: (project) => 'https://mctop.su/servers/' + project.id + '/vote/',

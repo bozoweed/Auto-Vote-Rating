@@ -103,7 +103,7 @@ async function checkAll(first) {
     }
 
     //Если мы находися на странице авторизации ВКонтакте
-    if (document.URL.match(/vk.com\/*/)) {
+    if (document.URL.match(/vk.com\/*/) || document.URL.match(/vk.ru\/*/)) {
         // TODO нужно полностью переписать тут всю логику под новую версию интерфейса ВК
 
         // https://cdn.discordapp.com/attachments/1072161816693710868/1072172021473095700/image.png
@@ -124,6 +124,12 @@ async function checkAll(first) {
             }, 1000)
             return
         }
+        if(document.querySelector(".vkc__Authorize__container")){
+            if (document.querySelector("button.vkuiButton") != null){
+                document.querySelector("button.vkuiButton").click()
+                return
+            }
+        }
         let text
         let notAuth = false
         if (document.querySelector('div.oauth_form_access')) {
@@ -139,7 +145,7 @@ async function checkAll(first) {
         } else if (document.querySelector('.profile_deleted_text')) {
             text = document.querySelector('.profile_deleted_text').textContent.trim()
             notAuth = true
-        } else if (document.URL.startsWith('https://vk.com/join')) {
+        } else if (document.URL.startsWith('https://vk.com/join') || document.URL.startsWith('https://vk.ru/join')) {
             text = chrome.i18n.getMessage('notRegVK')
             notAuth = true
         } else if (document.body.innerText.length < 500) {
