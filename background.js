@@ -379,7 +379,7 @@ async function silentVote(project) {
             return
         }
 
-        if (!self['silentVote' + project.rating]) {
+        if (!self['silentVote_' + (project.ratingMain || project.rating)]) {
             importScripts('scripts/' + (project.ratingMain || project.rating) + '_silentvote.js')
         }
 
