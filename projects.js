@@ -1383,6 +1383,18 @@ var allProjects = {
         needAdditionalPermissions: () => ['cookies']
     },
     'loliland.net': {},
+    'magicrust.gg': {
+        pageURL: () => 'https://magicrust.gg/ru',
+        voteURL: () => 'https://magicrust.gg/ru',
+        projectName: () => 'Бесплатный ежедневный кейс',
+        exampleURL: () => ['https://magicrust.gg/ru', '', ''],
+        parseURL: () => ({id: 'free daily case'}),
+        timeout: () => ({hour: 10}),
+        notRequiredCaptcha: () => true,
+        notRequiredNick: () => true,
+        notRequiredId: () => true,
+        needAdditionalOrigins: () => ['https://*.magicrust.gg/*', '*://*.steamcommunity.com/*']
+    },
     'mcservers.top': {
         pageURL: (project) => 'https://mcservers.top/server/' + project.id,
         voteURL: (project) => 'https://mcservers.top/server/' + project.id,
