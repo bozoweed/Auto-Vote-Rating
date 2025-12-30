@@ -11,6 +11,11 @@ async function vote(first) {
         return
     }
 
+    // Only run for wheel spin, not for promo code activation
+    if (document.URL.includes('/home')) {
+        return
+    }
+
     // Execute only on first run
     if (first === false) return
 

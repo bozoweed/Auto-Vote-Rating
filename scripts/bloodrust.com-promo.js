@@ -129,8 +129,10 @@ async function vote(first) {
         let promoCode = null
 
         // Get promo code from silentResponseBody (set by background script)
-        if (window.silentResponseBody && window.silentResponseBody.promoCode) {
-            promoCode = window.silentResponseBody.promoCode
+        // Check both 'bloodrust.com' and 'bloodrust.com-promo' keys for compatibility
+        if (window.silentResponseBody && (window.silentResponseBody['bloodrust.com'] || window.silentResponseBody['bloodrust.com-promo'])) {
+            const responseData = window.silentResponseBody['bloodrust.com'] || window.silentResponseBody['bloodrust.com-promo']
+            promoCode = responseData.promoCode
             console.log('[bloodrust.com-promo] ✓ Промокод получен от background script:', promoCode)
         }
 

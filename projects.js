@@ -1396,29 +1396,23 @@ var allProjects = {
         needAdditionalOrigins: () => ['https://*.magicrust.gg/*', '*://*.steamcommunity.com/*']
     },
     'bloodrust.com': {
-        pageURL: () => 'https://bloodrust.com/wheel',
-        voteURL: () => 'https://bloodrust.com/wheel',
-        projectName: () => 'Колесо фортуны',
+        pageURL: (project) => project.id === 'promo code' ? 'https://bloodrust.com/home' : 'https://bloodrust.com/wheel',
+        voteURL: (project) => project.id === 'promo code' ? 'https://bloodrust.com/home' : 'https://bloodrust.com/wheel',
+        projectName: (_doc, project) => project.id === 'promo code' ? 'Активация промокода' : 'Колесо фортуны',
         exampleURL: () => ['https://bloodrust.com/wheel', '', ''],
-        parseURL: () => ({id: 'wheel spin'}),
-        timeout: () => ({hour: 24}),
+        parseURL: (url) => {
+            // Determine task type based on URL path
+            if (url.pathname.includes('/home')) {
+                return {id: 'promo code'}
+            }
+            return {id: 'wheel spin'}
+        },
+        timeout: (project) => project.id === 'promo code' ? ({hour: 6}) : ({hour: 24}),
         notRequiredCaptcha: () => true,
         notRequiredNick: () => true,
         notRequiredId: () => true,
-        needAdditionalOrigins: () => ['https://*.bloodrust.com/*', '*://*.steamcommunity.com/*']
-    },
-    'bloodrust.com-promo': {
-        pageURL: () => 'https://bloodrust.com/home',
-        voteURL: () => 'https://bloodrust.com/home',
-        projectName: () => 'Активация промокода',
-        exampleURL: () => ['https://bloodrust.com/home', '', ''],
-        parseURL: () => ({id: 'promo code'}),
-        timeout: () => ({hour: 6}),
-        notRequiredCaptcha: () => true,
-        notRequiredNick: () => true,
-        notRequiredId: () => true,
-        silentVote: () => true,
-        needAdditionalOrigins: () => ['https://*.bloodrust.com/*', 'https://*.t.me/*', 'https://*.telegram.org/*']
+        silentVote: (project) => project.id === 'promo code',
+        needAdditionalOrigins: () => ['https://*.bloodrust.com/*', '*://*.steamcommunity.com/*', 'https://*.t.me/*', 'https://*.telegram.org/*']
     },
     'mcservers.top': {
         pageURL: (project) => 'https://mcservers.top/server/' + project.id,

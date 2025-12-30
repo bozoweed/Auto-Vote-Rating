@@ -1,13 +1,20 @@
 // noinspection ES6MissingAwait
 
-self['silentVote_bloodrust.com-promo'] = async function (project) {
-    console.log('[bloodrust.com-promo-silent] Начало silent vote')
+self['silentVote_bloodrust.com'] = async function (project) {
+    // Only run silent vote for promo code tasks
+    if (project.id !== 'promo code') {
+        endVote({message: 'Silent vote только для promo code'}, null, project)
+        return
+    }
+
+    // Use the same logic as bloodrust.com-promo
+    console.log('[bloodrust.com-silent] Начало silent vote для promo code')
 
     const PROMO_REGEX = /(?:Промокод|Промик|Промо).*?(?::|—)\s*([A-Za-z0-9]{5,10})/i
 
     try {
         // Step 1: Check wipe calendar
-        console.log('[bloodrust.com-promo-silent] Шаг 1: Проверка календаря вайпов')
+        console.log('[bloodrust.com-silent] Шаг 1: Проверка календаря вайпов')
         const wipeResponse = await fetch('https://core.bloodrust.com/public/wipe-calendar', {
             headers: {
                 'accept': 'application/json, text/plain, */*'
@@ -21,11 +28,11 @@ self['silentVote_bloodrust.com-promo'] = async function (project) {
         }
 
         const wipeData = await wipeResponse.json()
-        console.log('[bloodrust.com-promo-silent] Получено дней в календаре:', Array.isArray(wipeData) ? wipeData.length : 'не массив')
+        console.log('[bloodrust.com-silent] Получено дней в календаре:', Array.isArray(wipeData) ? wipeData.length : 'не массив')
 
         // Find wipe in next 24 hours from now
         const now = new Date()
-        console.log('[bloodrust.com-promo-silent] Текущее время:', now.toLocaleString('ru-RU'))
+        console.log('[bloodrust.com-silent] Текущее время:', now.toLocaleString('ru-RU'))
 
         let recentWipe = null
         let allWipes = []
@@ -56,7 +63,7 @@ self['silentVote_bloodrust.com-promo'] = async function (project) {
             // Sort by date (closest first, whether past or future)
             allWipes.sort((a, b) => Math.abs(a.hoursDiff) - Math.abs(b.hoursDiff))
 
-            console.log(`[bloodrust.com-promo-silent] Найдено вайпов: ${allWipes.length}`)
+            console.log(`[bloodrust.com-silent] Найдено вайпов: ${allWipes.length}`)
 
             // Find wipe within 24 hours (past or future)
             for (const item of allWipes) {
@@ -65,14 +72,14 @@ self['silentVote_bloodrust.com-promo'] = async function (project) {
                     recentWipe = item.wipe
                     const isInPast = item.hoursDiff >= 0
                     const status = isInPast ? 'прошедший' : 'предстоящий'
-                    console.log(`[bloodrust.com-promo-silent] ✓ Найден ${status} вайп: ${item.date.toLocaleString('ru-RU')}`)
+                    console.log(`[bloodrust.com-silent] ✓ Найден ${status} вайп: ${item.date.toLocaleString('ru-RU')}`)
                     break
                 }
             }
         }
 
         if (!recentWipe) {
-            console.log('[bloodrust.com-promo-silent] Вайпов в ближайшие 24 часа не найдено')
+            console.log('[bloodrust.com-silent] Вайпов в ближайшие 24 часа не найдено')
 
             // Calculate next check time: tomorrow at 00:00
             const tomorrow = new Date(now)
@@ -84,7 +91,7 @@ self['silentVote_bloodrust.com-promo'] = async function (project) {
         }
 
         // Step 2: Parse Telegram channel for promo code
-        console.log('[bloodrust.com-promo-silent] Шаг 2: Парсинг Telegram канала')
+        console.log('[bloodrust.com-silent] Шаг 2: Парсинг Telegram канала')
 
         const telegramResponse = await fetch('https://t.me/s/bloodrust', {
             method: 'GET'
@@ -96,12 +103,12 @@ self['silentVote_bloodrust.com-promo'] = async function (project) {
         }
 
         const html = await telegramResponse.text()
-        console.log('[bloodrust.com-promo-silent] Получен HTML, длина:', html.length)
+        console.log('[bloodrust.com-silent] Получен HTML, длина:', html.length)
 
         let promoCode = null
         let highestMessageId = 0
 
-        console.log('[bloodrust.com-promo-silent] Поиск промокодов по ID сообщений...')
+        console.log('[bloodrust.com-silent] Поиск промокодов по ID сообщений...')
 
         // First, let's find all message blocks with simpler regex
         const simpleMessageRegex = /<div[^>]*class="[^"]*tgme_widget_message[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/gi
@@ -136,7 +143,7 @@ self['silentVote_bloodrust.com-promo'] = async function (project) {
                     text: cleanText.substring(0, 100)
                 })
 
-                console.log('[bloodrust.com-promo-silent] Найден промокод:', foundCode, 'ID сообщения:', messageId || 'не найден')
+                console.log('[bloodrust.com-silent] Найден промокод:', foundCode, 'ID сообщения:', messageId || 'не найден')
 
                 // Keep track of the promo code with highest message ID (newest)
                 if (messageId > 0 && messageId > highestMessageId) {
@@ -146,19 +153,19 @@ self['silentVote_bloodrust.com-promo'] = async function (project) {
             }
         }
 
-        console.log('[bloodrust.com-promo-silent] Проверено сообщений:', messageCount)
-        console.log('[bloodrust.com-promo-silent] Найдено промокодов:', foundPromoCodes.length)
+        console.log('[bloodrust.com-silent] Проверено сообщений:', messageCount)
+        console.log('[bloodrust.com-silent] Найдено промокодов:', foundPromoCodes.length)
 
         if (promoCode) {
-            console.log('[bloodrust.com-promo-silent] ✓ Выбран самый свежий промокод:', promoCode, 'ID сообщения:', highestMessageId)
+            console.log('[bloodrust.com-silent] ✓ Выбран самый свежий промокод:', promoCode, 'ID сообщения:', highestMessageId)
         } else if (foundPromoCodes.length > 0) {
             // Fallback: if no message IDs found, take the last promo code in the HTML (likely newest)
             promoCode = foundPromoCodes[foundPromoCodes.length - 1].code
-            console.log('[bloodrust.com-promo-silent] ⚠ ID сообщений не найдены, выбран последний промокод:', promoCode)
+            console.log('[bloodrust.com-silent] ⚠ ID сообщений не найдены, выбран последний промокод:', promoCode)
         }
 
         if (!promoCode) {
-            console.log('[bloodrust.com-promo-silent] Промокод не найден в HTML')
+            console.log('[bloodrust.com-silent] Промокод не найден в HTML')
             endVote({message: 'Промокод не найден в Telegram канале @bloodrust'}, null, project)
             return
         }
@@ -173,11 +180,11 @@ self['silentVote_bloodrust.com-promo'] = async function (project) {
                 usedPromoCodes = stored
             }
         } catch (e) {
-            console.log('[bloodrust.com-promo-silent] Не удалось загрузить историю промокодов')
+            console.log('[bloodrust.com-silent] Не удалось загрузить историю промокодов')
         }
 
         if (usedPromoCodes.includes(promoCode)) {
-            console.log('[bloodrust.com-promo-silent] Промокод', promoCode, 'уже был использован')
+            console.log('[bloodrust.com-silent] Промокод', promoCode, 'уже был использован')
 
             // Find next wipe date and set cooldown
             const now = new Date()
@@ -188,7 +195,7 @@ self['silentVote_bloodrust.com-promo'] = async function (project) {
                 // Find wipe in the future (negative hoursDiff means future)
                 if (item.hoursDiff < 0) {
                     nextWipeTime = item.date.getTime()
-                    console.log('[bloodrust.com-promo-silent] Найден следующий вайп:', item.date.toLocaleString('ru-RU'))
+                    console.log('[bloodrust.com-silent] Найден следующий вайп:', item.date.toLocaleString('ru-RU'))
                     break
                 }
             }
@@ -200,17 +207,17 @@ self['silentVote_bloodrust.com-promo'] = async function (project) {
                 const tomorrow = new Date(now)
                 tomorrow.setDate(tomorrow.getDate() + 1)
                 tomorrow.setHours(0, 0, 0, 0)
-                console.log('[bloodrust.com-promo-silent] Следующий вайп не найден, проверка в 00:00')
+                console.log('[bloodrust.com-silent] Следующий вайп не найден, проверка в 00:00')
                 endVote({later: tomorrow.getTime()}, null, project)
             }
             return
         }
 
         // Step 3: Send promo code to content script
-        console.log('[bloodrust.com-promo-silent] Промокод найден, отправка в content script:', promoCode)
+        console.log('[bloodrust.com-silent] Промокод найден, отправка в content script:', promoCode)
 
         // Store promo code in silentResponseBody so content script can use it
-        silentResponseBody['bloodrust.com-promo'] = {
+        silentResponseBody['bloodrust.com'] = {
             promoCode: promoCode
         }
 
@@ -223,13 +230,13 @@ self['silentVote_bloodrust.com-promo'] = async function (project) {
         try {
             await db.put('other', usedPromoCodes, usedPromoCodesKey)
         } catch (e) {
-            console.log('[bloodrust.com-promo-silent] Не удалось сохранить промокод в историю')
+            console.log('[bloodrust.com-silent] Не удалось сохранить промокод в историю')
         }
 
         endVote({silentVote: true}, null, project)
 
     } catch (error) {
-        console.error('[bloodrust.com-promo-silent] Критическая ошибка:', error)
+        console.error('[bloodrust.com-silent] Критическая ошибка:', error)
         endVote({message: 'Ошибка: ' + error.message}, null, project)
     }
 }
