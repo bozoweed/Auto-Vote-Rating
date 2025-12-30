@@ -1395,6 +1395,18 @@ var allProjects = {
         notRequiredId: () => true,
         needAdditionalOrigins: () => ['https://*.magicrust.gg/*', '*://*.steamcommunity.com/*']
     },
+    'bloodrust.com': {
+        pageURL: () => 'https://bloodrust.com/wheel',
+        voteURL: () => 'https://bloodrust.com/wheel',
+        projectName: () => 'Колесо фортуны',
+        exampleURL: () => ['https://bloodrust.com/wheel', '', ''],
+        parseURL: () => ({id: 'wheel spin'}),
+        timeout: () => ({hour: 24}),
+        notRequiredCaptcha: () => true,
+        notRequiredNick: () => true,
+        notRequiredId: () => true,
+        needAdditionalOrigins: () => ['https://*.bloodrust.com/*', '*://*.steamcommunity.com/*']
+    },
     'mcservers.top': {
         pageURL: (project) => 'https://mcservers.top/server/' + project.id,
         voteURL: (project) => 'https://mcservers.top/server/' + project.id,
