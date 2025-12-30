@@ -1,165 +1,260 @@
 // noinspection ES6MissingAwait
 
-async function vote(first) {
-    // Only run on magicrust.gg domain
-    if (!document.URL.includes('magicrust.gg')) {
-        return
+// ============================================================================
+// Constants
+// ============================================================================
+const SELECTORS = {
+    notification: '.notyf__message',
+    moddedButton: 'button.change-gmod[data-gmod="modded"]',
+    freeCaseButton: '.products__card .products__card-btn-free',
+    productCard: '.products__card',
+    modal: '.modal[data-product-id="5"], .modal[data-modal="product-5"]',
+    authButton: '.auth-btn, .modal-simple-cmd__btn-auth',
+    openCaseButton: '.modal-product-buy',
+    errorMessage: '.alert-danger, .error-message',
+    successMessage: '.alert-success, .success-message, .modal-roulette__result'
+}
+
+const MESSAGES = {
+    cooldown: ['10 часов', '10 hours', 'доступен каждые'],
+    success: ['успешно', 'success'],
+    insufficientFunds: 'Недостаточно средств'
+}
+
+const TIMEOUTS = {
+    moddedButtonClick: 1000,
+    modalAppear: 150,
+    modalMaxAttempts: 20,
+    buttonReady: 500,
+    waitResult: 2500
+}
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function sendError(message) {
+    chrome.runtime.sendMessage({ errorVoteNoElement: message })
+}
+
+function sendCooldown() {
+    chrome.runtime.sendMessage({ later: true })
+}
+
+function sendSuccess() {
+    chrome.runtime.sendMessage({ successfully: Date.now() })
+}
+
+function sendMessage(text) {
+    chrome.runtime.sendMessage({ message: text })
+}
+
+function containsAny(text, keywords) {
+    return keywords.some(keyword => text.includes(keyword))
+}
+
+// ============================================================================
+// Message Handlers
+// ============================================================================
+function handleNotificationMessage(text) {
+    if (containsAny(text, MESSAGES.cooldown)) {
+        sendCooldown()
+        return true
+    }
+    if (containsAny(text, MESSAGES.success)) {
+        sendSuccess()
+        return true
+    }
+    if (text.includes(MESSAGES.insufficientFunds)) {
+        sendMessage('ERROR: Opened wrong case (not free). Got: ' + text)
+        return true
+    }
+    return false
+}
+
+function checkInitialNotification() {
+    const notification = document.querySelector(SELECTORS.notification)
+    if (!notification) return false
+
+    const text = notification.textContent.trim()
+    return handleNotificationMessage(text)
+}
+
+// ============================================================================
+// UI Interaction Functions
+// ============================================================================
+async function activateModdedMode() {
+    const button = document.querySelector(SELECTORS.moddedButton)
+    if (!button) {
+        sendError('Modded button not found')
+        return false
     }
 
-    // Check for success/error messages first (before performing actions)
-    const initialNotyfMessage = document.querySelector('.notyf__message')
-    if (initialNotyfMessage) {
-        const text = initialNotyfMessage.textContent.trim()
-        if (text.includes('10 часов') || text.includes('10 hours') || text.includes('доступен каждые')) {
-            chrome.runtime.sendMessage({later: Date.now() + (10 * 60 * 60 * 1000) + (1 * 60 * 1000)})
-            return
-        }
-        if (text.includes('успешно') || text.includes('success')) {
-            chrome.runtime.sendMessage({successfully: true})
-            return
-        }
+    if (!button.classList.contains('active')) {
+        button.click()
+        await wait(TIMEOUTS.moddedButtonClick)
     }
+    return true
+}
 
-    // Execute only on first run (like loliland.ru.js)
-    if (first === false) return
-
-    // Step 1: Click on "Modded" button
-    const gmodButton = document.querySelector('button.change-gmod[data-gmod="modded"]')
-    if (!gmodButton) {
-        chrome.runtime.sendMessage({errorVoteNoElement: 'Modded button not found'})
-        return
-    }
-
-    // Click the modded button first if not already active
-    if (!gmodButton.classList.contains('active')) {
-        gmodButton.click()
-        // Wait a bit for the page to update
-        await new Promise(resolve => setTimeout(resolve, 1000))
-    }
-
-    // Step 2: Find the free case button and get its parent card
-    const freeCaseButton = document.querySelector('.products__card .products__card-btn-free')
+function validateFreeCase() {
+    const freeCaseButton = document.querySelector(SELECTORS.freeCaseButton)
     if (!freeCaseButton) {
-        chrome.runtime.sendMessage({errorVoteNoElement: 'Free case button not found'})
-        return
+        sendError('Free case button not found')
+        return null
     }
 
-    // Get the parent card element
-    const freeCase = freeCaseButton.closest('.products__card')
+    const freeCase = freeCaseButton.closest(SELECTORS.productCard)
     if (!freeCase) {
-        chrome.runtime.sendMessage({errorVoteNoElement: 'Could not find parent card for free button'})
-        return
+        sendError('Could not find parent card for free button')
+        return null
     }
 
-    // Check if case is visible (has modded in data-gmod attribute)
+    // Check if case is for modded mode
     const gmodAttr = freeCase.getAttribute('data-gmod')
     if (!gmodAttr || !gmodAttr.includes('modded')) {
-        chrome.runtime.sendMessage({errorVoteNoElement: 'Free case not available for modded mode'})
-        return
+        sendError('Free case not available for modded mode')
+        return null
     }
 
-    // Check if case has display: none or is hidden
-    const computedStyle = window.getComputedStyle(freeCase)
-    if (computedStyle.display === 'none' || !freeCase.offsetParent) {
-        chrome.runtime.sendMessage({errorVoteNoElement: 'Free case is hidden'})
-        return
+    // Check visibility
+    const style = window.getComputedStyle(freeCase)
+    if (style.display === 'none' || !freeCase.offsetParent) {
+        sendError('Free case is hidden')
+        return null
     }
 
-    // Click the free case button
-    freeCaseButton.click()
+    return freeCaseButton
+}
 
-    // Wait for modal to appear (look for the specific modal for product 5)
-    let modalAppeared = false
-    let targetModal = null
+async function waitForModal() {
+    for (let i = 0; i < TIMEOUTS.modalMaxAttempts; i++) {
+        await wait(TIMEOUTS.modalAppear)
 
-    for (let i = 0; i < 20; i++) {
-        await new Promise(resolve => setTimeout(resolve, 150))
-
-        // Look for modal with data-product-id="5" or data-modal="product-5"
-        const modal5 = document.querySelector('.modal[data-product-id="5"], .modal[data-modal="product-5"]')
-
-        if (modal5 && modal5.classList.contains('modal-on')) {
-            targetModal = modal5
-            modalAppeared = true
-            break
+        const modal = document.querySelector(SELECTORS.modal)
+        if (modal && modal.classList.contains('modal-on')) {
+            return modal
         }
     }
 
-    if (!modalAppeared) {
-        // Maybe notyf message already appeared (error case)
-        const notyfCheck = document.querySelector('.notyf__message')
-        if (notyfCheck && notyfCheck.textContent.includes('10 часов')) {
-            chrome.runtime.sendMessage({later: Date.now() + (10 * 60 * 60 * 1000) + (1 * 60 * 1000)})
-            return
-        }
-        chrome.runtime.sendMessage({errorVoteNoElement: 'Modal did not appear'})
-        return
+    // Check if cooldown message appeared
+    const notification = document.querySelector(SELECTORS.notification)
+    if (notification && containsAny(notification.textContent, MESSAGES.cooldown)) {
+        sendCooldown()
+        return null
     }
 
-    // Additional wait for button to be ready
-    await new Promise(resolve => setTimeout(resolve, 500))
+    sendError('Modal did not appear')
+    return null
+}
 
-    // Step 3: Check for auth button or open case button in modal
-    const authButton = targetModal.querySelector('.auth-btn, .modal-simple-cmd__btn-auth')
+async function handleModalActions(modal) {
+    await wait(TIMEOUTS.buttonReady)
+
+    // Check if user needs to authenticate
+    const authButton = modal.querySelector(SELECTORS.authButton)
     if (authButton) {
-        // User not authorized - click auth button to redirect to Steam login
         authButton.click()
-        return
+        return false
     }
 
-    const openCaseButton = targetModal.querySelector('.modal-product-buy')
+    // Try to open the case
+    const openCaseButton = modal.querySelector(SELECTORS.openCaseButton)
     if (!openCaseButton) {
-        chrome.runtime.sendMessage({errorVoteNoElement: 'Open case button not found in modal'})
-        return
+        sendError('Open case button not found in modal')
+        return false
     }
 
     openCaseButton.click()
+    return true
+}
 
-    // Wait for the result
-    await new Promise(resolve => setTimeout(resolve, 2500))
+// ============================================================================
+// Result Checking Functions
+// ============================================================================
+function checkNotificationResult() {
+    const notification = document.querySelector(SELECTORS.notification)
+    if (!notification) return false
 
-    // Check for error notification (notyf)
-    const notyfMessage = document.querySelector('.notyf__message')
-    if (notyfMessage) {
-        const text = notyfMessage.textContent.trim()
-        if (text.includes('10 часов') || text.includes('10 hours') || text.includes('доступен каждые')) {
-            // Case available every 10 hours - set timer
-            chrome.runtime.sendMessage({later: Date.now() + (10 * 60 * 60 * 1000) + (1 * 60 * 1000)})
-            return
-        }
-        if (text.includes('Недостаточно средств')) {
-            // Wrong case opened! This shouldn't happen with free case
-            chrome.runtime.sendMessage({message: 'ERROR: Opened wrong case (not free). Got: ' + text})
-            return
-        }
-        if (text.includes('успешно') || text.includes('success')) {
-            chrome.runtime.sendMessage({successfully: true})
-            return
-        }
-        // Other error message
-        chrome.runtime.sendMessage({message: text})
+    const text = notification.textContent.trim()
+    if (handleNotificationMessage(text)) {
+        return true
+    }
+
+    // Unknown error
+    sendMessage(text)
+    return true
+}
+
+function checkErrorMessages() {
+    const errorMsg = document.querySelector(SELECTORS.errorMessage)
+    if (!errorMsg) return false
+
+    const text = errorMsg.textContent.trim()
+    if (containsAny(text, MESSAGES.cooldown)) {
+        sendCooldown()
+        return true
+    }
+
+    sendMessage(text)
+    return true
+}
+
+function checkSuccessMessages() {
+    const successMsg = document.querySelector(SELECTORS.successMessage)
+    if (successMsg) {
+        sendSuccess()
+        return true
+    }
+    return false
+}
+
+// ============================================================================
+// Main Vote Function
+// ============================================================================
+async function vote(first) {
+    // Check for immediate messages
+    if (checkInitialNotification()) {
         return
     }
 
-    // Check for other error messages
-    const errorMessage = document.querySelector('.alert-danger, .error-message')
-    if (errorMessage) {
-        const text = errorMessage.textContent.trim()
-        if (text.includes('10 часов') || text.includes('10 hours')) {
-            chrome.runtime.sendMessage({later: Date.now() + (10 * 60 * 60 * 1000) + (1 * 60 * 1000)})
-            return
-        }
-        chrome.runtime.sendMessage({message: text})
+    // Execute only on first run
+    if (first === false) return
+
+    // Step 1: Activate modded mode
+    if (!await activateModdedMode()) {
         return
     }
 
-    // Check for success messages
-    const successMessage = document.querySelector('.alert-success, .success-message, .modal-roulette__result')
-    if (successMessage) {
-        chrome.runtime.sendMessage({successfully: true})
+    // Step 2: Validate and click free case
+    const freeCaseButton = validateFreeCase()
+    if (!freeCaseButton) {
+        return
+    }
+    freeCaseButton.click()
+
+    // Step 3: Wait for modal and handle it
+    const modal = await waitForModal()
+    if (!modal) {
         return
     }
 
-    // If we got here, assume success (the case was opened)
-    chrome.runtime.sendMessage({successfully: true})
+    const caseOpened = await handleModalActions(modal)
+    if (!caseOpened) {
+        return
+    }
+
+    // Step 4: Wait for result and check messages
+    await wait(TIMEOUTS.waitResult)
+
+    // Check in order of priority
+    if (checkNotificationResult()) return
+    if (checkErrorMessages()) return
+    if (checkSuccessMessages()) return
+
+    // If we got here, assume success
+    sendSuccess()
 }

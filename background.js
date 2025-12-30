@@ -1212,6 +1212,10 @@ async function endVote(request, sender, project) {
                     }
                 }
                 if (needSetTime) {
+                    // Если later=true, используем время последнего успешного голосования вместо текущего
+                    if (request.later === true && project.stats.lastSuccessVote) {
+                        time = new Date(project.stats.lastSuccessVote)
+                    }
                     let hours = time.getHours() + timeoutRating.hours
                     let minutes = time.getMinutes()
                     let seconds = time.getSeconds()
