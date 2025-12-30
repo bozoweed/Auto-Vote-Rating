@@ -1407,6 +1407,19 @@ var allProjects = {
         notRequiredId: () => true,
         needAdditionalOrigins: () => ['https://*.bloodrust.com/*', '*://*.steamcommunity.com/*']
     },
+    'bloodrust.com-promo': {
+        pageURL: () => 'https://bloodrust.com/home',
+        voteURL: () => 'https://bloodrust.com/home',
+        projectName: () => 'Активация промокода',
+        exampleURL: () => ['https://bloodrust.com/home', '', ''],
+        parseURL: () => ({id: 'promo code'}),
+        timeout: () => ({hour: 6}),
+        notRequiredCaptcha: () => true,
+        notRequiredNick: () => true,
+        notRequiredId: () => true,
+        silentVote: () => true,
+        needAdditionalOrigins: () => ['https://*.bloodrust.com/*', 'https://*.t.me/*', 'https://*.telegram.org/*']
+    },
     'mcservers.top': {
         pageURL: (project) => 'https://mcservers.top/server/' + project.id,
         voteURL: (project) => 'https://mcservers.top/server/' + project.id,
