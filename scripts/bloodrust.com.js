@@ -34,30 +34,38 @@ async function vote(first) {
 
     // Check if button is disabled (cooldown active)
     if (spinButton.disabled) {
-        // Try to find cooldown text
-        const cooldownText = document.querySelector('.text-muted-foreground')
+        // Find all elements with cooldown text class
+        const allMutedElements = document.querySelectorAll('.text-muted-foreground')
+
+        // Search for element containing cooldown message
+        const cooldownText = Array.from(allMutedElements).find(el =>
+            el.textContent.includes('вращение будет доступно через')
+        )
 
         if (cooldownText) {
             const text = cooldownText.textContent.trim()
 
-            // Try to extract time in format HH:MM:SS or H:MM:SS
+            // Extract time in format HH:MM:SS or H:MM:SS
             const timeMatch = text.match(/(\d+):(\d+):(\d+)/)
+
             if (timeMatch) {
                 const hours = parseInt(timeMatch[1])
                 const minutes = parseInt(timeMatch[2])
                 const seconds = parseInt(timeMatch[3])
                 const milliseconds = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000) + (seconds * 1000)
-                chrome.runtime.sendMessage({later: Date.now() + milliseconds + (1 * 60 * 1000)}) // +1 minute buffer
+                const nextVoteTime = Date.now() + milliseconds + (1 * 60 * 1000) // +1 minute buffer
+
+                chrome.runtime.sendMessage({later: nextVoteTime})
                 return
             }
         }
 
-        // If we couldn't parse the time, just set timer to 24 hours
+        // If we couldn't parse the time, set timer to 24 hours
         chrome.runtime.sendMessage({later: Date.now() + (24 * 60 * 60 * 1000)})
         return
     }
 
-    // Click the spin button
+    // Button is enabled - click to spin
     spinButton.click()
 
     // Wait for spin animation and result
@@ -66,6 +74,29 @@ async function vote(first) {
     // Check for success - the button should be disabled again after successful spin
     if (spinButton.disabled) {
         chrome.runtime.sendMessage({successfully: true})
+
+        // Try to get the new cooldown time after successful spin
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
+        const allMutedElements = document.querySelectorAll('.text-muted-foreground')
+        const cooldownText = Array.from(allMutedElements).find(el =>
+            el.textContent.includes('вращение будет доступно через')
+        )
+
+        if (cooldownText) {
+            const text = cooldownText.textContent.trim()
+            const timeMatch = text.match(/(\d+):(\d+):(\d+)/)
+
+            if (timeMatch) {
+                const hours = parseInt(timeMatch[1])
+                const minutes = parseInt(timeMatch[2])
+                const seconds = parseInt(timeMatch[3])
+                const milliseconds = (hours * 60 * 60 * 1000) + (minutes * 60 * 1000) + (seconds * 1000)
+                const nextVoteTime = Date.now() + milliseconds + (1 * 60 * 1000)
+
+                chrome.runtime.sendMessage({later: nextVoteTime})
+            }
+        }
         return
     }
 
