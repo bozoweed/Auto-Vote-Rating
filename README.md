@@ -172,7 +172,7 @@
 
 ## Install the extension from zip archive
 Here is a short guide how to install an unpacked extension on Google Chrome or Chromium-based browsers
-1. [Download](https://github.com/bozoweed/Auto-Vote-Rating/archive/refs/heads/dev.zip) this repository
+1. [Download](https://github.com/bazzzilius/Auto-Vote-Rating/archive/refs/heads/dev.zip) this repository
 2. Unzip the archive to any convenient location
 3. Open the "Extensions" page `chrome://extensions/` in the browser and turn on the "Developer mode"
 
