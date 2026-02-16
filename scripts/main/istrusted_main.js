@@ -49,7 +49,7 @@
                                     return value
                                 },
                             })
-                        // более простой, но менее безопасный метод
+                            // более простой, но менее безопасный метод
                         } else if (args[0].type === port.dataset.ITtype) {
                             if (!ITLastEvent) {
                                 ITLastEvent = args[0]

@@ -20,6 +20,7 @@ let onLine
 
 self.addEventListener('error', (event) => onUnhandledError(event))
 self.addEventListener('unhandledrejection', (event) => onUnhandledError(event))
+
 function onUnhandledError(event) {
     let error
     if (event.reason) {
@@ -82,6 +83,7 @@ async function initializeConfig(background, version) {
     }
     db.onerror = (event) => dbError(event, false)
     dbLogs.onerror = (event) => dbError(event, true)
+
     function dbError(event, logs) {
         if (background) {
             sendNotification(chrome.i18n.getMessage('errordbTitle', event.target.source.name), event.target.error.message, 'error', 'openSettings')
@@ -94,6 +96,7 @@ async function initializeConfig(background, version) {
             createNotif(chrome.i18n.getMessage('errordb', [event.target.source.name, event.target.error.message]), 'error')
         }
     }
+
     settings = await db.get('other', 'settings')
     generalStats = await db.get('other', 'generalStats')
     todayStats = await db.get('other', 'todayStats')
@@ -467,7 +470,7 @@ async function upgrade(db, oldVersion, newVersion, transaction) {
             }
 
             if (project.rating === 'craftlist.org') {
-                project.error = chrome.i18n.getMessage('disabledSite','There is a high risk of being blocked for auto-voting, vote on this site manually')
+                project.error = chrome.i18n.getMessage('disabledSite', 'There is a high risk of being blocked for auto-voting, vote on this site manually')
                 project.time = Infinity
             }
 
@@ -492,7 +495,7 @@ async function upgrade(db, oldVersion, newVersion, transaction) {
         let cursor = await transaction.objectStore('projects').index('rating').openCursor('topcraft.club')
         while (cursor) {
             const project = cursor.value
-            project.error = chrome.i18n.getMessage('disabledSite','Высокий риск быть заблокированным за авто-голосование, голосуйте на данном сайте вручную')
+            project.error = chrome.i18n.getMessage('disabledSite', 'Высокий риск быть заблокированным за авто-голосование, голосуйте на данном сайте вручную')
             project.time = Infinity
             await cursor.update(project)
             // noinspection JSVoidFunctionReturnValueUsed
@@ -503,7 +506,7 @@ async function upgrade(db, oldVersion, newVersion, transaction) {
         let cursor2 = await transaction.objectStore('projects').index('rating').openCursor('mctop.su')
         while (cursor2) {
             const project = cursor2.value
-            project.error = chrome.i18n.getMessage('disabledSite','Высокий риск быть заблокированным за авто-голосование, голосуйте на данном сайте вручную')
+            project.error = chrome.i18n.getMessage('disabledSite', 'Высокий риск быть заблокированным за авто-голосование, голосуйте на данном сайте вручную')
             project.time = Infinity
             await cursor2.update(project)
             // noinspection JSVoidFunctionReturnValueUsed
@@ -513,7 +516,7 @@ async function upgrade(db, oldVersion, newVersion, transaction) {
         let cursor3 = await transaction.objectStore('projects').index('rating').openCursor('monitoringminecraft.ru')
         while (cursor3) {
             const project = cursor3.value
-            project.error = chrome.i18n.getMessage('disabledSite','Сайт не работает')
+            project.error = chrome.i18n.getMessage('disabledSite', 'Сайт не работает')
             project.time = Infinity
             await cursor3.update(project)
             // noinspection JSVoidFunctionReturnValueUsed

@@ -10,18 +10,18 @@ var allProjects = {
         URLMain: () => 'topcraft.ru',
         parseURL: (url) => ({id: url.pathname.split('/')[2]}),
         timeout: () => ({hour: 21}),
-        needAdditionalOrigins: ()=> ['https://*.topcraft.ru/*', '*://*.vk.com/*'],
+        needAdditionalOrigins: () => ['https://*.topcraft.ru/*', '*://*.vk.com/*'],
         needIsTrusted: () => true
     },
     'topcraft.club': {},
     'minecraft-servers.ru': {
-        pageURL: (project) => 'https://minecraft-servers.ru/server/' + project.id ,
-        voteURL: (project) => 'https://minecraft-servers.ru/server/' + project.id ,
+        pageURL: (project) => 'https://minecraft-servers.ru/server/' + project.id,
+        voteURL: (project) => 'https://minecraft-servers.ru/server/' + project.id,
         projectName: (doc) => doc.querySelector('div.flex.justify-between > h1').textContent,
         exampleURL: () => ['https://minecraft-servers.ru/server/', '5231', ''],
         parseURL: (url) => ({id: url.pathname.split('/')[2]}),
         timeout: () => ({hour: 21}),
-        needAdditionalOrigins: ()=> ['*://*.vk.com/*'],
+        needAdditionalOrigins: () => ['*://*.vk.com/*'],
         needIsTrusted: () => true
     },
     'mctop.su': {
@@ -31,7 +31,7 @@ var allProjects = {
         exampleURL: () => ['https://mctop.su/servers/', '5231', '/'],
         parseURL: (url) => ({id: url.pathname.split('/')[2]}),
         timeout: () => ({hour: 21}),
-        needAdditionalOrigins: ()=> ['*://*.vk.com/*'],
+        needAdditionalOrigins: () => ['*://*.vk.com/*'],
         needIsTrusted: () => true
     },
     'mcrate.su': {
@@ -43,14 +43,17 @@ var allProjects = {
         timeout: () => ({hour: 22}),
         oneProject: () => 1,
         notFound: (doc) => doc.querySelector('div[class=error]') != null && doc.querySelector('div[class=error]').textContent.includes('Проект с таким ID не найден'),
-        needAdditionalOrigins: ()=> ['*://*.vk.com/*']
+        needAdditionalOrigins: () => ['*://*.vk.com/*']
     },
     'minecraftrating.ru': {
         pageURL: (project) => (project.listing === 'projects') ? 'https://minecraftrating.ru/projects/' + project.id + '/' : 'https://minecraftrating.ru/vote/' + project.id + '/',
         voteURL: (project) => (project.listing === 'projects') ? 'https://minecraftrating.ru/projects/' + project.id + '/' : 'https://minecraftrating.ru/vote/' + project.id + '/',
         projectName: (doc, project) => (project.listing === 'projects') ? doc.querySelector('h1[itemprop="name"]').textContent.trim().replace('Проект ', '') : doc.querySelector('.page-header a').textContent,
         exampleURL: () => ['https://minecraftrating.ru/projects/', 'cubixworld', '/'],
-        parseURL: (url) => ({listing: url.pathname.split('/')[1] === 'projects' ? 'projects': 'servers', id: url.pathname.split('/')[2]}),
+        parseURL: (url) => ({
+            listing: url.pathname.split('/')[1] === 'projects' ? 'projects' : 'servers',
+            id: url.pathname.split('/')[2]
+        }),
         timeout: (project) => project.listing === 'projects' ? ({hour: 21}) : ({hours: 24}),
         exampleURLListing: () => ['https://minecraftrating.ru/', 'projects', '/mcskill/'],
         defaultListing: () => 'projects',
@@ -59,7 +62,7 @@ var allProjects = {
             ['servers', 'Сервера (нет награды за голосование)']
         ]),
         notRequiredNick: (project) => project?.listing === 'servers',
-        needAdditionalOrigins: (project)=> project?.listing === 'projects' ? ['*://*.vk.com/*'] : []
+        needAdditionalOrigins: (project) => project?.listing === 'projects' ? ['*://*.vk.com/*'] : []
     },
     'monitoringminecraft.ru': {
         pageURL: (project) => 'https://monitoringminecraft.ru/top/' + project.id + '/',
@@ -142,7 +145,7 @@ var allProjects = {
         voteURL: (project) => 'https://topg.org/' + project.game + '/' + project.id,
         projectName: (doc) => doc.querySelector('div.sheader').textContent,
         exampleURL: () => ['https://topg.org/minecraft-servers/', 'server-405637', ''],
-        parseURL: (url) => ({ game: url.pathname.split('/')[1], id: url.pathname.split('/')[2]}),
+        parseURL: (url) => ({game: url.pathname.split('/')[1], id: url.pathname.split('/')[2]}),
         timeout: () => ({hours: 12}),
         exampleURLGame: () => ['https://topg.org/', 'minecraft-servers', '/server-405637'],
         gameList: () => new Map([
@@ -440,7 +443,7 @@ var allProjects = {
         notRequiredNick: () => true,
         focusedTab: () => true,
         additionExampleURL: () => ['https://top.gg/bot/617037497574359050/vote', '?currency=DOGE', ''],
-        needAdditionalOrigins: ()=> ['https://discord.com/oauth2/*']
+        needAdditionalOrigins: () => ['https://discord.com/oauth2/*']
     },
     'discordbotlist.com': {
         pageURL: (project) => 'https://discordbotlist.com/' + project.listing + '/' + project.id,
@@ -456,7 +459,7 @@ var allProjects = {
             ['servers', 'Guilds']
         ]),
         notRequiredNick: () => true,
-        needAdditionalOrigins: ()=> ['https://discord.com/oauth2/*']
+        needAdditionalOrigins: () => ['https://discord.com/oauth2/*']
     },
     'discords.com': {
         pageURL: (project) => 'https://discords.com/' + project.listing + '/' + project.id,
@@ -491,7 +494,7 @@ var allProjects = {
             ['servers', 'Guilds']
         ]),
         notRequiredNick: () => true,
-        needAdditionalOrigins: ()=> ['https://discord.com/oauth2/*']
+        needAdditionalOrigins: () => ['https://discord.com/oauth2/*']
     },
     'mmotop.ru': {
         pageURL: (project) => {
@@ -724,7 +727,7 @@ var allProjects = {
         exampleURL: () => ['https://bestservers.com/server/', '1135', '/vote'],
         parseURL: (url) => ({id: url.pathname.split('/')[2]}),
         optionalNick: () => true,
-        needAdditionalOrigins: ()=> ['*://*.steamcommunity.com/*']
+        needAdditionalOrigins: () => ['*://*.steamcommunity.com/*']
     },
     'craft-list.net': {
         pageURL: (project) => 'https://craft-list.net/minecraft-server/' + project.id,
@@ -844,7 +847,7 @@ var allProjects = {
         timeout: () => ({hours: 16}),
         notRequiredNick: () => true,
         banAttention: () => true,
-        needAdditionalOrigins: ()=> ['*://*.steamcommunity.com/*']
+        needAdditionalOrigins: () => ['*://*.steamcommunity.com/*']
     },
     'minestatus.net': {
         pageURL: (project) => 'https://minestatus.net/server/' + project.id,
@@ -868,7 +871,10 @@ var allProjects = {
             else return doc.querySelector('.page-vote a').textContent
         },
         exampleURL: () => ['https://misterlauncher.org/projects/', 'omegamc', '/'],
-        parseURL: (url) => ({listing: url.pathname.split('/')[1] === 'projects' ? 'projects' : 'servers', id: url.pathname.split('/')[2]}),
+        parseURL: (url) => ({
+            listing: url.pathname.split('/')[1] === 'projects' ? 'projects' : 'servers',
+            id: url.pathname.split('/')[2]
+        }),
         timeout: (project) => project.listing === 'projects' ? ({hour: 21}) : ({hours: 24}),
         exampleURLListing: () => ['https://misterlauncher.org/', 'projects', '/omegamc/'],
         defaultListing: () => 'projects',
@@ -879,7 +885,7 @@ var allProjects = {
         silentVote: (project) => project?.listing === 'projects',
         notRequiredNick: (project) => project?.listing === 'servers',
         notRequiredCaptcha: (project) => project?.listing === 'projects',
-        needAdditionalOrigins: (project)=> project?.listing === 'projects' ? ['*://*.vk.com/*'] : []
+        needAdditionalOrigins: (project) => project?.listing === 'projects' ? ['*://*.vk.com/*'] : []
     },
     'minecraft-servers.de': {
         pageURL: (project) => 'https://minecraft-servers.de/server/' + project.id,
@@ -897,7 +903,7 @@ var allProjects = {
         parseURL: (url) => ({id: url.pathname.split('/')[2]}),
         timeout: () => ({hours: 12}),
         notRequiredNick: () => true,
-        needAdditionalOrigins: ()=> ['https://discord.com/oauth2/*']
+        needAdditionalOrigins: () => ['https://discord.com/oauth2/*']
     },
     'serverlist.games': {
         pageURL: (project) => 'https://serverlist.games/server/' + project.id,
@@ -1082,7 +1088,7 @@ var allProjects = {
     },
     'mc-server-list.com': {
         pageURL: (project) => 'https://mc-server-list.com/server/' + project.id + '/',
-        voteURL: (project) => 'https://mc-server-list.com/server/' + project.id +'/vote/',
+        voteURL: (project) => 'https://mc-server-list.com/server/' + project.id + '/vote/',
         projectName: (doc) => doc.querySelector('h2.header').textContent,
         exampleURL: () => ['https://mc-server-list.com/server/', '127-Armageddon+Server', '/vote/'],
         parseURL: (url) => ({id: url.pathname.split('/')[2]})
@@ -1103,8 +1109,8 @@ var allProjects = {
         needPrompt: () => true
     },
     'mmorpg.top': {
-        pageURL: (project) => 'https://' + project.game +'.mmorpg.top/server/' + project.id,
-        voteURL: (project) => 'https://' + project.game +'.mmorpg.top/server/' + project.id,
+        pageURL: (project) => 'https://' + project.game + '.mmorpg.top/server/' + project.id,
+        voteURL: (project) => 'https://' + project.game + '.mmorpg.top/server/' + project.id,
         projectName: (doc) => doc.querySelector('.title [itemprop="name"]').textContent,
         exampleURL: () => ['https://wow.mmorpg.top/server/', '23', ''],
         parseURL: (url) => ({game: url.hostname.split('.')[0], id: url.pathname.split('/')[2]}),
@@ -1124,8 +1130,8 @@ var allProjects = {
         ])
     },
     'mmovote.ru': {
-        pageURL: (project) => 'https://' + project.game +'.mmovote.ru/ru/vote/' + project.id,
-        voteURL: (project) => 'https://' + project.game +'.mmovote.ru/ru/vote/' + project.id,
+        pageURL: (project) => 'https://' + project.game + '.mmovote.ru/ru/vote/' + project.id,
+        voteURL: (project) => 'https://' + project.game + '.mmovote.ru/ru/vote/' + project.id,
         projectName: (doc) => doc.querySelector('.content .box h2').textContent.replace('Голосование за ', ''),
         exampleURL: () => ['https://wow.mmovote.ru/ru/vote/', '85', ''],
         parseURL: (url) => ({game: url.hostname.split('.')[0], id: url.pathname.split('/')[3]}),
@@ -1379,17 +1385,23 @@ var allProjects = {
         notRequiredCaptcha: () => true,
         notRequiredNick: () => true,
         notRequiredId: () => true,
-        needAdditionalOrigins: ()=> ['https://*.loliland.ru/*', 'https://*.loliland.io/*'],
+        needAdditionalOrigins: () => ['https://*.loliland.ru/*', 'https://*.loliland.io/*'],
         needAdditionalPermissions: () => ['cookies']
     },
     'loliland.net': {},
     'magicrust.gg': {
-        pageURL: () => 'https://magicrust.gg/ru',
-        voteURL: () => 'https://magicrust.gg/ru',
-        projectName: () => 'Бесплатный ежедневный кейс',
+        pageURL: (project) => project.id === 'wheel fortune' ? 'https://magicrust.gg/ru/wheel-fortune' : 'https://magicrust.gg/ru',
+        voteURL: (project) => project.id === 'wheel fortune' ? 'https://magicrust.gg/ru/wheel-fortune' : 'https://magicrust.gg/ru',
+        projectName: (_doc, project) => project.id === 'wheel fortune' ? 'Колесо фортуны' : 'Бесплатный ежедневный кейс',
         exampleURL: () => ['https://magicrust.gg/ru', '', ''],
-        parseURL: () => ({id: 'free daily case'}),
-        timeout: () => ({hours: 10, minutes: 1}),
+        parseURL: (url) => {
+            // Determine task type based on URL path
+            if (url.pathname.includes('/wheel-fortune')) {
+                return {id: 'wheel fortune'}
+            }
+            return {id: 'free daily case'}
+        },
+        timeout: (project) => project.id === 'wheel fortune' ? ({hours: 22, minutes: 1}) : ({hours: 10, minutes: 1}),
         notRequiredCaptcha: () => true,
         notRequiredNick: () => true,
         notRequiredId: () => true,
@@ -1433,7 +1445,7 @@ var allProjects = {
         oneProject: () => 1,
         notRequiredNick: () => true,
         notRequiredCaptcha: () => true,
-        needAdditionalOrigins: ()=> ['https://discord.com/oauth2/*']
+        needAdditionalOrigins: () => ['https://discord.com/oauth2/*']
     },
     'minecraftsurvivalservers.net': {
         pageURL: (project) => 'https://minecraftsurvivalservers.net/server/' + project.id,
@@ -1564,7 +1576,7 @@ var allProjects = {
         ]),
         notRequiredNick: () => true,
         notRequiredCaptcha: () => true,
-        needAdditionalOrigins: ()=> ['https://discord.com/oauth2/*']
+        needAdditionalOrigins: () => ['https://discord.com/oauth2/*']
     },
     'infinitybots.gg': {
         pageURL: (project) => 'https://infinitybots.gg/bot/' + project.id,
@@ -1574,7 +1586,7 @@ var allProjects = {
         parseURL: (url) => ({id: url.pathname.split('/')[2]}),
         timeout: () => ({hours: 6}),
         notRequiredNick: () => true,
-        needAdditionalOrigins: ()=> ['https://discord.com/oauth2/*']
+        needAdditionalOrigins: () => ['https://discord.com/oauth2/*']
     },
     'botlist.me': {
         pageURL: (project) => 'https://botlist.me/bots/' + project.id,
@@ -1585,11 +1597,11 @@ var allProjects = {
         timeout: () => ({hours: 12}),
         notRequiredNick: () => true,
         notRequiredCaptcha: () => true,
-        needAdditionalOrigins: ()=> ['https://discord.com/oauth2/*']
+        needAdditionalOrigins: () => ['https://discord.com/oauth2/*']
     },
     'topminecraft.io': {
-        pageURL: (project) => 'https://topminecraft.io/' + project.lang +'/' + project.id,
-        voteURL: (project) => 'https://topminecraft.io/' + project.lang +'/' + project.id + '/vote',
+        pageURL: (project) => 'https://topminecraft.io/' + project.lang + '/' + project.id,
+        voteURL: (project) => 'https://topminecraft.io/' + project.lang + '/' + project.id + '/vote',
         projectName: (doc) => doc.querySelector('div.head h1').textContent,
         exampleURL: () => ['https://topminecraft.io/fr/', 'vikicraft-5', '/vote'],
         parseURL: (url) => ({lang: url.pathname.split('/')[1], id: url.pathname.split('/')[2]}),

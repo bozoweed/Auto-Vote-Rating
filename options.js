@@ -26,10 +26,10 @@ svgSuccess.src = 'images/icons/success.svg'
 
 //Локализация
 const elements = document.querySelectorAll('[data-resource]')
-elements.forEach(function(el) {
+elements.forEach(function (el) {
     el.prepend(chrome.i18n.getMessage(el.getAttribute('data-resource')))
 })
-document.querySelectorAll('[placeholder]').forEach(function(el) {
+document.querySelectorAll('[placeholder]').forEach(function (el) {
     const message = chrome.i18n.getMessage(el.placeholder)
     if (!message || message === '') return
     el.placeholder = message
@@ -43,7 +43,7 @@ async function createNotif(message, type, options = {}) {
     if (!message || message === '') message = 'An empty error, see the details in the console'
     if (!type) type = 'hint'
     if (!options.dontLog) {
-        if (type === 'error' && (message instanceof Error || message.stack || message.message)) console.error('['+type+']', message)
+        if (type === 'error' && (message instanceof Error || message.stack || message.message)) console.error('[' + type + ']', message)
         // else if (type === 'warn') console.warn('['+type+']', message)
         // else console.log('['+type+']', message)
     }
@@ -69,12 +69,12 @@ async function createNotif(message, type, options = {}) {
 
     if (type !== 'hint') {
         let imgBlock = document.createElement('img')
-        imgBlock.src = 'images/notif/'+type+'.png'
+        imgBlock.src = 'images/notif/' + type + '.png'
         notif.append(imgBlock)
         let progressBlock = document.createElement('div')
         progressBlock.classList.add('progress')
         let progressBar = document.createElement('div')
-        progressBar.style.animation = 'notif-progress '+options.delay/1000+'s linear'
+        progressBar.style.animation = 'notif-progress ' + options.delay / 1000 + 's linear'
         progressBlock.append(progressBar)
         notif.append(progressBlock)
     }
@@ -90,28 +90,31 @@ async function createNotif(message, type, options = {}) {
     document.getElementById('notifBlock2').append(notif)
 
     let allNotifH
+
     function calcAllNotifH() {
         allNotifH = 10
-        document.querySelectorAll('#notifBlock > .notif').forEach((el)=> {
+        document.querySelectorAll('#notifBlock > .notif').forEach((el) => {
             allNotifH = allNotifH + el.clientHeight + 10
         })
-        document.querySelectorAll('#notifBlock2 > .notif').forEach((el)=> {
+        document.querySelectorAll('#notifBlock2 > .notif').forEach((el) => {
             allNotifH = allNotifH + el.clientHeight + 10
         })
     }
+
     calcAllNotifH()
 
     notif.remove()
     notif.removeAttribute('style')
 
     while (window.innerHeight < allNotifH) {
-        await new Promise(resolve=>{
+        await new Promise(resolve => {
             function listener(event) {
                 if (event.animationName === 'notif-hide') {
                     document.getElementById('notifBlock').removeEventListener('animationend', listener)
                     resolve()
                 }
             }
+
             document.getElementById('notifBlock').addEventListener('animationend', listener)
         })
         calcAllNotifH()
@@ -120,13 +123,13 @@ async function createNotif(message, type, options = {}) {
     document.getElementById('notifBlock').append(notif)
 
     let timer
-    if (type !== 'hint') timer = new Timer(()=> removeNotif(notif), options.delay)
+    if (type !== 'hint') timer = new Timer(() => removeNotif(notif), options.delay)
 
     if (notif.previousElementSibling != null && notif.previousElementSibling.classList.contains('hint')) {
-        setTimeout(()=> removeNotif(notif.previousElementSibling), options.delay >= 3000 ? 3000 : options.delay)
+        setTimeout(() => removeNotif(notif.previousElementSibling), options.delay >= 3000 ? 3000 : options.delay)
     }
 
-    notif.addEventListener('click', (e)=> {
+    notif.addEventListener('click', (e) => {
         if (notif.querySelector('a') != null || notif.querySelector('button') != null || options.onClick) {
             if (options.onClick) options.onClick()
             if (e.detail === 2) removeNotif(notif)
@@ -135,37 +138,38 @@ async function createNotif(message, type, options = {}) {
         }
     })
 
-    notif.addEventListener('mouseover', ()=> {
+    notif.addEventListener('mouseover', () => {
         if (!notif.classList.contains('hint')) {
             timer.pause()
             notif.querySelector('.progress div').style.animationPlayState = 'paused'
         }
     })
 
-    notif.addEventListener('mouseout', ()=> {
+    notif.addEventListener('mouseout', () => {
         if (!notif.classList.contains('hint')) {
             timer.resume()
             notif.querySelector('.progress div').style.animationPlayState = 'running'
         }
     })
 }
+
 function removeNotif(elem) {
     if (!elem) return
     elem.classList.remove('show')
     elem.classList.add('hide')
-    setTimeout(()=> elem.classList.add('hidden'), 500)
-    setTimeout(()=> elem.remove(), 1000)
+    setTimeout(() => elem.classList.add('hidden'), 500)
+    setTimeout(() => elem.remove(), 1000)
 }
 
-let Timer = function(callback, delay) {
+let Timer = function (callback, delay) {
     let timerId, start, remaining = delay
 
-    this.pause = function() {
+    this.pause = function () {
         clearTimeout(timerId)
         remaining -= Date.now() - start
     }
 
-    this.resume = function() {
+    this.resume = function () {
         start = Date.now()
         clearTimeout(timerId)
         timerId = setTimeout(callback, remaining)
@@ -178,18 +182,18 @@ let Timer = function(callback, delay) {
     this.resume()
 }
 
-document.addEventListener('DOMContentLoaded', async()=>{
+document.addEventListener('DOMContentLoaded', async () => {
     await initializeFunc
 
     await restoreOptions(true)
 
-    document.querySelector('div[data-resource="version"]').textContent+= chrome.runtime.getManifest().version
+    document.querySelector('div[data-resource="version"]').textContent += chrome.runtime.getManifest().version
 
     //Для FireFox почему-то не доступно это API
     // noinspection JSUnresolvedVariable
     if (typeof InstallTrigger === 'undefined') {
         if (chrome.notifications.getPermissionLevel != null) {
-            chrome.notifications.getPermissionLevel(function(callback) {
+            chrome.notifications.getPermissionLevel(function (callback) {
                 if (callback !== 'granted' && (!settings.disabledNotifError || !settings.disabledNotifWarn)) {
                     createNotif(chrome.i18n.getMessage('notificationsDisabled'), 'error')
                 }
@@ -672,17 +676,17 @@ for (const check of document.querySelectorAll('input[name=checkbox]')) {
 }
 
 //Слушатели дополнительных параметров в добавлении нового проекта
-document.getElementById('disableCheckProjects').addEventListener('change', function() {
+document.getElementById('disableCheckProjects').addEventListener('change', function () {
     if (this.checked && !confirm(chrome.i18n.getMessage('confirmDisableCheckProjects'))) {
         this.checked = false
     }
 })
-document.getElementById('priority').addEventListener('change', function() {
+document.getElementById('priority').addEventListener('change', function () {
     if (this.checked && !confirm(chrome.i18n.getMessage('confirmPriority'))) {
         this.checked = false
     }
 })
-document.getElementById('customTimeOut').addEventListener('change', function() {
+document.getElementById('customTimeOut').addEventListener('change', function () {
     document.getElementById('hour').parentElement.style.display = 'none'
     document.getElementById('hour').required = false
     document.getElementById('time').parentElement.style.display = 'none'
@@ -713,7 +717,7 @@ document.getElementById('customTimeOut').addEventListener('change', function() {
         document.getElementById('selectTime').parentElement.style.display = 'none'
     }
 })
-document.getElementById('randomize').addEventListener('change', function() {
+document.getElementById('randomize').addEventListener('change', function () {
     if (this.checked) {
         document.getElementById('randomizeMin').parentElement.removeAttribute('style')
         document.getElementById('randomizeMin').required = true
@@ -724,7 +728,7 @@ document.getElementById('randomize').addEventListener('change', function() {
         document.getElementById('randomizeMax').required = false
     }
 })
-document.getElementById('scheduleTimeCheckbox').addEventListener('change', function() {
+document.getElementById('scheduleTimeCheckbox').addEventListener('change', function () {
     if (this.checked) {
         document.getElementById('scheduleTime').parentElement.removeAttribute('style')
         document.getElementById('scheduleTime').required = true
@@ -733,7 +737,7 @@ document.getElementById('scheduleTimeCheckbox').addEventListener('change', funct
         document.getElementById('scheduleTime').required = false
     }
 })
-document.getElementById('voteMode').addEventListener('change', function() {
+document.getElementById('voteMode').addEventListener('change', function () {
     if (this.checked) {
         document.getElementById('voteModeSelect').parentElement.removeAttribute('style')
     } else {
@@ -742,7 +746,7 @@ document.getElementById('voteMode').addEventListener('change', function() {
 })
 
 //Слушатель на переключение ручного режима в добавлении
-document.getElementById('switchAddMode').addEventListener('change', function(event) {
+document.getElementById('switchAddMode').addEventListener('change', function (event) {
     if (event.target.checked) {
         linkChanged(null, true)
         document.getElementById('rating').dispatchEvent(new Event('input'))
@@ -851,7 +855,7 @@ function editProject(project, switchToEdit) {
         // noinspection JSCheckFunctionSignatures
         if (!isNaN(time)) {
             time.setMinutes(time.getMinutes() - time.getTimezoneOffset())
-            document.getElementById('scheduleTime').value = time.toISOString().slice(0,23)
+            document.getElementById('scheduleTime').value = time.toISOString().slice(0, 23)
         } else {
             document.getElementById('scheduleTime').value = null
         }
@@ -875,7 +879,7 @@ function editProject(project, switchToEdit) {
             // https://stackoverflow.com/a/61082536/11235240
             const hours = new Date(1980, 0, 1, project.timeoutHour, project.timeoutMinute, project.timeoutSecond, project.timeoutMS)
             hours.setMinutes(hours.getMinutes() - hours.getTimezoneOffset())
-            document.getElementById('hour').value = hours.toISOString().slice(11,23)
+            document.getElementById('hour').value = hours.toISOString().slice(11, 23)
         }
         document.getElementById('customTimeOut').dispatchEvent(new Event('change'))
     }
@@ -928,7 +932,7 @@ function editProject(project, switchToEdit) {
 }
 
 //Слушатель кнопки "Добавить"
-document.getElementById('append').addEventListener('submit', async(event)=>{
+document.getElementById('append').addEventListener('submit', async (event) => {
     event.preventDefault()
     event.submitter.disabled = true
     let domain, funcRating
@@ -1119,7 +1123,10 @@ document.getElementById('append').addEventListener('submit', async(event)=>{
 
         delete project.randomize
         if (document.getElementById('randomize').checked) {
-            project.randomize = {min: document.getElementById('randomizeMin').valueAsNumber, max: document.getElementById('randomizeMax').valueAsNumber}
+            project.randomize = {
+                min: document.getElementById('randomizeMin').valueAsNumber,
+                max: document.getElementById('randomizeMax').valueAsNumber
+            }
         }
     }
 
@@ -1189,7 +1196,7 @@ document.getElementById('append').addEventListener('submit', async(event)=>{
 })
 
 //Слушатель кнопки "Установить" на таймауте
-document.getElementById('timeout').addEventListener('submit', async (event)=>{
+document.getElementById('timeout').addEventListener('submit', async (event) => {
     event.preventDefault()
     event.submitter.disabled = true
     settings.timeout = document.getElementById('timeoutValue').valueAsNumber
@@ -1200,7 +1207,7 @@ document.getElementById('timeout').addEventListener('submit', async (event)=>{
 })
 
 //Слушатель кнопки "Установить" на таймауте при ошибке
-document.getElementById('timeoutError').addEventListener('submit', async (event)=>{
+document.getElementById('timeoutError').addEventListener('submit', async (event) => {
     event.preventDefault()
     event.submitter.disabled = true
     settings.timeoutError = document.getElementById('timeoutErrorValue').valueAsNumber
@@ -1211,7 +1218,7 @@ document.getElementById('timeoutError').addEventListener('submit', async (event)
 })
 
 //Слушатель кнопки "Установить" на таймауте при голосовании
-document.getElementById('timeoutVote').addEventListener('submit', async (event)=>{
+document.getElementById('timeoutVote').addEventListener('submit', async (event) => {
     event.preventDefault()
     event.submitter.disabled = true
     settings.timeoutVote = document.getElementById('timeoutVoteValue').valueAsNumber
@@ -1233,7 +1240,8 @@ async function addProject(project, element) {
         secondBonusText = chrome.i18n.getMessage('secondBonus', 'MythicalWorld')
         secondBonusButton.id = 'secondBonusMythicalWorld'
         secondBonusButton.className = 'secondBonus'
-    } else*/ if (project.id === 'victorycraft' || project.id === "8179" || project.id === "4729") {
+    } else*/
+    if (project.id === 'victorycraft' || project.id === "8179" || project.id === "4729") {
         secondBonusText = chrome.i18n.getMessage('secondBonus', 'VictoryCraft')
         secondBonusButton.id = 'secondBonusVictoryCraft'
         secondBonusButton.className = 'secondBonus'
@@ -1264,7 +1272,10 @@ async function addProject(project, element) {
                 if (!secondBonusText) {
                     createNotif(message, 'success', {element})
                 } else {
-                    createNotif([message, document.createElement('br'), secondBonusText, secondBonusButton], 'success', {delay: 30000, element})
+                    createNotif([message, document.createElement('br'), secondBonusText, secondBonusButton], 'success', {
+                        delay: 30000,
+                        element
+                    })
                 }
                 addProjectsBonus(project, element)
                 return
@@ -1365,7 +1376,7 @@ async function addProject(project, element) {
                 createNotif([message, document.createElement('br'), button], 'warn', {delay: 30000, element})
                 button.addEventListener('click', event => {
                     if (element != null) {
-                        openPopup(url2, ()=> document.location.reload(true))
+                        openPopup(url2, () => document.location.reload(true))
                     } else {
                         openPopup(url2, async () => {
                             event.target.disabled = true
@@ -1424,6 +1435,7 @@ async function addProject(project, element) {
 
     addProjectsBonus(project, element)
 }
+
 //Получение бонусов на проектах где требуется подтвердить получение бонуса
 function addProjectsBonus(project, element) {
 //  if (project.id == 'mythicalworld' || project.id == 5323 || project.id == 1654 || project.id == 6099) {
@@ -1444,7 +1456,8 @@ function addProjectsBonus(project, element) {
 //          await addProject('Custom', 'MythicalWorldBonus6Day', '{"credentials":"include","headers":{"accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","accept-language":"ru,en;q=0.9,en-US;q=0.8","cache-control":"max-age=0","content-type":"application/x-www-form-urlencoded","sec-fetch-dest":"document","sec-fetch-mode":"navigate","sec-fetch-site":"same-origin","sec-fetch-user":"?1","upgrade-insecure-requests":"1"},"referrer":"https://mythicalworld.su/bonus","referrerPolicy":"no-referrer-when-downgrade","body":"give=6&item=11","method":"POST","mode":"cors"}', null, 'https://mythicalworld.su/bonus', {ms: 86400000}, priorityOption, null)
 //          await addProject('Custom', 'MythicalWorldBonusMith', '{"credentials":"include","headers":{"accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","accept-language":"ru,en;q=0.9,en-US;q=0.8","cache-control":"max-age=0","content-type":"application/x-www-form-urlencoded","sec-fetch-dest":"document","sec-fetch-mode":"navigate","sec-fetch-site":"same-origin","sec-fetch-user":"?1","upgrade-insecure-requests":"1"},"referrer":"https://mythicalworld.su/bonus","referrerPolicy":"no-referrer-when-downgrade","body":"type=1&bonus=1&value=5","method":"POST","mode":"cors"}', null, 'https://mythicalworld.su/bonus', {ms: 86400000}, priorityOption, null)
 //      })
-/*  } else */if (project.id === 'victorycraft' || project.id === "8179" || project.id === "4729") {
+    /*  } else */
+    if (project.id === 'victorycraft' || project.id === "8179" || project.id === "4729") {
         document.getElementById('secondBonusVictoryCraft').addEventListener('click', async event => {
             event.target.disabled = true
             let vict = {
@@ -1527,8 +1540,8 @@ async function checkPermissions(projects, element) {
         button.textContent = chrome.i18n.getMessage('grant')
         button.classList.add('submitBtn')
         createNotif([chrome.i18n.getMessage('grantUrl'), button], 'hint', {element})
-        granted = await new Promise(resolve=>{
-            button.addEventListener('click', async ()=>{
+        granted = await new Promise(resolve => {
+            button.addEventListener('click', async () => {
                 try {
                     // noinspection JSVoidFunctionReturnValueUsed
                     granted = await chrome.permissions.request({origins, permissions})
@@ -1568,7 +1581,7 @@ function createMessage(text, level) {
 }
 
 //Слушатель на экспорт настроек
-document.getElementById('file-download').addEventListener('click', async ()=>{
+document.getElementById('file-download').addEventListener('click', async () => {
     createNotif(chrome.i18n.getMessage('exporting'), 'hint')
     generalStats = await db.get('other', 'generalStats')
     todayStats = await db.get('other', 'todayStats')
@@ -1580,7 +1593,7 @@ document.getElementById('file-download').addEventListener('click', async ()=>{
     }
     allSetting.projects = await db.getAll('projects')
     const text = JSON.stringify(allSetting, null, '\t')
-    const blob = new Blob([text],{type: 'text/json;charset=UTF-8;'})
+    const blob = new Blob([text], {type: 'text/json;charset=UTF-8;'})
     const anchor = document.createElement('a')
 
     anchor.download = 'AVR.json'
@@ -1590,7 +1603,7 @@ document.getElementById('file-download').addEventListener('click', async ()=>{
     createNotif(chrome.i18n.getMessage('exportingEnd'), 'success')
 })
 
-document.getElementById('logs-download').addEventListener('click', async ()=>{
+document.getElementById('logs-download').addEventListener('click', async () => {
     createNotif(chrome.i18n.getMessage('exporting'), 'hint')
     const logs = await dbLogs.getAll('logs')
     let text = ''
@@ -1599,7 +1612,7 @@ document.getElementById('logs-download').addEventListener('click', async ()=>{
         text += '\n'
     }
 
-    const blob = new Blob([text],{type: 'text/plain;charset=UTF-8;'})
+    const blob = new Blob([text], {type: 'text/plain;charset=UTF-8;'})
     const anchor = document.createElement('a')
 
     anchor.download = 'console_history.txt'
@@ -1615,17 +1628,18 @@ document.getElementById('logs-download').addEventListener('click', async ()=>{
 //Сколько использовано места на логи
 // noinspection JSIgnoredPromiseFromCall
 usageSpace()
+
 async function usageSpace() {
     const quota = await navigator.storage.estimate()
     // Код рассчитывающий использованное место позаимствовано из uBlock Origin https://github.com/gorhill/uBlock/blob/feaa338678ab64e334d33d5b5fb06749877454e7/src/js/settings.js#L118
     let v, unit
     v = quota.usage
-    if ( v < 1e3 ) {
+    if (v < 1e3) {
         unit = 'genericBytes'
-    } else if ( v < 1e6 ) {
+    } else if (v < 1e6) {
         v /= 1e3
         unit = 'KB'
-    } else if ( v < 1e9 ) {
+    } else if (v < 1e9) {
         v /= 1e6
         unit = 'MB'
     } else {
@@ -1634,8 +1648,9 @@ async function usageSpace() {
     }
     document.getElementById('storageUsed').textContent = chrome.i18n.getMessage('storageUsed', [v.toFixed(1), unit])
 }
+
 //Очистка логов
-document.getElementById('logs-clear').addEventListener('click', async ()=>{
+document.getElementById('logs-clear').addEventListener('click', async () => {
     createNotif(chrome.i18n.getMessage('clearingLogs'), 'hint')
     await dbLogs.clear('logs')
     usageSpace()
@@ -1643,7 +1658,7 @@ document.getElementById('logs-clear').addEventListener('click', async ()=>{
 })
 
 //Слушатель на импорт настроек
-document.getElementById('file-upload').addEventListener('change', async (event)=>{
+document.getElementById('file-upload').addEventListener('change', async (event) => {
     createNotif(chrome.i18n.getMessage('importing'), 'hint')
     try {
         if (event.target.files.length === 0) return
@@ -1697,7 +1712,7 @@ function getUrlProjects(element) {
     const projects = []
     let project = {}
     const url = new URL(document.location.href)
-    for(let [key, value] of url.searchParams) {
+    for (let [key, value] of url.searchParams) {
         if (key === 'top') key = 'rating' // TODO временный код
         if (key === 'rating' || key === 'nick' || key === 'id' || key === 'game' || key === 'listing' || key === 'lang' || key === 'maxCountVote' || key === 'ordinalWorld' || key === 'addition') {
             if (key !== 'rating' && !project.rating) continue
@@ -1854,7 +1869,7 @@ async function fastAdd() {
             buttonRetry.classList.add('btn')
             buttonRetry.textContent = chrome.i18n.getMessage('retry')
             document.querySelector('#addFastProject > div.content > .events').append(buttonRetry)
-            buttonRetry.addEventListener('click', ()=> document.location.reload(true))
+            buttonRetry.addEventListener('click', () => document.location.reload(true))
             return
         }
 
@@ -1888,7 +1903,7 @@ async function fastAdd() {
             buttonRetry.classList.add('btn')
             buttonRetry.textContent = chrome.i18n.getMessage('retry')
             document.querySelector('#addFastProject > div.content > .events').append(buttonRetry)
-            buttonRetry.addEventListener('click', ()=> document.location.reload(true))
+            buttonRetry.addEventListener('click', () => document.location.reload(true))
         } else if (document.querySelector('#addFastProject > div.content > div.message').childElementCount > 0) {
             const successFastAdd = document.createElement('div')
             successFastAdd.setAttribute('class', 'successFastAdd')
@@ -1905,7 +1920,7 @@ async function fastAdd() {
         buttonClose.classList.add('btn', 'redBtn')
         buttonClose.textContent = chrome.i18n.getMessage('closeTabButton')
         document.querySelector('#addFastProject > div.content > .events').append(buttonClose)
-        buttonClose.addEventListener('click', ()=> window.close())
+        buttonClose.addEventListener('click', () => window.close())
     }
 }
 
@@ -1941,19 +1956,20 @@ async function openPopup(url, onClose) {
                 chrome.tabs.onRemoved.removeListener(onRemoved)
             }
         }
+
         chrome.tabs.onRemoved.addListener(onRemoved)
     }
     return tabID
 }
 
-document.querySelector('.burger').addEventListener('click', ()=>{
+document.querySelector('.burger').addEventListener('click', () => {
     document.querySelector('.burger').classList.toggle('active')
     document.querySelector('nav').classList.toggle('active')
 })
 
 //Переключение между вкладками
-document.querySelectorAll('.tablinks').forEach((item)=> {
-    item.addEventListener('click', ()=> {
+document.querySelectorAll('.tablinks').forEach((item) => {
+    item.addEventListener('click', () => {
         if (document.getElementById('load').style.display !== 'none') return
         if (item.classList.contains('active')) return
 
@@ -1962,10 +1978,10 @@ document.querySelectorAll('.tablinks').forEach((item)=> {
             document.querySelector('nav').classList.remove('active')
         }
 
-        document.querySelectorAll('.tabcontent').forEach((elem)=> {
+        document.querySelectorAll('.tabcontent').forEach((elem) => {
             elem.style.display = 'none'
         })
-        document.querySelectorAll('.tablinks').forEach((elem)=> {
+        document.querySelectorAll('.tablinks').forEach((elem) => {
             elem.classList.remove('active')
         })
 
@@ -2022,6 +2038,7 @@ async function listSelect(event, tabs) {
 
 //Слушатель закрытия модалки статистики и её сброс
 document.querySelector('#stats .close').addEventListener('click', resetModalStats)
+
 //Сброс модалки статистики
 function resetModalStats() {
     if (document.querySelector('td[data-resource="statsSuccessVotes"]').nextElementSibling.textContent !== '') {
@@ -2042,7 +2059,7 @@ function resetModalStats() {
 
 
 //Слушатель общей статистики и вывод её в модалку
-document.getElementById('generalStats').addEventListener('click', async()=> {
+document.getElementById('generalStats').addEventListener('click', async () => {
     const store = db.transaction('other', 'readwrite').store
     generalStats = await store.get('generalStats')
     if (new Date(generalStats.lastAttemptVote).getMonth() < new Date().getMonth() || new Date(generalStats.lastAttemptVote).getFullYear() < new Date().getFullYear()) {
@@ -2064,7 +2081,7 @@ document.getElementById('generalStats').addEventListener('click', async()=> {
 })
 
 //Слушатель сегодняшней статистики и вывод её в модалку
-document.getElementById('todayStats').addEventListener('click', async()=> {
+document.getElementById('todayStats').addEventListener('click', async () => {
     const store = db.transaction('other', 'readwrite').store
     todayStats = await store.get('todayStats')
     if (new Date(todayStats.lastAttemptVote).getDay() < new Date().getDay()) {
@@ -2087,6 +2104,7 @@ document.getElementById('todayStats').addEventListener('click', async()=> {
 
 let laterChoose = false
 document.getElementById('link').addEventListener('input', linkChanged)
+
 function linkChanged(event, reset) {
     if (laterChoose || reset) {
         document.getElementById('nick').parentElement.style.display = 'none'
@@ -2150,6 +2168,7 @@ function linkChanged(event, reset) {
 
 let laterChooseManual = false
 document.getElementById('rating').addEventListener('input', ratingChanged)
+
 function ratingChanged(event, reset) {
     if (laterChooseManual || reset) {
         document.getElementById('id').parentElement.style.display = 'none'
@@ -2345,7 +2364,7 @@ function ratingChanged(event, reset) {
 }
 
 //Слушатель на выбор типа timeout для Custom
-document.getElementById('selectTime').addEventListener('change', function() {
+document.getElementById('selectTime').addEventListener('change', function () {
     document.getElementById('hour').parentElement.style.display = 'none'
     document.getElementById('hour').required = false
     document.getElementById('time').parentElement.style.display = 'none'
@@ -2513,7 +2532,7 @@ async function updateProjectText(project) {
                     img.appendChild(imgsvg)
                     img.appendChild(imgtext)
                     controlItems.prepend(img)
-                    img.addEventListener('click', async() => {
+                    img.addEventListener('click', async () => {
                         if (await checkPermissions([project])) {
                             delete project.error
                             await chrome.runtime.sendMessage({projectRestart: project, confirmed: true})
@@ -2568,8 +2587,8 @@ function conventPlainTextToLinks(text, element) {
 }
 
 //Модалки
-document.querySelectorAll('#modals .modal .close').forEach((closeBtn)=> {
-    closeBtn.addEventListener('click', ()=> {
+document.querySelectorAll('#modals .modal .close').forEach((closeBtn) => {
+    closeBtn.addEventListener('click', () => {
         if (closeBtn.parentElement.parentElement.id === 'addFastProject') {
             location.href = 'options.html'
         }
@@ -2582,27 +2601,28 @@ document.querySelectorAll('#modals .modal .close').forEach((closeBtn)=> {
 })
 
 const modalsBlock = document.querySelector('#modals')
+
 function toggleModal(modalID) {
     if (modalsBlock.querySelector('.overlay').classList.contains('active')) {
         modalsBlock.querySelector('.overlay').style.transition = '.3s'
-        modalsBlock.querySelector('#'+modalID).style.transition = '.3s'
-        setTimeout(()=> {
+        modalsBlock.querySelector('#' + modalID).style.transition = '.3s'
+        setTimeout(() => {
             modalsBlock.querySelector('.overlay').removeAttribute('style')
-            modalsBlock.querySelector('#'+modalID).removeAttribute('style')
+            modalsBlock.querySelector('#' + modalID).removeAttribute('style')
         }, 300)
     }
     modalsBlock.querySelector('.overlay').classList.toggle('active')
-    modalsBlock.querySelector('#'+modalID).classList.toggle('active')
+    modalsBlock.querySelector('#' + modalID).classList.toggle('active')
 }
 
-modalsBlock.querySelector('.overlay').addEventListener('click', ()=> {
+modalsBlock.querySelector('.overlay').addEventListener('click', () => {
     const activeModal = modalsBlock.querySelector('.modal.active')
     if (activeModal.id === 'stats' || activeModal.id === 'statsToday') {
         document.querySelector('#' + activeModal.id + ' .close').click()
         return
     }
     activeModal.style.transform = 'scale(1.1)'
-    setTimeout(()=> activeModal.removeAttribute('style'), 100)
+    setTimeout(() => activeModal.removeAttribute('style'), 100)
 })
 
 document.querySelectorAll('button[data-resource="deleteExtension"]').forEach(element => {

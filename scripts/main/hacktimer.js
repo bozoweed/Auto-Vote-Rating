@@ -9,7 +9,7 @@ function uuidv4() {
 window.setInterval = function (callback, time /* , parameters */) {
     let fakeId = uuidv4();
     fakeIdToCallback[fakeId] = {
-callback: callback,
+        callback: callback,
         parameters: Array.prototype.slice.call(arguments, 2),
     };
     chrome.runtime.sendMessage({

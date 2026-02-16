@@ -9,7 +9,7 @@ if (!window.loaded) {
 }
 
 async function run() {
-    chrome.runtime.onMessage.addListener(function(request/*, sender, sendResponse*/) {
+    chrome.runtime.onMessage.addListener(function (request/*, sender, sendResponse*/) {
         if (request.sendProject) {
             window.proj = request.project
             if (request.vkontakte) window.vkontakte = request.vkontakte
@@ -34,16 +34,16 @@ async function run() {
     }
 
     // Интеграция с расширениями на автоматические решение капч
-    const timer1 = setInterval(()=> {
+    const timer1 = setInterval(() => {
         // 2 Captcha
         if (document.querySelector('.captcha-solver[data-state="solved"]')) {
             startVote(false)
             clearInterval(timer1)
-        // Anti Captcha
+            // Anti Captcha
         } else if (document.querySelector('.antigate_solver') && document.querySelector('.solved_flag')) {
             startVote(false)
             clearInterval(timer1)
-        // Cap Monster Cloud
+            // Cap Monster Cloud
         } else if (document.querySelector('img.cm-addon-icon[src*="green"]')) {
             startVote(false)
             clearInterval(timer1)
@@ -54,7 +54,7 @@ async function run() {
         if (isVisibleElement(document.querySelector('.captcha-solver[data-state="ready"]'))) {
             document.querySelector('.captcha-solver[data-state="ready"]').click()
             clearInterval(timer2)
-        // Cap Monster Cloud
+            // Cap Monster Cloud
         } else if (isVisibleElement(document.querySelector('img.cm-addon-icon[src*="white-cogs"]'))) {
             document.querySelector('img.cm-addon-icon[src*="white-cogs"]').click()
             clearInterval(timer2)
@@ -76,7 +76,7 @@ async function checkAll(first) {
             chrome.runtime.sendMessage({authSteam: true})
             return
         }
-        const timer2 = setInterval(()=>{
+        const timer2 = setInterval(() => {
             try {
                 if (document.getElementById('error_display').style.display !== 'none') {
                     chrome.runtime.sendMessage({authSteam: true})
@@ -116,7 +116,7 @@ async function checkAll(first) {
         if (document.querySelector('#error .vkuiModalCardBase__container')) return
 
         if (document.querySelector('.vkc__AuthRoot__contentIn')) {
-            const timer = setInterval(()=>{
+            const timer = setInterval(() => {
                 if (document.querySelector('.vkc__AcceptPrivacyPolicy__content button[type="submit"]')) {
                     clearInterval(timer)
                     document.querySelector('.vkc__AcceptPrivacyPolicy__content button[type="submit"]').click()
@@ -124,8 +124,8 @@ async function checkAll(first) {
             }, 1000)
             return
         }
-        if(document.querySelector(".vkc__Authorize__container")){
-            if (document.querySelector("button.vkuiButton") != null){
+        if (document.querySelector(".vkc__Authorize__container")) {
+            if (document.querySelector("button.vkuiButton") != null) {
                 document.querySelector("button.vkuiButton").click()
                 return
             }
@@ -200,11 +200,11 @@ async function checkAll(first) {
             if (replaced) document.location.replace(url)
         }
         if (!replaced) {
-            const timer4 = setTimeout(()=>{//Да это костыль, а есть вариант по лучше?
+            const timer4 = setTimeout(() => {//Да это костыль, а есть вариант по лучше?
                 chrome.runtime.sendMessage({discordLogIn: true})
             }, 10000)
-            window.onbeforeunload = ()=> clearTimeout(timer4)
-            window.onunload = ()=> clearTimeout(timer4)
+            window.onbeforeunload = () => clearTimeout(timer4)
+            window.onunload = () => clearTimeout(timer4)
         }
         return
     }
@@ -212,7 +212,7 @@ async function checkAll(first) {
     //Если идёт проверка (новый CloudFlare?)
     if (document.querySelector('#challenge-form') || document.querySelector('#challenge-body-text')) {
         //Если нам требуется нажать на "Verify you are human" https://gyazo.com/56426c80a3072e5b4d565949af7da81b
-        const timer5 = setInterval(()=>{
+        const timer5 = setInterval(() => {
             if (document.querySelector('#cf-norobot-container input[type="button"]')) {
                 clearInterval(timer5)
                 document.querySelector('#cf-norobot-container input[type="button"]').click()
@@ -227,7 +227,7 @@ async function checkAll(first) {
     //Если мы находимся на странице проверки CloudFlare https://i.imgur.com/BVk3z6y.png
     // TODO CloudFlare выдаёт пустую страницу и сообщает браузеру типо всё загружено. Всё что там известно это то что указано в селекторе ниже, возможны конфликты с сайтами (мониторингами)
     if (document.querySelector('div.main-wrapper > div.main-content')) {
-    // if (document.querySelector('div.main-wrapper div.main-content #challenge-body-text') || document.querySelector('div.main-wrapper div.main-content #challenge-running') || document.querySelector('div.main-wrapper div.main-content #challenge-success')) {
+        // if (document.querySelector('div.main-wrapper div.main-content #challenge-body-text') || document.querySelector('div.main-wrapper div.main-content #challenge-running') || document.querySelector('div.main-wrapper div.main-content #challenge-success')) {
         return
     }
 
@@ -279,7 +279,7 @@ async function checkAll(first) {
     for (const script of document.querySelectorAll('script')) {
         if (script.src.toLowerCase().includes('jquery')) {
             await new Promise(resolve => {
-                const timer6 = setInterval(()=>{
+                const timer6 = setInterval(() => {
                     for (const entry of window.performance.getEntries()) {
                         if (entry.name.toLowerCase().includes('jquery')) {
                             clearInterval(timer6)
@@ -300,7 +300,7 @@ async function startVote(first) {
     // ыыы костыли? вроде не всегда второй скрипт вовремя загружается
     if (typeof vote !== 'function') {
         await new Promise(resolve => {
-            const timer3 = setInterval(()=> {
+            const timer3 = setInterval(() => {
                 if (typeof vote === 'function') {
                     clearInterval(timer3)
                     resolve()

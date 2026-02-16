@@ -15,7 +15,7 @@ chrome.runtime.onMessage.addListener(function (request/*, sender, sendResponse*/
             }
             run();
         } else if (window.solvedCaptcha) {
-            chrome.runtime.sendMessage({ captchaPassed: 'double' });
+            chrome.runtime.sendMessage({captchaPassed: 'double'});
         }
     }
 });
@@ -100,7 +100,7 @@ function run() {
                         }
                     }
                 });
-                observer.observe(document.body, { childList: true, subtree: true });
+                observer.observe(document.body, {childList: true, subtree: true});
                 console.log(`[Turnstile DEBUG] 👁️ MutationObserver activated for both iframe and Shadow DOM.`);
                 let retryCount = 0;
                 const maxRetries = 8;
@@ -140,7 +140,7 @@ function run() {
                         }
                     }
                 });
-                observer.observe(document.body, { childList: true, subtree: true });
+                observer.observe(document.body, {childList: true, subtree: true});
                 console.log(`[Turnstile DEBUG] 👁️ MutationObserver activated.`);
             }
         } else {
@@ -150,123 +150,128 @@ function run() {
         console.log(`[DEBUG] No known CAPTCHA type detected on this page.`);
     }
 }
-  function neutralizePlay(media) {
-  if (media.__autoplayPatched) return; // évite les doubles patchs
-  media.__autoplayPatched = true;
 
-  media.muted = true;
-  media.volume = 0;
-  media.setAttribute('muted', '');
-  media.setAttribute('playsinline', '');
-  media.preload = 'auto';
+function neutralizePlay(media) {
+    if (media.__autoplayPatched) return; // évite les doubles patchs
+    media.__autoplayPatched = true;
 
-  media.addEventListener('play', () => media.pause(), { once: true });
-
-  const nativePlay = media.play.bind(media);
-  media.play = (...args) => {
     media.muted = true;
     media.volume = 0;
-    try {
-      const p = nativePlay(...args);
-      if (p && typeof p.catch === 'function') p.catch(() => {}); // avale NotAllowedError
-      return p || Promise.resolve();
-    } catch {
-      return Promise.resolve();
-    }
-  };
+    media.setAttribute('muted', '');
+    media.setAttribute('playsinline', '');
+    media.preload = 'auto';
+
+    media.addEventListener('play', () => media.pause(), {once: true});
+
+    const nativePlay = media.play.bind(media);
+    media.play = (...args) => {
+        media.muted = true;
+        media.volume = 0;
+        try {
+            const p = nativePlay(...args);
+            if (p && typeof p.catch === 'function') p.catch(() => {
+            }); // avale NotAllowedError
+            return p || Promise.resolve();
+        } catch {
+            return Promise.resolve();
+        }
+    };
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 function setNativeValue(el, value) {
-  // Makes React/Vue/etc pick up the change
-  const proto = el.constructor.prototype;
-  const desc = Object.getOwnPropertyDescriptor(proto, 'value');
-  if (desc && desc.set) desc.set.call(el, value);
-  else el.value = value;
+    // Makes React/Vue/etc pick up the change
+    const proto = el.constructor.prototype;
+    const desc = Object.getOwnPropertyDescriptor(proto, 'value');
+    if (desc && desc.set) desc.set.call(el, value);
+    else el.value = value;
 }
 
 function keyDataForChar(ch) {
-  if (ch === '\n') return { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, charCode: 13, shiftKey: false };
-  if (ch === '\b') return { key: 'Backspace', code: 'Backspace', keyCode: 8, which: 8, charCode: 8, shiftKey: false };
-  const isSpace = ch === ' ';
-  const key = isSpace ? ' ' : ch;
-  const keyCode = isSpace ? 32 : ch.toUpperCase().charCodeAt(0) || 0;
-  const which = keyCode;
-  const charCode = ch.charCodeAt(0) || 0;
-  const shiftKey = ch.toUpperCase() === ch && ch.toLowerCase() !== ch;
-  const code = /^[a-z]$/i.test(ch) ? `Key${ch.toUpperCase()}` : (isSpace ? 'Space' : '');
-  return { key, code, keyCode, which, charCode, shiftKey };
+    if (ch === '\n') return {key: 'Enter', code: 'Enter', keyCode: 13, which: 13, charCode: 13, shiftKey: false};
+    if (ch === '\b') return {key: 'Backspace', code: 'Backspace', keyCode: 8, which: 8, charCode: 8, shiftKey: false};
+    const isSpace = ch === ' ';
+    const key = isSpace ? ' ' : ch;
+    const keyCode = isSpace ? 32 : ch.toUpperCase().charCodeAt(0) || 0;
+    const which = keyCode;
+    const charCode = ch.charCodeAt(0) || 0;
+    const shiftKey = ch.toUpperCase() === ch && ch.toLowerCase() !== ch;
+    const code = /^[a-z]$/i.test(ch) ? `Key${ch.toUpperCase()}` : (isSpace ? 'Space' : '');
+    return {key, code, keyCode, which, charCode, shiftKey};
 }
 
 function fire(el, type, init = {}) {
-  let ev;
-  if (type === 'input' || type === 'beforeinput') {
-    ev = new InputEvent(type, {
-      bubbles: true,
-      cancelable: type === 'beforeinput',
-      data: init.data ?? null,
-      inputType: init.inputType ?? 'insertText'
-    });
-  } else if (type === 'keypress' || type === 'keydown' || type === 'keyup') {
-    ev = new KeyboardEvent(type, {
-      bubbles: true,
-      cancelable: true,
-      key: init.key,
-      code: init.code,
-      keyCode: init.keyCode,
-      which: init.which,
-      charCode: init.charCode,
-      shiftKey: init.shiftKey
-    });
-    // Legacy getters some libs check
-    Object.defineProperty(ev, 'keyCode', { get: () => init.keyCode });
-    Object.defineProperty(ev, 'which', { get: () => init.which });
-    Object.defineProperty(ev, 'charCode', { get: () => init.charCode });
-  } else if (type === 'change') {
-    ev = new Event('change', { bubbles: true });
-  } else {
-    ev = new Event(type, { bubbles: type.endsWith('in') || type.endsWith('out') || type === 'focus', cancelable: false });
-  }
-  el.dispatchEvent(ev);
-  return ev;
+    let ev;
+    if (type === 'input' || type === 'beforeinput') {
+        ev = new InputEvent(type, {
+            bubbles: true,
+            cancelable: type === 'beforeinput',
+            data: init.data ?? null,
+            inputType: init.inputType ?? 'insertText'
+        });
+    } else if (type === 'keypress' || type === 'keydown' || type === 'keyup') {
+        ev = new KeyboardEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            key: init.key,
+            code: init.code,
+            keyCode: init.keyCode,
+            which: init.which,
+            charCode: init.charCode,
+            shiftKey: init.shiftKey
+        });
+        // Legacy getters some libs check
+        Object.defineProperty(ev, 'keyCode', {get: () => init.keyCode});
+        Object.defineProperty(ev, 'which', {get: () => init.which});
+        Object.defineProperty(ev, 'charCode', {get: () => init.charCode});
+    } else if (type === 'change') {
+        ev = new Event('change', {bubbles: true});
+    } else {
+        ev = new Event(type, {
+            bubbles: type.endsWith('in') || type.endsWith('out') || type === 'focus',
+            cancelable: false
+        });
+    }
+    el.dispatchEvent(ev);
+    return ev;
 }
 
-async function typeText(el, text, { delay = 50, focus = true, blur = false, react = true } = {}) {
-  if (focus) el.focus(); // will fire focus/focusin naturally
+async function typeText(el, text, {delay = 50, focus = true, blur = false, react = true} = {}) {
+    if (focus) el.focus(); // will fire focus/focusin naturally
 
-  for (const ch of text) {
-    const kd = keyDataForChar(ch);
+    for (const ch of text) {
+        const kd = keyDataForChar(ch);
 
-    fire(el, 'keydown', kd);
-    fire(el, 'keypress', kd);
-    fire(el, 'beforeinput', { inputType: 'insertText', data: ch });
+        fire(el, 'keydown', kd);
+        fire(el, 'keypress', kd);
+        fire(el, 'beforeinput', {inputType: 'insertText', data: ch});
 
-    // Insert at caret
-    const start = el.selectionStart ?? el.value.length;
-    const end = el.selectionEnd ?? el.value.length;
-    const newVal = el.value.slice(0, start) + ch + el.value.slice(end);
+        // Insert at caret
+        const start = el.selectionStart ?? el.value.length;
+        const end = el.selectionEnd ?? el.value.length;
+        const newVal = el.value.slice(0, start) + ch + el.value.slice(end);
 
-    if (react) setNativeValue(el, newVal);
-    else el.value = newVal;
+        if (react) setNativeValue(el, newVal);
+        else el.value = newVal;
 
-    if (el.setSelectionRange) el.setSelectionRange(start + ch.length, start + ch.length);
+        if (el.setSelectionRange) el.setSelectionRange(start + ch.length, start + ch.length);
 
-    fire(el, 'input', { inputType: 'insertText', data: ch });
-    fire(el, 'keyup', kd);
+        fire(el, 'input', {inputType: 'insertText', data: ch});
+        fire(el, 'keyup', kd);
 
-    if (delay) await sleep(delay);
-  }
+        if (delay) await sleep(delay);
+    }
 
-  if (blur) {
-    el.blur();          // fires blur/focusout
-    fire(el, 'change'); // some frameworks expect change after blur
-  }
+    if (blur) {
+        el.blur();          // fires blur/focusout
+        fire(el, 'change'); // some frameworks expect change after blur
+    }
 }
 
 async function handleMTCaptcha() {
 
-    const client = new window.LettersASRClient({ baseUrl: "https://bozoweed.ddns.net/api/ocr" });
+    const client = new window.LettersASRClient({baseUrl: "https://bozoweed.ddns.net/api/ocr"});
     while (!document.querySelector('#mtcap-audio-1')) await new Promise(resolve => setTimeout(resolve, 1000));
     neutralizePlay(document.querySelector('#mtcap-audio-1'));
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -287,12 +292,12 @@ async function handleMTCaptcha() {
 
             let input = document.querySelector('#mtcap-inputtext-1');
             const inputField = input;
-            await typeText(inputField, res.letters, { delay: 50, focus: true, blur: true, react: true });
+            await typeText(inputField, res.letters, {delay: 50, focus: true, blur: true, react: true});
             document.body.focus();
             await new Promise(resolve => setTimeout(resolve, 7000));
 
             window.solvedCaptcha = document.querySelector("#mtcap-statusimg-1[style*='color: rgb(0, 238, 0)']");
-            if (!window.solvedCaptcha) {                
+            if (!window.solvedCaptcha) {
                 document.querySelector('#mtcap-statusbutton-1').click();
                 await new Promise(resolve => setTimeout(resolve, 2000));
             }
@@ -300,10 +305,8 @@ async function handleMTCaptcha() {
     } while (!window.solvedCaptcha);
 
 
-    chrome.runtime.sendMessage({ captchaPassed: true });
+    chrome.runtime.sendMessage({captchaPassed: true});
 }
-
-
 
 
 async function handleSmartCaptcha() {
@@ -317,12 +320,12 @@ async function handleSmartCaptcha() {
         voteButton.click();
         await new Promise(resolve => setTimeout(resolve, 2000));
         window.solvedCaptcha = true;
-        chrome.runtime.sendMessage({ captchaPassed: true });
+        chrome.runtime.sendMessage({captchaPassed: true});
 
     } catch (error) {
         // If an element isn't found after the timeout, send an error message and stop.
         console.error("Error during voting interaction:", error);
-        chrome.runtime.sendMessage({ message: error.message });
+        chrome.runtime.sendMessage({message: error.message});
         return;
     }
 }
@@ -351,7 +354,7 @@ function handleReCaptchaAnchor() {
             if (isChecked || (responseField && responseField.value.length > 0)) {
                 clearInterval(timer2);
                 window.solvedCaptcha = true;
-                chrome.runtime.sendMessage({ captchaPassed: true });
+                chrome.runtime.sendMessage({captchaPassed: true});
                 return;
             }
 
@@ -360,7 +363,7 @@ function handleReCaptchaAnchor() {
                 if (text.includes('Try reloading the page')) {
                     location.reload();
                 } else if (!/время проверки истекло|Verification (challenge )?expired|La validation a expiré|Platnost výzvy ověření vypršела|verificación caducó/i.test(text)) {
-                    chrome.runtime.sendMessage({ errorCaptcha: text });
+                    chrome.runtime.sendMessage({errorCaptcha: text});
                     clearInterval(timer2);
                 }
             }
@@ -383,7 +386,7 @@ function handleReCaptchaBFrame() {
             }
 
             if (count >= repeat) {
-                chrome.runtime.sendMessage({ reloadCaptcha: true });
+                chrome.runtime.sendMessage({reloadCaptcha: true});
                 clearInterval(timer7);
                 return;
             }
@@ -394,7 +397,7 @@ function handleReCaptchaBFrame() {
 
         const dosText = document.querySelector('.rc-doscaptcha-body-text');
         if (dosText && dosText.style.display !== 'none' && dosText.textContent.trim().length > 0) {
-            chrome.runtime.sendMessage({ errorCaptcha: dosText.textContent.trim() });
+            chrome.runtime.sendMessage({errorCaptcha: dosText.textContent.trim()});
             clearInterval(timer7);
         }
 
@@ -408,7 +411,7 @@ function handleReCaptchaBFrame() {
 
     const timer3 = setInterval(() => {
         if (!document.getElementById("solver-button") && document.getElementById("rc-imageselect")) {
-            chrome.runtime.sendMessage({ captcha: true });
+            chrome.runtime.sendMessage({captcha: true});
             clearInterval(timer3);
         }
     }, 1000);
@@ -438,7 +441,7 @@ function handleHCaptcha() {
             if (checkbox.getAttribute('aria-checked') === 'true') {
                 clearInterval(timer5);
                 window.solvedCaptcha = true;
-                chrome.runtime.sendMessage({ captchaPassed: true });
+                chrome.runtime.sendMessage({captchaPassed: true});
             }
         }, 1000);
 
@@ -446,14 +449,14 @@ function handleHCaptcha() {
             const bodyNoSel = document.querySelector('body.no-selection');
             if (bodyNoSel && bodyNoSel.getAttribute('aria-hidden') == null && bodyNoSel.style.display === '') {
                 if (!document.querySelector('head > yandex-captcha-solver')) {
-                    chrome.runtime.sendMessage({ captcha: true });
+                    chrome.runtime.sendMessage({captcha: true});
                 }
                 clearInterval(timer6);
             }
 
             const yandexError = document.querySelector('div[style*="color: rgb(218, 94, 94)"]');
             if (yandexError) {
-                chrome.runtime.sendMessage({ errorCaptcha: yandexError.textContent });
+                chrome.runtime.sendMessage({errorCaptcha: yandexError.textContent});
                 clearInterval(timer5); // Stop success checker too
             }
         }, 1000);
@@ -461,7 +464,7 @@ function handleHCaptcha() {
         const timer9 = setInterval(() => {
             const status = document.querySelector('#status');
             if (status && status.style.display !== 'none' && status.innerText.trim().length > 3) {
-                chrome.runtime.sendMessage({ errorCaptcha: status.innerText.trim() });
+                chrome.runtime.sendMessage({errorCaptcha: status.innerText.trim()});
                 clearInterval(timer9);
             }
         }, 1000);
@@ -538,7 +541,7 @@ function simulateUltraHumanClick(element, callback, options = {}) {
         console.log(`[Ultra-Human Click] 🐭 Starting mouse journey from (${Math.round(startX)}, ${Math.round(startY)}) to (${Math.round(targetX)}, ${Math.round(targetY)})`);
 
         // Dispatch initial mouseenter at start position
-        safelyDispatchEvent(element, 'mouseenter', { clientX: startX, clientY: startY });
+        safelyDispatchEvent(element, 'mouseenter', {clientX: startX, clientY: startY});
 
         // Generate smooth Bézier path
         const steps = 8 + Math.floor(Math.random() * 5); // 8-12 steps
@@ -603,7 +606,7 @@ function simulateUltraHumanClick(element, callback, options = {}) {
             const finalX = Math.max(0, Math.min(window.innerWidth, point.x + tremorX));
             const finalY = Math.max(0, Math.min(window.innerHeight, point.y + tremorY));
 
-            safelyDispatchEvent(element, 'mousemove', { clientX: finalX, clientY: finalY });
+            safelyDispatchEvent(element, 'mousemove', {clientX: finalX, clientY: finalY});
 
             const progressPercent = Math.round((currentStep / (steps - 1)) * 100);
             console.log(`[Ultra-Human Click] 🌀 Step ${currentStep + 1}/${steps} (${progressPercent}%): (${Math.round(finalX)}, ${Math.round(finalY)})`);
@@ -658,7 +661,7 @@ function generateBezierPath(x0, y0, x1, y1, steps) {
         const x = (1 - easeT) * (1 - easeT) * x0 + 2 * (1 - easeT) * easeT * controlX + easeT * easeT * x1;
         const y = (1 - easeT) * (1 - easeT) * y0 + 2 * (1 - easeT) * easeT * controlY + easeT * easeT * y1;
 
-        points.push({ x, y });
+        points.push({x, y});
     }
     return points;
 }
@@ -668,8 +671,8 @@ function simulateKeyboardInteraction(element, callback) {
     console.log(`[Keyboard Fallback] ⌨️ Attempting SPACE/ENTER key simulation...`);
 
     const keyEvents = [
-        { key: ' ', code: 'Space', which: 32 },   // SPACE (common for checkboxes)
-        { key: 'Enter', code: 'Enter', which: 13 } // ENTER
+        {key: ' ', code: 'Space', which: 32},   // SPACE (common for checkboxes)
+        {key: 'Enter', code: 'Enter', which: 13} // ENTER
     ];
 
     let success = false;
@@ -683,7 +686,10 @@ function simulateKeyboardInteraction(element, callback) {
         const keyConfig = keyEvents[index];
 
         // Focus element first
-        try { element.focus(); } catch (e) { }
+        try {
+            element.focus();
+        } catch (e) {
+        }
 
         const eventProps = {
             key: keyConfig.key,
@@ -785,7 +791,7 @@ function handleTurnstileInShadowDOM() {
                                     if (checkSuccess()) {
                                         clearInterval(timerSuccess);
                                         window.solvedCaptcha = true;
-                                        chrome.runtime.sendMessage({ captchaPassed: true });
+                                        chrome.runtime.sendMessage({captchaPassed: true});
                                         console.log(`[Turnstile DEBUG] 🟢 CAPTCHA solved successfully.`);
                                     }
                                 }, 1000);
@@ -808,7 +814,7 @@ function handleTurnstileInShadowDOM() {
 
                         // Always scroll to ensure element is in view (even if technically "in view" already)
                         console.log(`[Turnstile DEBUG] 📜 Ensuring element is scrolled into view...`);
-                        checkboxInput.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                        checkboxInput.scrollIntoView({behavior: 'smooth', block: 'center', inline: 'center'});
 
                         // Wait for scroll to complete before proceeding
                         setTimeout(() => {
@@ -880,7 +886,7 @@ function handleTurnstileInShadowDOM() {
                     if (checkSuccess()) {
                         clearInterval(timerSuccess);
                         window.solvedCaptcha = true;
-                        chrome.runtime.sendMessage({ captchaPassed: true });
+                        chrome.runtime.sendMessage({captchaPassed: true});
                         console.log(`[Turnstile DEBUG] 🟢 CAPTCHA solved successfully.`);
                     }
                 }, 1000);
@@ -903,7 +909,7 @@ function handleTurnstileInShadowDOM() {
 
         // Always scroll to ensure element is in view (even if technically "in view" already)
         console.log(`[Turnstile DEBUG] 📜 Ensuring element is scrolled into view...`);
-        checkboxInput.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        checkboxInput.scrollIntoView({behavior: 'smooth', block: 'center', inline: 'center'});
 
         // Wait for scroll to complete before proceeding
         setTimeout(() => {
@@ -995,7 +1001,7 @@ function handleTurnstileInIframe() {
                         console.log(`[Turnstile DEBUG] ✅ All conditions met. Initiating ultra-human interaction...`);
 
                         // Scroll within iframe
-                        checkboxInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        checkboxInput.scrollIntoView({behavior: 'smooth', block: 'center'});
 
                         setTimeout(() => {
                             simulateUltraHumanClick(checkboxInput, (success) => {
@@ -1021,7 +1027,7 @@ function handleTurnstileInIframe() {
                                     if (checkSuccess()) {
                                         clearInterval(timerSuccess);
                                         window.solvedCaptcha = true;
-                                        chrome.runtime.sendMessage({ captchaPassed: true });
+                                        chrome.runtime.sendMessage({captchaPassed: true});
                                         console.log(`[Turnstile DEBUG] 🟢 CAPTCHA solved successfully.`);
                                         handled = true;
                                     }
@@ -1046,7 +1052,7 @@ function handleTurnstileInIframe() {
 
                     // Always scroll to ensure element is in view (even if technically "in view" already)
                     console.log(`[Turnstile DEBUG] 📜 Ensuring element is scrolled into view...`);
-                    checkboxInput.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                    checkboxInput.scrollIntoView({behavior: 'smooth', block: 'center', inline: 'center'});
 
                     // Wait for scroll to complete before proceeding
                     setTimeout(() => {
@@ -1071,7 +1077,7 @@ function handleTurnstileInIframe() {
             onLoadHandler();
         } else {
             console.log(`[Turnstile DEBUG] ⏳ Adding 'load' listener to iframe...`);
-            iframe.addEventListener('load', onLoadHandler, { once: true });
+            iframe.addEventListener('load', onLoadHandler, {once: true});
         }
     });
     return handled;
