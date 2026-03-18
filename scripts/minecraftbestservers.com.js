@@ -10,10 +10,11 @@ async function vote(first) {
     return
   }
 
-  // Error message - red notification
-  if (document.querySelector('div[class*="bg-red-"][x-data="{ show: true }"]')) {
-    const request = {}
-    request.message = document.querySelector('div[class*="bg-red-"][x-data="{ show: true }"]')?.innerText
+  // Error message - red notification (Alpine.js: x-show + x-text OR x-data)
+  const errorDiv = document.querySelector('div.bg-red-500[x-show][x-text]') || document.querySelector('div[class*="bg-red-"][x-data="{ show: true }"]')
+  if (errorDiv) {
+  	const request = {}
+  	request.message = errorDiv?.innerText
     if (request.message?.includes('failed the security challenge')) {
       // None
     } else if (request.message?.toLowerCase().includes('already voted')) {
