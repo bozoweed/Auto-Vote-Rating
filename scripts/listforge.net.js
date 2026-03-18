@@ -78,9 +78,71 @@ async function vote(first) {
         return
     }
 
-    //Если на странице есть hCaptcha то мы ждём её решения
-    if ((document.querySelector('div.h-captcha') || document.querySelector('.cf-turnstile') || document.querySelector('#captcha-block')) && first) {
-        return
+    // ==================== WAIT FOR CAPTCHA TO BE SOLVED ====================
+    let captchaSolved = false;
+   
+    // Special handling for Cloudflare Turnstile
+    function checkTurnstileSolved() {
+    	// Check for hidden response field with value
+    	const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]');
+    	if (turnstileResponse && turnstileResponse.value && turnstileResponse.value.length > 0) {
+    		return true;
+    	}
+   
+    	// Check for success indicator classes
+    	const successIndicators = document.querySelectorAll('.cf-turnstile-success, .turnstile-success, [data-state="solved"]');
+    	for (let indicator of successIndicators) {
+    		if (indicator.offsetParent !== null) {
+    			return true;
+    		}
+    	}
+   
+    	return false;
+    }
+   
+    // Listen for captchaPassed message from content.js
+    const captchaListener = (message, sender, sendResponse) => {
+    	if (message.captchaPassed === true || message.captchaPassed === 'double') {
+    		console.log("[VOTE] CAPTCHA solved! Proceeding to submit vote.");
+    		captchaSolved = true;
+    		chrome.runtime.onMessage.removeListener(captchaListener);
+    	}
+    };
+    chrome.runtime.onMessage.addListener(captchaListener);
+   
+    // Also check if CAPTCHA was already solved before
+    if (window.__captchaExt?.solvedCaptcha) {
+    	console.log("[VOTE] CAPTCHA was already solved. Proceeding immediately.");
+    	captchaSolved = true;
+    }
+   
+    // Check specifically for Turnstile being solved
+    if (!captchaSolved && document.querySelector('.cf-turnstile, [data-widget-id]')) {
+    	console.log("[VOTE] Checking if Turnstile is already solved...");
+    	if (checkTurnstileSolved()) {
+    		console.log("[VOTE] Turnstile already solved!");
+    		captchaSolved = true;
+    	}
+    }
+   
+    // If not solved yet, wait for it
+    if (!captchaSolved && (document.querySelector('div.h-captcha') || document.querySelector('.cf-turnstile') || document.querySelector('#captcha-block'))) {
+    	console.log("[VOTE] Waiting for CAPTCHA to be solved...");
+   
+    	// Wait until captchaSolved becomes true
+    	await new Promise(resolve => {
+    		const checkInterval = setInterval(() => {
+    			// Check both the general captcha solution and Turnstile-specific solution
+    			if (captchaSolved || checkTurnstileSolved()) {
+    				if (checkTurnstileSolved()) {
+    					console.log("[VOTE] Turnstile solved by direct check!");
+    					captchaSolved = true;
+    				}
+    				clearInterval(checkInterval);
+    				resolve();
+    			}
+    		}, 500);
+    	});
     }
 
     //Соглашаемся с Privacy Policy
@@ -125,9 +187,14 @@ async function vote(first) {
         }
 
         document.getElementById('nickname').value = project.nick
-        //Кликаем проголосовать, если нет hCaptcha
-        if (document.getElementById('voteBtn') != null) {
-            document.getElementById('voteBtn').click()
+       //Кликаем проголосовать, если нет hCaptcha
+       if (document.getElementById('voteBtn') != null) {
+        // Double-check Turnstile is solved right before submitting
+        if (document.querySelector('.cf-turnstile, [data-widget-id]') && !checkTurnstileSolved()) {
+        	console.warn("[VOTE] Turnstile may not be fully solved yet, waiting a bit longer...");
+        	await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+        document.getElementById('voteBtn').click()
         //Если hCaptcha
         } else if (document.querySelector('button[form="vote_form"]') != null) {
                 document.querySelector('button[form="vote_form"]').click()

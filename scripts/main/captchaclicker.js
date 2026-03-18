@@ -35,13 +35,15 @@ function run() {
     const isRecaptchaAnchor = /https?:\/\/(.+?\.)?(google\.com|recaptcha\.net)\/recaptcha\/(api\d|enterprise)\/anchor/.test(url);
     const isRecaptchaBFrame = /https?:\/\/(.+?\.)?(google\.com|recaptcha\.net)\/recaptcha\/(api\d|enterprise)\/bframe/.test(url);
     const isMTCaptcha = /https?:\/\/service\.mtcaptcha\.com\/mtcv1/.test(url);
-    const isHCaptcha = url.includes('.hcaptcha.com/captcha.v');
+    const isHCaptcha = /https?:\/\/(.+?\.)?hcaptcha\.com\/captcha/.test(url);
     const isSmartCaptcha = url.includes('smartcaptcha.yandexcloud.net');
     const isCloudflareChallengePage = url.startsWith('https://challenges.cloudflare.com');
     const hasTurnstileWidget = document.querySelector('.cf-turnstile, [name="cf-turnstile-response"], iframe[src*="challenges.cloudflare.com/turnstile"]') !== null;
-
+    const isRecaptchaFallback = /https?:\/\/(.+?\.)?(google\.com|recaptcha\.net)\/recaptcha/.test(url) && !isRecaptchaAnchor && !isRecaptchaBFrame;
+   
     console.log(`[DEBUG] Recaptcha Anchor: ${isRecaptchaAnchor}`);
     console.log(`[DEBUG] Recaptcha BFrame: ${isRecaptchaBFrame}`);
+    console.log(`[DEBUG] Recaptcha Fallback: ${isRecaptchaFallback}`);
     console.log(`[DEBUG] HCaptcha: ${isHCaptcha}`);
     console.log(`[DEBUG] SmartCaptcha: ${isSmartCaptcha}`);
     console.log(`[DEBUG] MTCaptcha: ${isMTCaptcha}`);
