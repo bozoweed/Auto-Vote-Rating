@@ -5,6 +5,134 @@ window.dontSolve = false;
 window.solvedCaptcha = false;
 window.loadedCaptcha = false;
 
+// ============================
+// TURNSTILE ERROR RECOVERY SYSTEM
+// ============================
+const TURNSTILE_CONFIG = {
+    GLOBAL_TIMEOUT: 60000,      // 60 secondes max pour résoudre Turnstile
+    MAX_RETRIES: 3,             // Maximum 3 tentatives de reload
+    SUCCESS_CHECK_TIMEOUT: 30000 // 30 secondes pour vérifier le succès
+};
+
+// Compteur de tentatives persisté en sessionStorage (reset par navigation)
+let turnstileRetryCount = parseInt(sessionStorage.getItem('turnstile_retry_count') || '0');
+let turnstileGlobalTimer = null;
+let turnstileResolved = false;
+
+/**
+ * Initialise le système de récupération Turnstile
+ * - Définit un timeout global de sécurité
+ * - Nettoie le compteur si la page est rechargée avec succès
+ */
+function initTurnstileRecovery() {
+    console.log(`[Turnstile Recovery] 🛡️ Initializing recovery system (attempt ${turnstileRetryCount + 1}/${TURNSTILE_CONFIG.MAX_RETRIES})`);
+
+    // Reset du flag de résolution
+    turnstileResolved = false;
+
+    // Clear tout timer existant
+    if (turnstileGlobalTimer) {
+        clearTimeout(turnstileGlobalTimer);
+    }
+
+    // Timeout global de sécurité
+    turnstileGlobalTimer = setTimeout(() => {
+        if (!turnstileResolved && !window.solvedCaptcha) {
+            console.error(`[Turnstile Recovery] ⏰ GLOBAL TIMEOUT after ${TURNSTILE_CONFIG.GLOBAL_TIMEOUT}ms - No resolution detected`);
+            handleTurnstileFailure('GLOBAL_TIMEOUT');
+        }
+    }, TURNSTILE_CONFIG.GLOBAL_TIMEOUT);
+
+    // Écouter les erreurs non capturées
+    window.addEventListener('error', (event) => {
+        if (event.message && (
+            event.message.includes('turnstile') ||
+            event.message.includes('cloudflare') ||
+            event.message.includes('cf-turnstile')
+        )) {
+            console.error(`[Turnstile Recovery] 💥 Uncaught error:`, event.message);
+            handleTurnstileFailure('UNCAUGHT_ERROR');
+        }
+    });
+}
+
+/**
+ * Gère un échec Turnstile
+ * @param {string} reason - Raison de l'échec
+ */
+function handleTurnstileFailure(reason) {
+    console.error(`[Turnstile Recovery] ❌ Turnstile failed: ${reason}`);
+
+    // Cleanup du timer
+    if (turnstileGlobalTimer) {
+        clearTimeout(turnstileGlobalTimer);
+        turnstileGlobalTimer = null;
+    }
+
+    // Incrémenter le compteur
+    turnstileRetryCount++;
+    sessionStorage.setItem('turnstile_retry_count', turnstileRetryCount.toString());
+
+    // Vérifier si on peut retry
+    if (turnstileRetryCount < TURNSTILE_CONFIG.MAX_RETRIES) {
+        console.log(`[Turnstile Recovery] 🔄 Retrying... (${turnstileRetryCount}/${TURNSTILE_CONFIG.MAX_RETRIES})`);
+        // Message au background avant reload
+        try {
+            chrome.runtime.sendMessage({
+                turnstileRetry: true,
+                attempt: turnstileRetryCount,
+                maxRetries: TURNSTILE_CONFIG.MAX_RETRIES,
+                reason: reason
+            });
+        } catch (e) {
+            console.warn(`[Turnstile Recovery] Could not notify background:`, e.message);
+        }
+
+        // Reload après un court délai
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+    } else {
+        // Abandon propre
+        console.error(`[Turnstile Recovery] 🚫 Max retries reached (${TURNSTILE_CONFIG.MAX_RETRIES}). Abandoning.`);
+
+        // Reset le compteur pour la prochaine session
+        sessionStorage.removeItem('turnstile_retry_count');
+
+        // Notifier le background de l'échec définitif
+        try {
+            chrome.runtime.sendMessage({
+                turnstileFailed: true,
+                reason: reason,
+                message: `Turnstile failed after ${TURNSTILE_CONFIG.MAX_RETRIES} attempts: ${reason}`
+            });
+        } catch (e) {
+            console.warn(`[Turnstile Recovery] Could not notify background:`, e.message);
+        }
+
+        // Définir un flag global pour que les scripts individuels puissent réagir
+        window.turnstileFailedPermanently = true;
+    }
+}
+
+/**
+ * Marque Turnstile comme résolu avec succès
+ */
+function markTurnstileResolved() {
+    turnstileResolved = true;
+    if (turnstileGlobalTimer) {
+        clearTimeout(turnstileGlobalTimer);
+        turnstileGlobalTimer = null;
+    }
+    // Reset le compteur de retries en cas de succès
+    sessionStorage.removeItem('turnstile_retry_count');
+    console.log(`[Turnstile Recovery] ✅ Turnstile resolved successfully - Recovery timer cleared`);
+}
+
+// ============================
+// /END TURNSTILE ERROR RECOVERY SYSTEM
+// ============================
+
 chrome.runtime.onMessage.addListener(function (request/*, sender, sendResponse*/) {
     console.log('Captchaclicker received message', request);
     if (request.sendProject) {
@@ -40,7 +168,7 @@ function run() {
     const isCloudflareChallengePage = url.startsWith('https://challenges.cloudflare.com');
     const hasTurnstileWidget = document.querySelector('.cf-turnstile, [name="cf-turnstile-response"], iframe[src*="challenges.cloudflare.com/turnstile"]') !== null;
     const isRecaptchaFallback = /https?:\/\/(.+?\.)?(google\.com|recaptcha\.net)\/recaptcha/.test(url) && !isRecaptchaAnchor && !isRecaptchaBFrame;
-   
+
     console.log(`[DEBUG] Recaptcha Anchor: ${isRecaptchaAnchor}`);
     console.log(`[DEBUG] Recaptcha BFrame: ${isRecaptchaBFrame}`);
     console.log(`[DEBUG] Recaptcha Fallback: ${isRecaptchaFallback}`);
@@ -65,6 +193,9 @@ function run() {
         handleHCaptcha();
     } else if (isCloudflareChallengePage) {
         console.log(`[Cloudflare DEBUG] ➡️ Detected Cloudflare challenge page. Assuming Turnstile.`);
+
+        // 🔒 INITIALISATION DU SYSTÈME DE RÉCUPÉRATION TURNSTILE
+        initTurnstileRecovery();
 
         let handled = false;
         handled = handleTurnstileInIframe();
@@ -110,6 +241,8 @@ function run() {
                     if (retryCount >= maxRetries) {
                         clearInterval(retryInterval);
                         console.log(`[Turnstile DEBUG] ❌ Gave up after ${maxRetries} retries.`);
+                        // 🔄 UTILISATION DU SYSTÈME DE RÉCUPÉRATION GLOBAL
+                        handleTurnstileFailure('OBSERVER_RETRIES_EXHAUSTED');
                         return;
                     }
                     retryCount++;
@@ -121,6 +254,10 @@ function run() {
         }
     } else if (hasTurnstileWidget) {
         console.log(`[Turnstile DEBUG] ⚙️ Turnstile widget detected. Attempting to handle now...`);
+
+        // 🔒 INITIALISATION DU SYSTÈME DE RÉCUPÉRATION TURNSTILE
+        initTurnstileRecovery();
+
         if (!handleTurnstileInIframe()) {
             console.log(`[Turnstile DEBUG] 🔄 Initial attempt failed or iframe not ready. Setting up observer for dynamic injection...`);
             if (!window.turnstileObserverActive) {
@@ -152,118 +289,118 @@ function run() {
         console.log(`[DEBUG] No known CAPTCHA type detected on this page.`);
     }
 }
-  function neutralizePlay(media) {
-  if (media.__autoplayPatched) return; // évite les doubles patchs
-  media.__autoplayPatched = true;
+function neutralizePlay(media) {
+    if (media.__autoplayPatched) return; // évite les doubles patchs
+    media.__autoplayPatched = true;
 
-  media.muted = true;
-  media.volume = 0;
-  media.setAttribute('muted', '');
-  media.setAttribute('playsinline', '');
-  media.preload = 'auto';
-
-  media.addEventListener('play', () => media.pause(), { once: true });
-
-  const nativePlay = media.play.bind(media);
-  media.play = (...args) => {
     media.muted = true;
     media.volume = 0;
-    try {
-      const p = nativePlay(...args);
-      if (p && typeof p.catch === 'function') p.catch(() => {}); // avale NotAllowedError
-      return p || Promise.resolve();
-    } catch {
-      return Promise.resolve();
-    }
-  };
+    media.setAttribute('muted', '');
+    media.setAttribute('playsinline', '');
+    media.preload = 'auto';
+
+    media.addEventListener('play', () => media.pause(), { once: true });
+
+    const nativePlay = media.play.bind(media);
+    media.play = (...args) => {
+        media.muted = true;
+        media.volume = 0;
+        try {
+            const p = nativePlay(...args);
+            if (p && typeof p.catch === 'function') p.catch(() => { }); // avale NotAllowedError
+            return p || Promise.resolve();
+        } catch {
+            return Promise.resolve();
+        }
+    };
 }
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 function setNativeValue(el, value) {
-  // Makes React/Vue/etc pick up the change
-  const proto = el.constructor.prototype;
-  const desc = Object.getOwnPropertyDescriptor(proto, 'value');
-  if (desc && desc.set) desc.set.call(el, value);
-  else el.value = value;
+    // Makes React/Vue/etc pick up the change
+    const proto = el.constructor.prototype;
+    const desc = Object.getOwnPropertyDescriptor(proto, 'value');
+    if (desc && desc.set) desc.set.call(el, value);
+    else el.value = value;
 }
 
 function keyDataForChar(ch) {
-  if (ch === '\n') return { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, charCode: 13, shiftKey: false };
-  if (ch === '\b') return { key: 'Backspace', code: 'Backspace', keyCode: 8, which: 8, charCode: 8, shiftKey: false };
-  const isSpace = ch === ' ';
-  const key = isSpace ? ' ' : ch;
-  const keyCode = isSpace ? 32 : ch.toUpperCase().charCodeAt(0) || 0;
-  const which = keyCode;
-  const charCode = ch.charCodeAt(0) || 0;
-  const shiftKey = ch.toUpperCase() === ch && ch.toLowerCase() !== ch;
-  const code = /^[a-z]$/i.test(ch) ? `Key${ch.toUpperCase()}` : (isSpace ? 'Space' : '');
-  return { key, code, keyCode, which, charCode, shiftKey };
+    if (ch === '\n') return { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, charCode: 13, shiftKey: false };
+    if (ch === '\b') return { key: 'Backspace', code: 'Backspace', keyCode: 8, which: 8, charCode: 8, shiftKey: false };
+    const isSpace = ch === ' ';
+    const key = isSpace ? ' ' : ch;
+    const keyCode = isSpace ? 32 : ch.toUpperCase().charCodeAt(0) || 0;
+    const which = keyCode;
+    const charCode = ch.charCodeAt(0) || 0;
+    const shiftKey = ch.toUpperCase() === ch && ch.toLowerCase() !== ch;
+    const code = /^[a-z]$/i.test(ch) ? `Key${ch.toUpperCase()}` : (isSpace ? 'Space' : '');
+    return { key, code, keyCode, which, charCode, shiftKey };
 }
 
 function fire(el, type, init = {}) {
-  let ev;
-  if (type === 'input' || type === 'beforeinput') {
-    ev = new InputEvent(type, {
-      bubbles: true,
-      cancelable: type === 'beforeinput',
-      data: init.data ?? null,
-      inputType: init.inputType ?? 'insertText'
-    });
-  } else if (type === 'keypress' || type === 'keydown' || type === 'keyup') {
-    ev = new KeyboardEvent(type, {
-      bubbles: true,
-      cancelable: true,
-      key: init.key,
-      code: init.code,
-      keyCode: init.keyCode,
-      which: init.which,
-      charCode: init.charCode,
-      shiftKey: init.shiftKey
-    });
-    // Legacy getters some libs check
-    Object.defineProperty(ev, 'keyCode', { get: () => init.keyCode });
-    Object.defineProperty(ev, 'which', { get: () => init.which });
-    Object.defineProperty(ev, 'charCode', { get: () => init.charCode });
-  } else if (type === 'change') {
-    ev = new Event('change', { bubbles: true });
-  } else {
-    ev = new Event(type, { bubbles: type.endsWith('in') || type.endsWith('out') || type === 'focus', cancelable: false });
-  }
-  el.dispatchEvent(ev);
-  return ev;
+    let ev;
+    if (type === 'input' || type === 'beforeinput') {
+        ev = new InputEvent(type, {
+            bubbles: true,
+            cancelable: type === 'beforeinput',
+            data: init.data ?? null,
+            inputType: init.inputType ?? 'insertText'
+        });
+    } else if (type === 'keypress' || type === 'keydown' || type === 'keyup') {
+        ev = new KeyboardEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            key: init.key,
+            code: init.code,
+            keyCode: init.keyCode,
+            which: init.which,
+            charCode: init.charCode,
+            shiftKey: init.shiftKey
+        });
+        // Legacy getters some libs check
+        Object.defineProperty(ev, 'keyCode', { get: () => init.keyCode });
+        Object.defineProperty(ev, 'which', { get: () => init.which });
+        Object.defineProperty(ev, 'charCode', { get: () => init.charCode });
+    } else if (type === 'change') {
+        ev = new Event('change', { bubbles: true });
+    } else {
+        ev = new Event(type, { bubbles: type.endsWith('in') || type.endsWith('out') || type === 'focus', cancelable: false });
+    }
+    el.dispatchEvent(ev);
+    return ev;
 }
 
 async function typeText(el, text, { delay = 50, focus = true, blur = false, react = true } = {}) {
-  if (focus) el.focus(); // will fire focus/focusin naturally
+    if (focus) el.focus(); // will fire focus/focusin naturally
 
-  for (const ch of text) {
-    const kd = keyDataForChar(ch);
+    for (const ch of text) {
+        const kd = keyDataForChar(ch);
 
-    fire(el, 'keydown', kd);
-    fire(el, 'keypress', kd);
-    fire(el, 'beforeinput', { inputType: 'insertText', data: ch });
+        fire(el, 'keydown', kd);
+        fire(el, 'keypress', kd);
+        fire(el, 'beforeinput', { inputType: 'insertText', data: ch });
 
-    // Insert at caret
-    const start = el.selectionStart ?? el.value.length;
-    const end = el.selectionEnd ?? el.value.length;
-    const newVal = el.value.slice(0, start) + ch + el.value.slice(end);
+        // Insert at caret
+        const start = el.selectionStart ?? el.value.length;
+        const end = el.selectionEnd ?? el.value.length;
+        const newVal = el.value.slice(0, start) + ch + el.value.slice(end);
 
-    if (react) setNativeValue(el, newVal);
-    else el.value = newVal;
+        if (react) setNativeValue(el, newVal);
+        else el.value = newVal;
 
-    if (el.setSelectionRange) el.setSelectionRange(start + ch.length, start + ch.length);
+        if (el.setSelectionRange) el.setSelectionRange(start + ch.length, start + ch.length);
 
-    fire(el, 'input', { inputType: 'insertText', data: ch });
-    fire(el, 'keyup', kd);
+        fire(el, 'input', { inputType: 'insertText', data: ch });
+        fire(el, 'keyup', kd);
 
-    if (delay) await sleep(delay);
-  }
+        if (delay) await sleep(delay);
+    }
 
-  if (blur) {
-    el.blur();          // fires blur/focusout
-    fire(el, 'change'); // some frameworks expect change after blur
-  }
+    if (blur) {
+        el.blur();          // fires blur/focusout
+        fire(el, 'change'); // some frameworks expect change after blur
+    }
 }
 
 async function handleMTCaptcha() {
@@ -294,7 +431,7 @@ async function handleMTCaptcha() {
             await new Promise(resolve => setTimeout(resolve, 7000));
 
             window.solvedCaptcha = document.querySelector("#mtcap-statusimg-1[style*='color: rgb(0, 238, 0)']");
-            if (!window.solvedCaptcha) {                
+            if (!window.solvedCaptcha) {
                 document.querySelector('#mtcap-statusbutton-1').click();
                 await new Promise(resolve => setTimeout(resolve, 2000));
             }
@@ -786,13 +923,22 @@ function handleTurnstileInShadowDOM() {
                                 const timerSuccess = setInterval(() => {
                                     if (checkSuccess()) {
                                         clearInterval(timerSuccess);
+                                        // 🔓 Marquer Turnstile comme résolu - arrête le timer de recovery
+                                        markTurnstileResolved();
                                         window.solvedCaptcha = true;
                                         chrome.runtime.sendMessage({ captchaPassed: true });
                                         console.log(`[Turnstile DEBUG] 🟢 CAPTCHA solved successfully.`);
                                     }
                                 }, 1000);
 
-                                setTimeout(() => clearInterval(timerSuccess), 30000);
+                                setTimeout(() => {
+                                    clearInterval(timerSuccess);
+                                    // ⏰ Si le success check timeout expire sans succès, déclencher le recovery
+                                    if (!window.solvedCaptcha) {
+                                        console.warn(`[Turnstile DEBUG] ⚠️ Success check timeout expired without resolution`);
+                                        handleTurnstileFailure('SUCCESS_CHECK_TIMEOUT');
+                                    }
+                                }, TURNSTILE_CONFIG.SUCCESS_CHECK_TIMEOUT);
                             });
                         };
 
@@ -881,13 +1027,22 @@ function handleTurnstileInShadowDOM() {
                 const timerSuccess = setInterval(() => {
                     if (checkSuccess()) {
                         clearInterval(timerSuccess);
+                        // 🔓 Marquer Turnstile comme résolu - arrête le timer de recovery
+                        markTurnstileResolved();
                         window.solvedCaptcha = true;
                         chrome.runtime.sendMessage({ captchaPassed: true });
                         console.log(`[Turnstile DEBUG] 🟢 CAPTCHA solved successfully.`);
                     }
                 }, 1000);
 
-                setTimeout(() => clearInterval(timerSuccess), 30000);
+                setTimeout(() => {
+                    clearInterval(timerSuccess);
+                    // ⏰ Si le success check timeout expire sans succès, déclencher le recovery
+                    if (!window.solvedCaptcha) {
+                        console.warn(`[Turnstile DEBUG] ⚠️ Success check timeout expired without resolution`);
+                        handleTurnstileFailure('SUCCESS_CHECK_TIMEOUT');
+                    }
+                }, TURNSTILE_CONFIG.SUCCESS_CHECK_TIMEOUT);
             });
         };
 
@@ -1022,6 +1177,8 @@ function handleTurnstileInIframe() {
                                 const timerSuccess = setInterval(() => {
                                     if (checkSuccess()) {
                                         clearInterval(timerSuccess);
+                                        // 🔓 Marquer Turnstile comme résolu - arrête le timer de recovery
+                                        markTurnstileResolved();
                                         window.solvedCaptcha = true;
                                         chrome.runtime.sendMessage({ captchaPassed: true });
                                         console.log(`[Turnstile DEBUG] 🟢 CAPTCHA solved successfully.`);
@@ -1029,7 +1186,14 @@ function handleTurnstileInIframe() {
                                     }
                                 }, 1000);
 
-                                setTimeout(() => clearInterval(timerSuccess), 30000);
+                                setTimeout(() => {
+                                    clearInterval(timerSuccess);
+                                    // ⏰ Si le success check timeout expire sans succès, déclencher le recovery
+                                    if (!window.solvedCaptcha) {
+                                        console.warn(`[Turnstile DEBUG] ⚠️ Success check timeout expired without resolution`);
+                                        handleTurnstileFailure('SUCCESS_CHECK_TIMEOUT');
+                                    }
+                                }, TURNSTILE_CONFIG.SUCCESS_CHECK_TIMEOUT);
                             });
                         }, 500 + Math.random() * 500);
                     };
@@ -1065,6 +1229,8 @@ function handleTurnstileInIframe() {
                 }, 15);
             } catch (e) {
                 console.error(`[Turnstile DEBUG] 💥 Error during iframe handling:`, e.message);
+                // 🔄 Déclencher le recovery en cas d'erreur critique
+                handleTurnstileFailure('IFRAME_ERROR: ' + e.message);
             }
         };
 
