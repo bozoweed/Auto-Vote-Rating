@@ -1,16 +1,24 @@
 async function vote(first) {
-    if (checkAnswer()) return
+if (checkAnswer()) return
 
-    const project = await getProject()
-    document.querySelector('#username').value = project.nick
+const project = await getProject()
+document.querySelector('#username').value = project.nick
 
-    //Если у нас не настоящая капча, значит голосуем сразу без капчи
-    if (document.querySelector('#voteForm img[alt="Hcaptcha"]')) {
-        document.querySelector('#voteBtn').click()
-    } else {
-        chrome.runtime.sendMessage({captcha: true})
-    }
+//Если у нас не настоящая капча, значит голосуем сразу без капчи
+if (document.querySelector('#voteForm img[alt="Hcaptcha"]')) {
+document.querySelector('#voteBtn').click()
+} else {
+chrome.runtime.sendMessage({captcha: true})
 }
+}
+
+// Listen for captchaPassed message from captchaclicker.js (MTCaptcha resolver)
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+if (request.captchaPassed === true || request.captchaPassed === 'double') {
+console.log("[VOTE] MTCaptcha solved! Clicking vote button.");
+document.querySelector('#voteBtn').click()
+}
+});
 
 const timer = setInterval(()=>{
     try {
