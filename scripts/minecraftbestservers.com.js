@@ -13,22 +13,30 @@ async function vote(first) {
   // Error message - red notification (Alpine.js: x-show + x-text OR x-data)
   const errorDiv = document.querySelector('div.bg-red-500[x-show][x-text]') || document.querySelector('div[class*="bg-red-"][x-data="{ show: true }"]')
   if (errorDiv) {
-  	const request = {}
-  	request.message = errorDiv?.innerText
-    if (request.message?.includes('failed the security challenge')) {
-      // None
-    } else if (request.message?.toLowerCase().includes('already voted')) {
-      chrome.runtime.sendMessage({later: true})
-      return
-    } else {
-      if (request.message?.includes('Server does not exist')) {
-        request.ignoreReport = true
-        request.retryCoolDown = 21600000
-      } else if (request.message?.toLowerCase().includes('could not send vote via votifier')) {
-        request.ignoreReport = true
+    // Attendre l'hydratation Alpine.js si le texte est vide
+    let message = errorDiv?.innerText?.trim()
+    if (!message) {
+      await new Promise(resolve => setTimeout(resolve, 500))
+      message = errorDiv?.innerText?.trim()
+    }
+    if (message) {
+      const request = {}
+      request.message = message
+      if (request.message?.includes('failed the security challenge')) {
+        // None
+      } else if (request.message?.toLowerCase().includes('already voted')) {
+        chrome.runtime.sendMessage({later: true})
+        return
+      } else {
+        if (request.message?.includes('Server does not exist')) {
+          request.ignoreReport = true
+          request.retryCoolDown = 21600000
+        } else if (request.message?.toLowerCase().includes('could not send vote via votifier')) {
+          request.ignoreReport = true
+        }
+        chrome.runtime.sendMessage(request)
+        return
       }
-      chrome.runtime.sendMessage(request)
-      return
     }
   }
 
