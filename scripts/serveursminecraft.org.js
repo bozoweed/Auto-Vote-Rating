@@ -7,9 +7,8 @@ async function vote(first) {
         const request = {}
         request.message = document.querySelector('.alert.alert-danger').textContent.trim()
         if (request.message.includes('Vous devez attendre')) {
-            // const numbers = document.querySelector('div.error.message').textContent.match(/\d+/g).map(Number)
-            // chrome.runtime.sendMessage({later: new Date(numbers[0][1]...)})
-            chrome.runtime.sendMessage({ later: true })
+        	const numbers = request.message.match(/\d+/g).map(Number)
+        	chrome.runtime.sendMessage({ later: Date.UTC(numbers[2], numbers[1] - 1, numbers[0], numbers[3], numbers[4]) })
         } else if (request.message.includes('Répondre au captcha est obligatoire') || request.message.includes('Le captcha est invalide')) {
             // None
         } else {
