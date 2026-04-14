@@ -191,7 +191,7 @@ async function vote(first) {
         // Soumettre le formulaire APRÈS avoir rempli le nom
         const submitButtons = [
             document.querySelector('.modal-footer button[type="submit"]'),// appear not allways true
-            document.querySelector('#frm-voteForm button[type="submit"]')
+            document.querySelector('.modal-footer button[type^="sub"]')
         ]
         let done = false
         for(const submitButton of submitButtons)
