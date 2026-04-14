@@ -193,15 +193,11 @@ async function vote(first) {
             document.querySelector('.modal-footer button[type="submit"]'),// appear not allways true
             document.querySelector('.modal-footer button[type^="sub"]')
         ]
-        let done = false
         for(const submitButton of submitButtons)
             if (submitButton) {
                 submitButton.click()
-                done = true
                 break
             }
-        if(!done)
-            alert("strange thing happened")
     }
 
     // ========== ERROR POLLING ==========
