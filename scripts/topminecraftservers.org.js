@@ -23,9 +23,11 @@ function sendResult(cooldownDiv) {
             if (currentMinutes !== null && nextMinutes !== null) {
                 let deltaMinutes = nextMinutes - currentMinutes
                 if (deltaMinutes <= 0) deltaMinutes += 24 * 60
-                const msg = {successfully: window.localStorage.topMineCraftServersJustVoted ==="true", later: Date.now() + deltaMinutes * 60 * 1000}
-                
-                window.localStorage.topMineCraftServersJustVoted = false
+                const msg = { later: Date.now() + deltaMinutes * 60 * 1000}
+                if(window.localStorage.topMineCraftServersJustVoted ==="true"){
+                    msg.successfully = true
+                    window.localStorage.topMineCraftServersJustVoted = false
+                }
                 chrome.runtime.sendMessage(msg)
                 return
             }
@@ -37,7 +39,7 @@ function sendResult(cooldownDiv) {
 }
 
 async function vote(first) {
-    
+    if (first === false) return
     if (document.querySelector('div.row > div.col-md-4 > button')) {
         const button = document.querySelector('div.row > div.col-md-4 > button')
         const buttonText = button.textContent.toLowerCase()
@@ -46,7 +48,7 @@ async function vote(first) {
         } else {
             chrome.runtime.sendMessage({later:true,message: button.textContent})
         }
-    } else if (first) {
+    } else {
         const timer = setInterval(async ()=>{
             try {
                 if (document.querySelector('input[name="t"]') != null && document.querySelector('input[name="t"]').value !== '') {
