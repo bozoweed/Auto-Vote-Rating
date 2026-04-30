@@ -1,5 +1,4 @@
 // ========== GLOBAL CAPTCHA LISTENER ==========
-// Le listener DOIT être global pour recevoir captchaPassed même après un return
 let craftlistCaptchaSolved = false
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -14,27 +13,133 @@ async function vote(first) {
         return new Promise(resolve => setTimeout(resolve, Math.random() * (max - min) + min))
     }
 
+    function randomBetween(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min
+    }
+
+    /**
+     * Simule une frappe clavier humaine complète :
+     * - Sélection du texte existant (Ctrl+A) puis suppression
+     * - Pour chaque caractère : keydown → keypress → input → keyup
+     * - Délais aléatoires réalistes entre chaque événement
+     * - Utilise KeyboardEvent avec code/key/codePlateforme conformes
+     */
     async function humanType(element, text) {
         element.focus()
-        element.dispatchEvent(new Event('focus', { bubbles: true }))
-        for (let char of text) {
-            element.value += char
-            element.dispatchEvent(new Event('input', { bubbles: true }))
-            await randomDelay(50, 150)
+        element.dispatchEvent(new FocusEvent('focus', { bubbles: true }))
+        await randomDelay(100, 250)
+
+        // Sélectionner tout le texte existant comme un humain (Ctrl+A)
+        element.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', code: 'KeyA', keyCode: 65, ctrlKey: true, bubbles: true }))
+        element.dispatchEvent(new KeyboardEvent('keypress', { key: 'a', code: 'KeyA', keyCode: 97, ctrlKey: true, bubbles: true }))
+        element.select()
+        element.dispatchEvent(new Event('select', { bubbles: true }))
+        element.dispatchEvent(new KeyboardEvent('keyup', { key: 'a', code: 'KeyA', keyCode: 65, ctrlKey: true, bubbles: true }))
+        await randomDelay(50, 150)
+
+        // Supprimer la sélection avec Backspace
+        element.dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', code: 'Backspace', keyCode: 8, bubbles: true }))
+        const oldValue = element.value
+        element.value = ''
+        if (oldValue !== element.value) {
+            element.dispatchEvent(new InputEvent('input', { inputType: 'deleteContentBackward', bubbles: true, cancelable: true }))
         }
+        element.dispatchEvent(new KeyboardEvent('keyup', { key: 'Backspace', code: 'Backspace', keyCode: 8, bubbles: true }))
+        await randomDelay(80, 200)
+
+        // Frappe caractère par caractère
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i]
+            const isUpper = char !== char.toLowerCase()
+            const shiftKey = isUpper
+            const keyCode = char.charCodeAt(0)
+
+            // keydown
+            element.dispatchEvent(new KeyboardEvent('keydown', {
+                key: char,
+                code: `Key${char.toUpperCase()}`,
+                keyCode: keyCode,
+                shiftKey: shiftKey,
+                bubbles: true,
+                cancelable: true
+            }))
+            await randomDelay(5, 25)
+
+            // keypress
+            element.dispatchEvent(new KeyboardEvent('keypress', {
+                key: char,
+                code: `Key${char.toUpperCase()}`,
+                keyCode: keyCode,
+                shiftKey: shiftKey,
+                bubbles: true,
+                cancelable: true
+            }))
+            await randomDelay(5, 15)
+
+            // Modifier la valeur et déclencher input
+            element.value += char
+            element.dispatchEvent(new InputEvent('input', {
+                inputType: 'insertText',
+                data: char,
+                bubbles: true,
+                cancelable: true
+            }))
+            await randomDelay(5, 20)
+
+            // keyup
+            element.dispatchEvent(new KeyboardEvent('keyup', {
+                key: char,
+                code: `Key${char.toUpperCase()}`,
+                keyCode: keyCode,
+                shiftKey: shiftKey,
+                bubbles: true
+            }))
+
+            // Délai inter-caractère réaliste (plus long pour les majuscules)
+            await randomDelay(isUpper ? 100 : 40, isUpper ? 220 : 160)
+        }
+
+        await randomDelay(100, 300)
         element.dispatchEvent(new Event('change', { bubbles: true }))
-        element.dispatchEvent(new Event('blur', { bubbles: true }))
+        await randomDelay(50, 150)
+        element.dispatchEvent(new FocusEvent('blur', { bubbles: true }))
+    }
+
+    /**
+     * Simule un clic humain complet : pointerdown → mousedown → focus → mouseup → click
+     * Ordre conforme au W3C et au comportement réel du navigateur
+     */
+    async function humanClick(element) {
+        const rect = element.getBoundingClientRect()
+        const x = rect.left + rect.width * (0.3 + Math.random() * 0.4)
+        const y = rect.top + rect.height * (0.3 + Math.random() * 0.4)
+
+        const pointerOpts = { clientX: x, clientY: y, bubbles: true, cancelable: true, isPrimary: true }
+        const mouseOpts = { clientX: x, clientY: y, bubbles: true, cancelable: true, button: 0, buttons: 1 }
+
+        element.dispatchEvent(new PointerEvent('pointerdown', { ...pointerOpts, pointerId: 1, pointerType: 'mouse', pressure: 0.5 }))
+        await randomDelay(8, 30)
+        element.dispatchEvent(new MouseEvent('mousedown', mouseOpts))
+        await randomDelay(5, 20)
+        element.focus()
+        element.dispatchEvent(new FocusEvent('focus', { bubbles: true }))
+        await randomDelay(40, 120)
+        element.dispatchEvent(new PointerEvent('pointerup', { ...pointerOpts, pointerId: 1, pointerType: 'mouse', pressure: 0 }))
+        await randomDelay(5, 15)
+        element.dispatchEvent(new MouseEvent('mouseup', { ...mouseOpts, buttons: 0 }))
+        await randomDelay(5, 15)
+        element.dispatchEvent(new MouseEvent('click', { ...mouseOpts, buttons: 0, detail: 1 }))
     }
 
     // ========== SUCCESS DETECTION ==========
     if (document.querySelector('div.alert.alert-success')) {
         const message = document.querySelector('div.alert.alert-success').textContent
         if (message.includes('vote was successfully')
-        || message.includes('hlas byl úspěšně přijatý')
-        || message.includes('hlas bol úspešne prijatý')
-        || message.includes('Dein Vote wurde akzeptiert')
-        || message.includes('Tvůj hlas byl úspěšne přijatý')
-        || message.includes('głos został pomyślnie zaakceptowany')) {
+            || message.includes('hlas byl úspěšně přijatý')
+            || message.includes('hlas bol úspešne prijatý')
+            || message.includes('Dein Vote wurde akzeptiert')
+            || message.includes('Tvůj hlas byl úspěšne přijatý')
+            || message.includes('głos został pomyślnie zaakceptowany')) {
             chrome.runtime.sendMessage({ successfully: true })
         } else {
             chrome.runtime.sendMessage({ message })
@@ -46,10 +151,10 @@ async function vote(first) {
     if (document.querySelector('div.alert.alert-info')) {
         const message = document.querySelector('div.alert.alert-info').textContent
         if (message.includes('next vote')
-        || message.includes('možný hlas za tento server můžeš odeslat')
-        || message.includes('možný hlas za tento server môžeš odoslať')
-        || message.includes('nächster Vote')
-        || message.includes('następny głos będzie możliwy')) {
+            || message.includes('možný hlas za tento server můžeš odeslat')
+            || message.includes('možný hlas za tento server môžeš odoslať')
+            || message.includes('nächster Vote')
+            || message.includes('następny głos będzie możliwy')) {
             const numbers = message.match(/\d+/g).map(Number)
             chrome.runtime.sendMessage({ later: Date.UTC(numbers[2], numbers[1] - 1, numbers[0], numbers[3], numbers[4], numbers[5]) + 3600000 })
         } else {
@@ -61,10 +166,10 @@ async function vote(first) {
     if (document.querySelector('div.alert.alert-error')) {
         const message = document.querySelector('div.alert.alert-error').textContent
         if (message.includes('next vote')
-        || message.includes('možný hlas za tento server můžeteš odeslat')
-        || message.includes('možný hlas za tento server môžeš odoslať')
-        || message.includes('nächster Vote')
-        || message.includes('następny głos będzie możliwy')) {
+            || message.includes('možný hlas za tento server můžeteš odeslat')
+            || message.includes('možný hlas za tento server môžeš odoslať')
+            || message.includes('nächster Vote')
+            || message.includes('następny głos będzie możliwy')) {
             const numbers = message.match(/\d+/g).map(Number)
             chrome.runtime.sendMessage({ later: Date.UTC(numbers[2], numbers[1] - 1, numbers[0], numbers[3], numbers[4]) + 3600000 })
             return
@@ -123,7 +228,7 @@ async function vote(first) {
             chrome.runtime.sendMessage({ later: Date.now() + milliseconds })
             return
         } else {
-            document.querySelector('.sidebar .card-body .btn')?.click()
+            await humanClick(document.querySelector('.sidebar .card-body .btn'))
         }
 
         const timeout = document.querySelector('#voteModal p.text-center')
@@ -140,7 +245,7 @@ async function vote(first) {
 
     // Si modal fermée, l'ouvrir
     if (!document.querySelector('#voteModal')?.classList.contains('show')) {
-        document.querySelector('.sidebar .card-body .btn')?.click()
+        await humanClick(document.querySelector('.sidebar .card-body .btn'))
     }
 
     const btnText = document.querySelector('.modal-footer a span')?.textContent
@@ -153,18 +258,16 @@ async function vote(first) {
 
     if (!first) {
         // ========== CAPTCHA WAIT PATTERN ==========
-        // Vérifier si CAPTCHA déjà résolu globalement
         if (window.solvedCaptcha) {
             craftlistCaptchaSolved = true
         }
 
         // Détecter reCAPTCHA dans la modal
-        const recaptchaElement = document.querySelector('.modal-body .g-recaptcha') ||
-                                  document.querySelector('.modal-body iframe[src*="recaptcha"]')
+        const recaptchaElement = document.querySelector('.modal-body .g-recaptcha')
+            || document.querySelector('.modal-body iframe[src*="recaptcha"]')
 
         if (!craftlistCaptchaSolved && recaptchaElement) {
             chrome.runtime.sendMessage({ captcha: true })
-            // Attendre la résolution du CAPTCHA
             await new Promise(resolve => {
                 const checkInterval = setInterval(() => {
                     if (craftlistCaptchaSolved || window.solvedCaptcha) {
@@ -177,27 +280,21 @@ async function vote(first) {
         }
 
         // ========== HUMAN-LIKE VOTE ACTIONS ==========
-        await randomDelay(500, 1500)
+        await randomDelay(800, 2000)
 
-        // Remplir le champ visible avec le bon sélecteur
         const nickInput = document.querySelector('.modal-body [name="nickName"]')
         if (nickInput) {
-            nickInput.value = ''
             await humanType(nickInput, project.nick)
         }
 
-        await randomDelay(400, 1000)
+        await randomDelay(500, 1200)
 
-        // Soumettre le formulaire APRÈS avoir rempli le nom
-        const submitButtons = [
-            document.querySelector('.modal-footer button[type="submit"]'),// appear not allways true
-            document.querySelector('.modal-footer button[type^="sub"]')
-        ]
-        for(const submitButton of submitButtons)
-            if (submitButton) {
-                submitButton.click()
-                break
-            }
+        const submitButton = document.querySelector('.modal-footer button[type="submit"]')
+            || document.querySelector('.modal-footer button[type^="sub"]')
+        if (submitButton) {
+            await humanClick(submitButton)
+            await randomDelay(200, 500) // let check function do is job
+        }
     }
 
     // ========== ERROR POLLING ==========
