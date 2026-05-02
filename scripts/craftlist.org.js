@@ -135,6 +135,7 @@ async function vote(first) {
     if (document.querySelector('div.alert.alert-success')) {
         const message = document.querySelector('div.alert.alert-success').textContent
         if (message.includes('vote was successfully')
+            || message.includes('hlas byl úspěšně přijat')
             || message.includes('hlas byl úspěšně přijatý')
             || message.includes('hlas bol úspešne prijatý')
             || message.includes('Dein Vote wurde akzeptiert')
