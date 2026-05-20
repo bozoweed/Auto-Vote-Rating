@@ -38,7 +38,8 @@ async function vote(first) {
 
         if (request.message.includes('need to accept our Privacy Policy')
             || request.message.includes('website is made possible by displaying online advertisements')
-            || request.message.includes('have one unread message')) continue
+            || request.message.includes('have one unread message')
+            || request.message.includes('Ad blocker detected')) continue
 
         if (request.message.includes('already voted') || request.message.includes('have reached your daily vote limit')) {
             chrome.runtime.sendMessage({later: true})
