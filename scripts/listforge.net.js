@@ -30,6 +30,7 @@ async function vote(first) {
     }
 
     for (const el of document.querySelectorAll('div.alert.alert-danger')) {
+        if (el.offsetParent === null) continue // skip hidden element like "Ad block detected"
         if (el.querySelector('center > strong')) continue
         if (!el.innerText) continue
 
@@ -38,8 +39,7 @@ async function vote(first) {
 
         if (request.message.includes('need to accept our Privacy Policy')
             || request.message.includes('website is made possible by displaying online advertisements')
-            || request.message.includes('have one unread message')
-            || request.message.includes('Ad blocker detected')) continue
+            || request.message.includes('have one unread message')) continue
 
         if (request.message.includes('already voted') || request.message.includes('have reached your daily vote limit')) {
             chrome.runtime.sendMessage({later: true})
