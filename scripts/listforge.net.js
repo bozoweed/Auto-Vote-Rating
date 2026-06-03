@@ -147,7 +147,15 @@ async function vote(first) {
     }
 
     //Соглашаемся с Privacy Policy
-    if (document.querySelector('#accept')) document.querySelector('#accept').checked = true
+    const privacyElement = document.querySelector('#accept');
+
+    if (privacyElement) {
+        if (privacyElement.type === 'checkbox') {
+            privacyElement.checked = true;
+        } else {
+            privacyElement.value = 1;
+        }
+    }
 
     //Если требуется авторизация Steam
     if (document.querySelector('form[name="steam_form"] > input[type="image"]') != null) {
